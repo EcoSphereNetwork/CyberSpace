@@ -22,10 +22,18 @@
    - Datenaufbereitung und Darstellung als Knoten-Netz (Graph).
   
 6. **Gamification**
-   - Gamification
+   - Basis: Dateiformat-Import/Export (z. B. GLTF, USD) für 3D‑Assets, Szenen und Metadaten.
+   - Echtzeit-API (REST/WebSocket) zum dynamischen Austauschen von Objekten, Events, Avataren.
+   - Portale zwischen deinem Cyberspace und fremden VR/AR-Welten (via WebXR oder proprietäre Bridges).
+   - Brücken-Plugins in Unity/Unreal/NeosVR/VRChat usw. für weitergehende Integration.
+   - Sicherheits- & Rollenmodell wahren, damit externe 3D-Spaces nicht einfach unberechtigt auf private Daten zugreifen.
+   - Kollaboration & Multi-User: Synchrone Avatare, Chat-Kanäle, Whiteboard-Sharing über 3D-Spaces hinweg, etc.
 
 8. **3D-Space-building**
-   - 3d-Space-Builder
+   - „Create 3D World“-Plugin
+      - Mini-Editor-Modus
+      - KI-Generator für 3D-Inhalte
+   - Tools & Schnittstellen (Blender & GIMP)
 
 9. **dApp Funktionen**
    - dApp Funktionen, NFTs, SmoliToken
