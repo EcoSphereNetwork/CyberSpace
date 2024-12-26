@@ -3,7 +3,7 @@
 Der Cyberspace ist eine immersive 3D-Welt, die digitale Strukturen, Netzwerke, Geräte, Datenflüsse und Benutzerinteraktionen visualisiert. Inspiriert von futuristischen Konzepten wie „Ghost in the Shell“ und cyberpunkartiger Ästhetik, kombiniert er realistische Funktionalität mit beeindruckenden visuellen Effekten, um eine neue Art des Arbeitens, Lernens und der Interaktion in der digitalen Welt zu schaffen.
 Hauptmerkmale
 
-## 1. Architektur und Design
+1. Architektur und Design
 
     3D-Weltkarte:
         Der Cyberspace basiert auf einer digitalen Karte der Welt, auf der Netzwerke, Geräte und Server realitätsnah auf geografischen Koordinaten abgebildet werden.
@@ -12,7 +12,7 @@ Hauptmerkmale
         Neben der Weltkarte gibt es einen dynamischen, grenzenlosen Raum, in dem Daten, Geräte und Netzwerke als Graphen dargestellt werden.
         Knoten (z. B. Server, Geräte) und Kanten (Datenflüsse) sind animiert und interaktiv.
 
-## 2. Visuelle Ästhetik
+2. Visuelle Ästhetik
 
     Cyberpunk-Stil:
         Neonfarben, Glitch-Effekte und dynamische Beleuchtung dominieren die visuelle Darstellung.
@@ -39,7 +39,7 @@ Hauptmerkmale
     Portale zwischen Räumen:
         Über Portale können Nutzer nahtlos zwischen verschiedenen Räumen oder sogar externen 3D-Welten wechseln (z. B. Mozilla Hubs, Neos VR).
 
-Technologien und Erweiterungen
+## Technologien und Erweiterungen
 1. AI/ML-Integration
 
     Neuronale Netzwerke und ML-Modelle:
@@ -61,7 +61,7 @@ Technologien und Erweiterungen
         Erstellung neuer Räume, Module und Backend-Funktionen.
         Gamification-Belohnungen wie XP, Abzeichen oder spezielle Tools.
 
-Darstellung und Interaktivität
+## Darstellung und Interaktivität
 1. Nutzerpräsenz
 
     Avatare oder digitale Signaturen repräsentieren die Nutzer im Cyberspace.
@@ -77,17 +77,17 @@ Darstellung und Interaktivität
     Schwebende Menüs und Panels ermöglichen den Zugriff auf Tools, Visualisierungen und Einstellungen.
     Drag-and-Drop-Funktionalität für schnelle Anpassungen.
 
-Langfristige Vision
+## Langfristige Vision
 
-    Federiertes Ökosystem:
-        Der Cyberspace kann als verteilte Plattform für Organisationen, Unternehmen und Einzelpersonen dienen.
-        Verbindungen zwischen verschiedenen Netzwerken und Räumen ermöglichen eine dynamische, globale Interaktion.
-    Zeitbasierte Replays und historische Analysen:
-        Nutzer können Ereignisse im Cyberspace „zurückspulen“, um z. B. den Verlauf von Sicherheitsvorfällen zu analysieren.
-    VR-/AR-Integration:
-        Immersive Technologien wie WebXR machen den Cyberspace physisch erfahrbar.
+Federiertes Ökosystem:
+    Der Cyberspace kann als verteilte Plattform für Organisationen, Unternehmen und Einzelpersonen dienen.
+    Verbindungen zwischen verschiedenen Netzwerken und Räumen ermöglichen eine dynamische, globale Interaktion.
+Zeitbasierte Replays und historische Analysen:
+    Nutzer können Ereignisse im Cyberspace „zurückspulen“, um z. B. den Verlauf von Sicherheitsvorfällen zu analysieren.
+VR-/AR-Integration:
+    Immersive Technologien wie WebXR machen den Cyberspace physisch erfahrbar.
 
-Zusammenfassung
+## Zusammenfassung
 
 Der Cyberspace ist eine visuell beeindruckende, interaktive 3D-Welt, die digitale Strukturen und Daten greifbar macht. Durch die Kombination von Visualisierung, Kollaboration und Gamification wird er zu einem Werkzeug für:
 
