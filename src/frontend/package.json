@@ -4,6 +4,9 @@
   "scripts": {
     "start": "node server.js" 
     // oder du baust einen eigenen dev-server
+    "scripts": {
+    "serve": "http-server ./public -p 8080"
+  },
   },
   "dependencies": {
     "three": "^0.154.0"
