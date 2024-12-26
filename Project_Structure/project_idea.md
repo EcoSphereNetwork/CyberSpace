@@ -87,7 +87,7 @@ Um ein solches System zu bauen, benötigt man mehrere Komponenten, die sinnvoll 
     Herausforderungen: Community kleiner, manche Features weniger ausgereift als bei Unity/Unreal.
     Empfehlung: Guter Kompromiss, wenn man Open Source bevorzugt.
 
-4.4 Drei.js / Babylon.js (WebGL, JavaScript)
+4.4 Three.js / Babylon.js (WebGL, JavaScript)
 
     Vorteile: Läuft im Browser, einfacher Prototyping-Ansatz, viele Beispiele im Web.
     Herausforderungen: Performance in sehr komplexen Szenen kann schwierig werden, Browser-Sicherheit und Sandbox.
