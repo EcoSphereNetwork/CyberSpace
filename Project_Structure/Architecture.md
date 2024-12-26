@@ -21,8 +21,8 @@
 5. **Netzwerkvisualisierung**
    - Datenaufbereitung und Darstellung als Knoten-Netz (Graph).
   
-6. **Game**
-   - 
+6. **Gamification**
+   - Gamification
 
 8. **3D-Space-building**
    - 3d-Space-Builder
@@ -37,4 +37,4 @@
    - Calendar
    - ...
 
-11. 
+11. **...**
