@@ -21,14 +21,10 @@ To get a local copy up and running, follow these steps:
 
 ### **Clone the repository:**
 
-    bash
-    Copy code
     git clone https://github.com/EcoSphereNetwork/CyberSpace.git
   
 **Navigate to the project directory:**
 
-    bash
-    Copy code
     cd CyberSpace/src
   
 Open index.html in your preferred web browser to view the project.
