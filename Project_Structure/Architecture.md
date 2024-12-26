@@ -20,3 +20,21 @@
 
 5. **Netzwerkvisualisierung**
    - Datenaufbereitung und Darstellung als Knoten-Netz (Graph).
+  
+6. **Game**
+   - 
+
+8. **3D-Space-building**
+   - 3d-Space-Builder
+
+9. **dApp Funktionen**
+   - dApp Funktionen, NFTs, SmoliToken
+
+10. **Plugin Architektur**
+   - Search engine
+   - Musicplayer
+   - E-Mail
+   - Calendar
+   - ...
+
+11. 
