@@ -8,15 +8,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Beispiel-Route: GET /api/hello
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
+app.get('/api/files', (req, res) => {
+  const fs = require('fs');
+  const dirPath = req.query.path || '.';  // Pfad aus Query, Standardwert = aktuelles Verzeichnis
 
-// Später: Routen zum Auslesen von Dateistrukturen, Netzwerk-Infos, usw.
+  fs.readdir(dirPath, { withFileTypes: true }, (err, dirents) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
 
-// Starte Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
+    const items = dirents.map(d => ({
+      name: d.name,
+      isDirectory: d.isDirectory()
+    }));
+    
+    res.json({ path: dirPath, items });
+  });
 });
