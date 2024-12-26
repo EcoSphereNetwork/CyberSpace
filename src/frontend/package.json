@@ -1,6 +1,11 @@
-{ 
-  "name": "mindspace-frontend", 
-  "version": "1.0.0", 
-  "scripts": { "start": "node server.js" // oder du baust einen eigenen dev-server }, 
-  "dependencies": { "three": "^0.154.0" } 
+{
+  "name": "mindspace-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js" 
+    // oder du baust einen eigenen dev-server
+  },
+  "dependencies": {
+    "three": "^0.154.0"
+  }
 }
