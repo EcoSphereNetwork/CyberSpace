@@ -11,22 +11,22 @@ The repository is organized as follows:
   app.js: JavaScript file containing the core logic.
   
 Technologies Used
-  JavaScript: 80.9%
-  HTML: 18.4%
-  Python: 0.7%
+    JavaScript: 80.9%
+    HTML: 18.4%
+    Python: 0.7%
 
 ### **Getting Started**
 To get a local copy up and running, follow these steps:
 
 ### **Clone the repository:**
 
-  bash
+bash
   Copy code
   git clone https://github.com/EcoSphereNetwork/CyberSpace.git
   
 **Navigate to the project directory:**
 
-  bash
+bash
   Copy code
   cd CyberSpace/src
   
