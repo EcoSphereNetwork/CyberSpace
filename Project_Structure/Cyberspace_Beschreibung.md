@@ -1,4 +1,4 @@
-## Beschreibung des Cyberspace
+# Beschreibung des Cyberspace
 
 Der Cyberspace ist eine immersive 3D-Welt, die digitale Strukturen, Netzwerke, Geräte, Datenflüsse und Benutzerinteraktionen visualisiert. Inspiriert von futuristischen Konzepten wie „Ghost in the Shell“ und cyberpunkartiger Ästhetik, kombiniert er realistische Funktionalität mit beeindruckenden visuellen Effekten, um eine neue Art des Arbeitens, Lernens und der Interaktion in der digitalen Welt zu schaffen.
 Hauptmerkmale
@@ -12,7 +12,7 @@ Hauptmerkmale
         Neben der Weltkarte gibt es einen dynamischen, grenzenlosen Raum, in dem Daten, Geräte und Netzwerke als Graphen dargestellt werden.
         Knoten (z. B. Server, Geräte) und Kanten (Datenflüsse) sind animiert und interaktiv.
 
-2. Visuelle Ästhetik
+## 2. Visuelle Ästhetik
 
     Cyberpunk-Stil:
         Neonfarben, Glitch-Effekte und dynamische Beleuchtung dominieren die visuelle Darstellung.
