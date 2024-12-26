@@ -321,28 +321,28 @@ Da du das Projekt im Browser realisieren möchtest, brauchst du im Wesentlichen 
 ## 7. Projektstruktur & Open-Source-Tools
 7.1 Typische Projektstruktur (Beispiel)
 
-my-mindspace-project
-├─ backend
-│  ├─ package.json
-│  ├─ server.js (Express/WS-Server)
-│  ├─ routes
-│  │  ├─ files.js
-│  │  └─ system.js
-│  └─ ...
-├─ frontend
-│  ├─ package.json
-│  ├─ public
-│  ├─ src
-│  │  ├─ main.js (Einstieg)
-│  │  ├─ threejs
-│  │  │  ├─ scene.js
-│  │  │  ├─ windowManager.js
-│  │  │  └─ ...
-│  │  ├─ components
-│  │  │  └─ Terminal.vue / Terminal.js / ...
-│  │  └─ ...
-│  └─ ...
-└─ README.md
+    my-mindspace-project
+    ├─ backend
+    │  ├─ package.json
+    │  ├─ server.js (Express/WS-Server)
+    │  ├─ routes
+    │  │  ├─ files.js
+    │  │  └─ system.js
+    │  └─ ...
+    ├─ frontend
+    │  ├─ package.json
+    │  ├─ public
+    │  ├─ src
+    │  │  ├─ main.js (Einstieg)
+    │  │  ├─ threejs
+    │  │  │  ├─ scene.js
+    │  │  │  ├─ windowManager.js
+    │  │  │  └─ ...
+    │  │  ├─ components
+    │  │  │  └─ Terminal.vue / Terminal.js / ...
+    │  │  └─ ...
+    │  └─ ...
+    └─ README.md
 
 7.2 Wichtige Open-Source-Bausteine
 
@@ -404,22 +404,22 @@ Below is a code review of the project so far, along with new developments to mak
 
 Your project typically looks like this:
 
-mindspace-project
-├─ backend
-│  ├─ package.json
-│  ├─ server.js
-│  └─ ...
-└─ frontend
-   ├─ package.json
-   ├─ public
-   │  └─ index.html
-   └─ src
-      ├─ main.js
-      ├─ windowManager.js
-      ├─ fileListWindow.js
-      ├─ terminalWindow.js
-      ├─ networkGraphWindow.js
-      └─ ...
+    mindspace-project
+    ├─ backend
+    │  ├─ package.json
+    │  ├─ server.js
+    │  └─ ...
+    └─ frontend
+       ├─ package.json
+       ├─ public
+       │  └─ index.html
+       └─ src
+          ├─ main.js
+          ├─ windowManager.js
+          ├─ fileListWindow.js
+          ├─ terminalWindow.js
+          ├─ networkGraphWindow.js
+          └─ ...
 
 Backend
 
@@ -489,235 +489,235 @@ Below is a more unified approach to the code. We’ll assume a minimal bundler o
 
 We’ll keep Window3D in the same file for simplicity; feel free to split it if you prefer. We’ll add a simple top bar with close/minimize logic and placeholders for resizing handles.
 
-// frontend/src/windowManager.js
-import * as THREE from 'three';
-
-// ---- Base Window3D class ----
-export class Window3D {
-  constructor({
-    width = 2,
-    height = 1.5,
-    color = 0x0044ff,
-    position = new THREE.Vector3(0, 0, 0),
-    title = 'Untitled'
-  }) {
-    this.width = width;
-    this.height = height;
-    this.title = title;
-
-    this.isDragging = false;
-    this.isMinimized = false;
-    this.isClosed = false;
-
-    // Main plane
-    this.geometry = new THREE.PlaneGeometry(width, height);
-    this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position.copy(position);
-
-    // Top bar plane
-    const barHeight = 0.2;
-    this.barGeometry = new THREE.PlaneGeometry(width, barHeight);
-    this.barMaterial = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
-    this.barMesh = new THREE.Mesh(this.barGeometry, this.barMaterial);
-    // place at top
-    this.barMesh.position.set(0, height / 2 + barHeight / 2, 0);
-    this.mesh.add(this.barMesh);
-
-    // Example "close button" plane in the bar
-    const btnSize = 0.15;
-    this.closeBtnGeo = new THREE.PlaneGeometry(btnSize, btnSize);
-    const closeBtnMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
-    this.closeBtn = new THREE.Mesh(this.closeBtnGeo, closeBtnMat);
-    this.closeBtn.position.set(width / 2 - btnSize / 2, 0, 0.01); // right side of bar
-    this.barMesh.add(this.closeBtn);
-
-    // Example "minimize button"
-    this.minBtnGeo = new THREE.PlaneGeometry(btnSize, btnSize);
-    const minBtnMat = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
-    this.minBtn = new THREE.Mesh(this.minBtnGeo, minBtnMat);
-    this.minBtn.position.set(width / 2 - btnSize * 1.8, 0, 0.01); // to the left of close
-    this.barMesh.add(this.minBtn);
-
-    // (Optional) corner resize handle
-    const handleSize = 0.1;
-    this.handleGeo = new THREE.PlaneGeometry(handleSize, handleSize);
-    const handleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    this.resizeHandle = new THREE.Mesh(this.handleGeo, handleMat);
-    this.resizeHandle.position.set(width / 2 - handleSize / 2, -height / 2 + handleSize / 2, 0.02);
-    this.mesh.add(this.resizeHandle);
-  }
-
-  addToScene(scene) {
-    scene.add(this.mesh);
-  }
-
-  removeFromScene(scene) {
-    scene.remove(this.mesh);
-    this.isClosed = true;
-  }
-
-  toggleMinimize() {
-    this.isMinimized = !this.isMinimized;
-    if (this.isMinimized) {
-      // compress vertically
-      this.mesh.scale.set(1, 0.2, 1);
-    } else {
-      this.mesh.scale.set(1, 1, 1);
-    }
-  }
-}
-
-// ---- WindowManager class ----
-export class WindowManager {
-  constructor(scene, camera, renderer) {
-    this.scene = scene;
-    this.camera = camera;
-    this.renderer = renderer;
-    this.windows = [];
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
-    this.draggedWindow = null;
-    this.dragOffset = new THREE.Vector3();
-
-    // For resizing
-    this.resizingWindow = null;
-
-    this._initEvents();
-  }
-
-  createWindow(options) {
-    const win = new Window3D(options);
-    win.addToScene(this.scene);
-    this.windows.push(win);
-    return win;
-  }
-
-  _initEvents() {
-    const canvas = this.renderer.domElement;
-    canvas.addEventListener('mousedown', (ev) => this.onMouseDown(ev));
-    canvas.addEventListener('mousemove', (ev) => this.onMouseMove(ev));
-    canvas.addEventListener('mouseup', (ev) => this.onMouseUp(ev));
-  }
-
-  onMouseDown(event) {
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // Collect all meshes that can be interacted with
-    const interactiveMeshes = [];
-    this.windows.forEach((w) => {
-      interactiveMeshes.push(w.mesh);
-      interactiveMeshes.push(w.barMesh, w.closeBtn, w.minBtn, w.resizeHandle);
-    });
-    const intersects = this.raycaster.intersectObjects(interactiveMeshes);
-
-    if (intersects.length > 0) {
-      const { object, point } = intersects[0];
-      // Find which window belongs to this mesh
-      const foundWin = this._findWindowByObject(object);
-      if (!foundWin) return;
-
-      if (object === foundWin.closeBtn) {
-        // Close window
-        foundWin.removeFromScene(this.scene);
-        return;
+    // frontend/src/windowManager.js
+    import * as THREE from 'three';
+    
+    // ---- Base Window3D class ----
+    export class Window3D {
+      constructor({
+        width = 2,
+        height = 1.5,
+        color = 0x0044ff,
+        position = new THREE.Vector3(0, 0, 0),
+        title = 'Untitled'
+      }) {
+        this.width = width;
+        this.height = height;
+        this.title = title;
+    
+        this.isDragging = false;
+        this.isMinimized = false;
+        this.isClosed = false;
+    
+        // Main plane
+        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.position.copy(position);
+    
+        // Top bar plane
+        const barHeight = 0.2;
+        this.barGeometry = new THREE.PlaneGeometry(width, barHeight);
+        this.barMaterial = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
+        this.barMesh = new THREE.Mesh(this.barGeometry, this.barMaterial);
+        // place at top
+        this.barMesh.position.set(0, height / 2 + barHeight / 2, 0);
+        this.mesh.add(this.barMesh);
+    
+        // Example "close button" plane in the bar
+        const btnSize = 0.15;
+        this.closeBtnGeo = new THREE.PlaneGeometry(btnSize, btnSize);
+        const closeBtnMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+        this.closeBtn = new THREE.Mesh(this.closeBtnGeo, closeBtnMat);
+        this.closeBtn.position.set(width / 2 - btnSize / 2, 0, 0.01); // right side of bar
+        this.barMesh.add(this.closeBtn);
+    
+        // Example "minimize button"
+        this.minBtnGeo = new THREE.PlaneGeometry(btnSize, btnSize);
+        const minBtnMat = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+        this.minBtn = new THREE.Mesh(this.minBtnGeo, minBtnMat);
+        this.minBtn.position.set(width / 2 - btnSize * 1.8, 0, 0.01); // to the left of close
+        this.barMesh.add(this.minBtn);
+    
+        // (Optional) corner resize handle
+        const handleSize = 0.1;
+        this.handleGeo = new THREE.PlaneGeometry(handleSize, handleSize);
+        const handleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+        this.resizeHandle = new THREE.Mesh(this.handleGeo, handleMat);
+        this.resizeHandle.position.set(width / 2 - handleSize / 2, -height / 2 + handleSize / 2, 0.02);
+        this.mesh.add(this.resizeHandle);
       }
-      if (object === foundWin.minBtn) {
-        // Minimize
-        foundWin.toggleMinimize();
-        return;
+    
+      addToScene(scene) {
+        scene.add(this.mesh);
       }
-      if (object === foundWin.resizeHandle) {
-        // Begin resizing
-        this.resizingWindow = foundWin;
-        return;
+    
+      removeFromScene(scene) {
+        scene.remove(this.mesh);
+        this.isClosed = true;
       }
-      if (object === foundWin.barMesh) {
-        // Start dragging
-        this.draggedWindow = foundWin;
-        foundWin.isDragging = true;
-        this.dragOffset.copy(point).sub(foundWin.mesh.position);
-        return;
-      }
-
-      // If clicked on main mesh but not bar or handle, treat as drag?
-      this.draggedWindow = foundWin;
-      foundWin.isDragging = true;
-      this.dragOffset.copy(point).sub(foundWin.mesh.position);
-    }
-  }
-
-  onMouseMove(event) {
-    if (this.draggedWindow) {
-      this._setMouseCoords(event);
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-
-      // Move the window along a plane at the window's current Z
-      const planeZ = this.draggedWindow.mesh.position.z;
-      const pointOnPlane = this._getPointOnZPlane(planeZ);
-      if (pointOnPlane) {
-        const newPos = pointOnPlane.sub(this.dragOffset);
-        this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
-      }
-    } else if (this.resizingWindow) {
-      // Basic example: we’ll just expand the width/height based on mouse movement
-      this._setMouseCoords(event);
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-
-      const planeZ = this.resizingWindow.mesh.position.z;
-      const pointOnPlane = this._getPointOnZPlane(planeZ);
-      if (pointOnPlane) {
-        const center = this.resizingWindow.mesh.position.clone();
-        const diff = pointOnPlane.clone().sub(center);
-        const newWidth = Math.abs(diff.x) * 2;  // from center to edge * 2
-        const newHeight = Math.abs(diff.y) * 2;
-        // Rebuild geometry
-        this.resizingWindow.width = newWidth;
-        this.resizingWindow.height = newHeight;
-        this.resizingWindow.mesh.geometry.dispose();
-        this.resizingWindow.mesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
-
-        // reposition bar, closeBtn, minBtn, handle, etc. (left as an exercise to refine)
+    
+      toggleMinimize() {
+        this.isMinimized = !this.isMinimized;
+        if (this.isMinimized) {
+          // compress vertically
+          this.mesh.scale.set(1, 0.2, 1);
+        } else {
+          this.mesh.scale.set(1, 1, 1);
+        }
       }
     }
-  }
-
-  onMouseUp(event) {
-    if (this.draggedWindow) {
-      this.draggedWindow.isDragging = false;
-      this.draggedWindow = null;
+    
+    // ---- WindowManager class ----
+    export class WindowManager {
+      constructor(scene, camera, renderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.windows = [];
+    
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+    
+        this.draggedWindow = null;
+        this.dragOffset = new THREE.Vector3();
+    
+        // For resizing
+        this.resizingWindow = null;
+    
+        this._initEvents();
+      }
+    
+      createWindow(options) {
+        const win = new Window3D(options);
+        win.addToScene(this.scene);
+        this.windows.push(win);
+        return win;
+      }
+    
+      _initEvents() {
+        const canvas = this.renderer.domElement;
+        canvas.addEventListener('mousedown', (ev) => this.onMouseDown(ev));
+        canvas.addEventListener('mousemove', (ev) => this.onMouseMove(ev));
+        canvas.addEventListener('mouseup', (ev) => this.onMouseUp(ev));
+      }
+    
+      onMouseDown(event) {
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        // Collect all meshes that can be interacted with
+        const interactiveMeshes = [];
+        this.windows.forEach((w) => {
+          interactiveMeshes.push(w.mesh);
+          interactiveMeshes.push(w.barMesh, w.closeBtn, w.minBtn, w.resizeHandle);
+        });
+        const intersects = this.raycaster.intersectObjects(interactiveMeshes);
+    
+        if (intersects.length > 0) {
+          const { object, point } = intersects[0];
+          // Find which window belongs to this mesh
+          const foundWin = this._findWindowByObject(object);
+          if (!foundWin) return;
+    
+          if (object === foundWin.closeBtn) {
+            // Close window
+            foundWin.removeFromScene(this.scene);
+            return;
+          }
+          if (object === foundWin.minBtn) {
+            // Minimize
+            foundWin.toggleMinimize();
+            return;
+          }
+          if (object === foundWin.resizeHandle) {
+            // Begin resizing
+            this.resizingWindow = foundWin;
+            return;
+          }
+          if (object === foundWin.barMesh) {
+            // Start dragging
+            this.draggedWindow = foundWin;
+            foundWin.isDragging = true;
+            this.dragOffset.copy(point).sub(foundWin.mesh.position);
+            return;
+          }
+    
+          // If clicked on main mesh but not bar or handle, treat as drag?
+          this.draggedWindow = foundWin;
+          foundWin.isDragging = true;
+          this.dragOffset.copy(point).sub(foundWin.mesh.position);
+        }
+      }
+    
+      onMouseMove(event) {
+        if (this.draggedWindow) {
+          this._setMouseCoords(event);
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+          // Move the window along a plane at the window's current Z
+          const planeZ = this.draggedWindow.mesh.position.z;
+          const pointOnPlane = this._getPointOnZPlane(planeZ);
+          if (pointOnPlane) {
+            const newPos = pointOnPlane.sub(this.dragOffset);
+            this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
+          }
+        } else if (this.resizingWindow) {
+          // Basic example: we’ll just expand the width/height based on mouse movement
+          this._setMouseCoords(event);
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+          const planeZ = this.resizingWindow.mesh.position.z;
+          const pointOnPlane = this._getPointOnZPlane(planeZ);
+          if (pointOnPlane) {
+            const center = this.resizingWindow.mesh.position.clone();
+            const diff = pointOnPlane.clone().sub(center);
+            const newWidth = Math.abs(diff.x) * 2;  // from center to edge * 2
+            const newHeight = Math.abs(diff.y) * 2;
+            // Rebuild geometry
+            this.resizingWindow.width = newWidth;
+            this.resizingWindow.height = newHeight;
+            this.resizingWindow.mesh.geometry.dispose();
+            this.resizingWindow.mesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
+    
+            // reposition bar, closeBtn, minBtn, handle, etc. (left as an exercise to refine)
+          }
+        }
+      }
+    
+      onMouseUp(event) {
+        if (this.draggedWindow) {
+          this.draggedWindow.isDragging = false;
+          this.draggedWindow = null;
+        }
+        if (this.resizingWindow) {
+          this.resizingWindow = null;
+        }
+      }
+    
+      _setMouseCoords(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+    
+      _getPointOnZPlane(zValue) {
+        const ray = this.raycaster.ray;
+        const t = (zValue - ray.origin.z) / ray.direction.z;
+        if (t < 0) return null; // behind camera
+        return new THREE.Vector3(
+          ray.origin.x + t * ray.direction.x,
+          ray.origin.y + t * ray.direction.y,
+          zValue
+        );
+      }
+    
+      _findWindowByObject(object) {
+        return this.windows.find((w) =>
+          [w.mesh, w.barMesh, w.closeBtn, w.minBtn, w.resizeHandle].includes(object)
+        );
+      }
     }
-    if (this.resizingWindow) {
-      this.resizingWindow = null;
-    }
-  }
-
-  _setMouseCoords(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
-  _getPointOnZPlane(zValue) {
-    const ray = this.raycaster.ray;
-    const t = (zValue - ray.origin.z) / ray.direction.z;
-    if (t < 0) return null; // behind camera
-    return new THREE.Vector3(
-      ray.origin.x + t * ray.direction.x,
-      ray.origin.y + t * ray.direction.y,
-      zValue
-    );
-  }
-
-  _findWindowByObject(object) {
-    return this.windows.find((w) =>
-      [w.mesh, w.barMesh, w.closeBtn, w.minBtn, w.resizeHandle].includes(object)
-    );
-  }
-}
 
 Notes
 
@@ -728,113 +728,113 @@ Notes
 
 We’ll keep the file listing logic. It can extend Window3D:
 
-// frontend/src/fileListWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class FileListWindow extends Window3D {
-  constructor(options) {
-    super(options);
-    this.currentPath = options.currentPath || '.';
-
-    // Canvas for text
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
+    // frontend/src/fileListWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
     
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.fileItems = [];
-    this.lineEntries = [];
-    this.lineHeight = 24;
-    this.startX = 10;
-    this.startY = 30;
-
-    this._clearCanvas();
-    this._drawText('Loading...', this.startX, this.startY);
-  }
-
-  async loadPath(path) {
-    this.currentPath = path;
-    const res = await fetch(`http://localhost:3000/api/files?path=${encodeURIComponent(path)}`);
-    const data = await res.json();
-    this.fileItems = data.items || [];
-    this._renderFiles();
-  }
-
-  handleClick(localX, localY) {
-    // Convert local plane coords to canvas coords
-    const uv = this._planeCoordsToCanvasCoords(localX, localY);
-    for (const entry of this.lineEntries) {
-      const x1 = entry.x, y1 = entry.y;
-      const x2 = entry.x + entry.width, y2 = entry.y + entry.height;
-      if (uv.x >= x1 && uv.x <= x2 && uv.y >= y1 && uv.y <= y2) {
-        // Clicked this file/folder
-        if (entry.isDirectory) {
-          this.loadPath(`${this.currentPath}/${entry.name}`);
-        } else {
-          console.log('Clicked file:', entry.name);
+    export class FileListWindow extends Window3D {
+      constructor(options) {
+        super(options);
+        this.currentPath = options.currentPath || '.';
+    
+        // Canvas for text
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.fileItems = [];
+        this.lineEntries = [];
+        this.lineHeight = 24;
+        this.startX = 10;
+        this.startY = 30;
+    
+        this._clearCanvas();
+        this._drawText('Loading...', this.startX, this.startY);
+      }
+    
+      async loadPath(path) {
+        this.currentPath = path;
+        const res = await fetch(`http://localhost:3000/api/files?path=${encodeURIComponent(path)}`);
+        const data = await res.json();
+        this.fileItems = data.items || [];
+        this._renderFiles();
+      }
+    
+      handleClick(localX, localY) {
+        // Convert local plane coords to canvas coords
+        const uv = this._planeCoordsToCanvasCoords(localX, localY);
+        for (const entry of this.lineEntries) {
+          const x1 = entry.x, y1 = entry.y;
+          const x2 = entry.x + entry.width, y2 = entry.y + entry.height;
+          if (uv.x >= x1 && uv.x <= x2 && uv.y >= y1 && uv.y <= y2) {
+            // Clicked this file/folder
+            if (entry.isDirectory) {
+              this.loadPath(`${this.currentPath}/${entry.name}`);
+            } else {
+              console.log('Clicked file:', entry.name);
+            }
+            return;
+          }
         }
-        return;
+      }
+    
+      _renderFiles() {
+        this._clearCanvas();
+        // breadcrumb
+        this._drawText(`Path: ${this.currentPath}`, 10, 20);
+    
+        this.lineEntries = [];
+        let y = this.startY + 20; // shift down after breadcrumb
+        for (let i = 0; i < this.fileItems.length; i++) {
+          const item = this.fileItems[i];
+          const text = item.isDirectory ? `[DIR]  ${item.name}` : `       ${item.name}`;
+          this._drawText(text, this.startX, y);
+    
+          this.lineEntries.push({
+            name: item.name,
+            isDirectory: item.isDirectory,
+            x: this.startX,
+            y: y - this.lineHeight + 4,
+            width: 400,
+            height: this.lineHeight,
+          });
+    
+          y += this.lineHeight;
+          if (y > this.canvas.height - 10) {
+            this._drawText('... (truncated)', this.startX, y);
+            break;
+          }
+        }
+        this.texture.needsUpdate = true;
+      }
+    
+      // Local coords [-w/2..+w/2] => [0..canvas.width]
+      _planeCoordsToCanvasCoords(lx, ly) {
+        const planeWidth = this.width;
+        const planeHeight = this.height;
+        const cx = ((lx + planeWidth / 2) / planeWidth) * this.canvas.width;
+        // invert ly because canvas y=0 is top
+        const cy = ((-ly + planeHeight / 2) / planeHeight) * this.canvas.height;
+        return { x: cx, y: cy };
+      }
+    
+      _clearCanvas() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '20px monospace';
+        this.texture.needsUpdate = true;
+      }
+    
+      _drawText(txt, x, y) {
+        this.ctx.fillText(txt, x, y);
+        this.texture.needsUpdate = true;
       }
     }
-  }
-
-  _renderFiles() {
-    this._clearCanvas();
-    // breadcrumb
-    this._drawText(`Path: ${this.currentPath}`, 10, 20);
-
-    this.lineEntries = [];
-    let y = this.startY + 20; // shift down after breadcrumb
-    for (let i = 0; i < this.fileItems.length; i++) {
-      const item = this.fileItems[i];
-      const text = item.isDirectory ? `[DIR]  ${item.name}` : `       ${item.name}`;
-      this._drawText(text, this.startX, y);
-
-      this.lineEntries.push({
-        name: item.name,
-        isDirectory: item.isDirectory,
-        x: this.startX,
-        y: y - this.lineHeight + 4,
-        width: 400,
-        height: this.lineHeight,
-      });
-
-      y += this.lineHeight;
-      if (y > this.canvas.height - 10) {
-        this._drawText('... (truncated)', this.startX, y);
-        break;
-      }
-    }
-    this.texture.needsUpdate = true;
-  }
-
-  // Local coords [-w/2..+w/2] => [0..canvas.width]
-  _planeCoordsToCanvasCoords(lx, ly) {
-    const planeWidth = this.width;
-    const planeHeight = this.height;
-    const cx = ((lx + planeWidth / 2) / planeWidth) * this.canvas.width;
-    // invert ly because canvas y=0 is top
-    const cy = ((-ly + planeHeight / 2) / planeHeight) * this.canvas.height;
-    return { x: cx, y: cy };
-  }
-
-  _clearCanvas() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '20px monospace';
-    this.texture.needsUpdate = true;
-  }
-
-  _drawText(txt, x, y) {
-    this.ctx.fillText(txt, x, y);
-    this.texture.needsUpdate = true;
-  }
-}
 
 Integrating Click Logic
 
@@ -843,12 +843,12 @@ To handle clicks on the file text:
     In WindowManager.onMouseDown, if the user clicks the main window plane (not bar/close/min/etc.), we can forward that to handleClick.
     For example, after the dragOffset logic, we might do:
 
-// windowManager.js, inside onMouseDown after we set this.draggedWindow:
-if (foundWin.handleClick) {
-  // Convert intersection point to local coords
-  const localPoint = foundWin.mesh.worldToLocal(point.clone());
-  foundWin.handleClick(localPoint.x, localPoint.y);
-}
+    // windowManager.js, inside onMouseDown after we set this.draggedWindow:
+    if (foundWin.handleClick) {
+      // Convert intersection point to local coords
+      const localPoint = foundWin.mesh.worldToLocal(point.clone());
+      foundWin.handleClick(localPoint.x, localPoint.y);
+    }
 
 But be sure to do that only if you’re not in “dragging” mode. You might have a threshold to distinguish a click from a drag. This detail is up to your UI approach.
 
@@ -856,136 +856,136 @@ But be sure to do that only if you’re not in “dragging” mode. You might ha
 
 No major changes, but we can make sure it extends Window3D:
 
-// frontend/src/terminalWindow.js
-import { Window3D } from './windowManager.js';
-import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
-import * as THREE from 'three';
-
-export class TerminalWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.termContainer = document.createElement('div');
-    this.termContainer.style.width = '600px';
-    this.termContainer.style.height = '300px';
-
-    this.terminal = new Terminal({ /* config */ });
-    this.terminal.open(this.termContainer);
-    this.terminal.write('Welcome to 3D Terminal\r\n');
-
-    // WebSocket
-    this.socket = null;
-    this._initSocket(options.wsUrl || 'ws://localhost:3000');
-
-    // Canvas for texture
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 1024;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Update loop
-    this._updateTextureLoop();
-  }
-
-  _initSocket(wsUrl) {
-    this.socket = new WebSocket(wsUrl);
-    this.socket.onopen = () => this.terminal.write('WS connected\r\n');
-    this.socket.onmessage = (evt) => this.terminal.write(evt.data);
-    this.socket.onclose = () => this.terminal.write('\r\n[Connection closed]');
-
-    this.terminal.onData((data) => {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(data);
+    // frontend/src/terminalWindow.js
+    import { Window3D } from './windowManager.js';
+    import { Terminal } from 'xterm';
+    import 'xterm/css/xterm.css';
+    import * as THREE from 'three';
+    
+    export class TerminalWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.termContainer = document.createElement('div');
+        this.termContainer.style.width = '600px';
+        this.termContainer.style.height = '300px';
+    
+        this.terminal = new Terminal({ /* config */ });
+        this.terminal.open(this.termContainer);
+        this.terminal.write('Welcome to 3D Terminal\r\n');
+    
+        // WebSocket
+        this.socket = null;
+        this._initSocket(options.wsUrl || 'ws://localhost:3000');
+    
+        // Canvas for texture
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 1024;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Update loop
+        this._updateTextureLoop();
       }
-    });
-  }
-
-  _updateTextureLoop() {
-    if (this.isClosed) return;  // if user closed the window, stop updating
-    requestAnimationFrame(() => this._updateTextureLoop());
-
-    const xtermCanvas = this.termContainer.querySelector('canvas');
-    if (xtermCanvas) {
-      this.ctx.drawImage(xtermCanvas, 0, 0, this.canvas.width, this.canvas.height);
-      this.texture.needsUpdate = true;
+    
+      _initSocket(wsUrl) {
+        this.socket = new WebSocket(wsUrl);
+        this.socket.onopen = () => this.terminal.write('WS connected\r\n');
+        this.socket.onmessage = (evt) => this.terminal.write(evt.data);
+        this.socket.onclose = () => this.terminal.write('\r\n[Connection closed]');
+    
+        this.terminal.onData((data) => {
+          if (this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(data);
+          }
+        });
+      }
+    
+      _updateTextureLoop() {
+        if (this.isClosed) return;  // if user closed the window, stop updating
+        requestAnimationFrame(() => this._updateTextureLoop());
+    
+        const xtermCanvas = this.termContainer.querySelector('canvas');
+        if (xtermCanvas) {
+          this.ctx.drawImage(xtermCanvas, 0, 0, this.canvas.width, this.canvas.height);
+          this.texture.needsUpdate = true;
+        }
+      }
     }
-  }
-}
 
 ### 2.4 main.js
 
 Bringing it all together in a minimal example:
 
-// frontend/src/main.js
-import * as THREE from 'three';
-import { WindowManager } from './windowManager.js';
-import { FileListWindow } from './fileListWindow.js';
-import { TerminalWindow } from './terminalWindow.js';
-
-function init() {
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  const windowManager = new WindowManager(scene, camera, renderer);
-
-  // Rotating reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // Create a FileListWindow
-  const fileWin = new FileListWindow({
-    width: 3,
-    height: 2,
-    position: new THREE.Vector3(-2, 1, 0),
-    color: 0x2222cc,
-    title: 'File Explorer',
-    currentPath: '.'
-  });
-  fileWin.addToScene(scene);
-  windowManager.windows.push(fileWin);
-  fileWin.loadPath('.'); // load current directory
-
-  // Create a TerminalWindow
-  const termWin = new TerminalWindow({
-    width: 3,
-    height: 2,
-    position: new THREE.Vector3(2, 1, 0),
-    color: 0x444444,
-    title: 'Terminal',
-    wsUrl: 'ws://localhost:3000'
-  });
-  termWin.addToScene(scene);
-  windowManager.windows.push(termWin);
-
-  // Animation loop
-  function animate() {
-    requestAnimationFrame(animate);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // Resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-init();
+    // frontend/src/main.js
+    import * as THREE from 'three';
+    import { WindowManager } from './windowManager.js';
+    import { FileListWindow } from './fileListWindow.js';
+    import { TerminalWindow } from './terminalWindow.js';
+    
+    function init() {
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      const windowManager = new WindowManager(scene, camera, renderer);
+    
+      // Rotating reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // Create a FileListWindow
+      const fileWin = new FileListWindow({
+        width: 3,
+        height: 2,
+        position: new THREE.Vector3(-2, 1, 0),
+        color: 0x2222cc,
+        title: 'File Explorer',
+        currentPath: '.'
+      });
+      fileWin.addToScene(scene);
+      windowManager.windows.push(fileWin);
+      fileWin.loadPath('.'); // load current directory
+    
+      // Create a TerminalWindow
+      const termWin = new TerminalWindow({
+        width: 3,
+        height: 2,
+        position: new THREE.Vector3(2, 1, 0),
+        color: 0x444444,
+        title: 'Terminal',
+        wsUrl: 'ws://localhost:3000'
+      });
+      termWin.addToScene(scene);
+      windowManager.windows.push(termWin);
+    
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      // Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    init();
 
 ## Part 3: Future Extensions
 
@@ -1033,89 +1033,89 @@ We’ll introduce the idea that multiple clients connect to the same Node.js/Web
 
 We’ll assume you have your existing server.js in backend/. Let’s add a shared “state” object that tracks each window’s position/size/status. We’ll store that in memory for simplicity (in production, you might use a database).
 
-// backend/server.js (snippet showing multi-user logic)
-
-const express = require('express');
-const cors = require('cors');
-const { WebSocketServer } = require('ws');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Example routes...
-app.get('/api/files', (req, res) => {
-  // your existing code
-});
-
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-});
-
-// WebSocket server
-const wss = new WebSocketServer({ noServer: true });
-
-// This is our shared state of windows (in a real app, store in DB or distributed store)
-let globalWindowsState = {
-  // For example:
-  // win1: { position: { x:0, y:1, z:0 }, width: 3, height:2, minimized: false, ... },
-};
-
-// Handle HTTP -> WS upgrade
-server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
-});
-
-// When a client connects
-wss.on('connection', (ws) => {
-  console.log('New WebSocket connection');
-
-  // 1) Immediately send the current globalWindowsState so the new user can sync
-  ws.send(JSON.stringify({ type: 'INIT_STATE', payload: globalWindowsState }));
-
-  // 2) Listen for updates from this client
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-
-      if (data.type === 'WINDOW_UPDATE') {
-        // For instance, the client sends { type: 'WINDOW_UPDATE', windowId: 'win1', newState: {...} }
-        const { windowId, newState } = data;
-        // Merge or replace state
-        globalWindowsState[windowId] = {
-          ...globalWindowsState[windowId],
-          ...newState,
-        };
-
-        // Broadcast to all clients
-        broadcastExcept(ws, {
-          type: 'WINDOW_UPDATE',
-          windowId,
-          newState: globalWindowsState[windowId],
-        });
-      }
-    } catch (err) {
-      console.error('Error parsing message', err);
+    // backend/server.js (snippet showing multi-user logic)
+    
+    const express = require('express');
+    const cors = require('cors');
+    const { WebSocketServer } = require('ws');
+    
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    
+    // Example routes...
+    app.get('/api/files', (req, res) => {
+      // your existing code
+    });
+    
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Backend listening on http://localhost:${PORT}`);
+    });
+    
+    // WebSocket server
+    const wss = new WebSocketServer({ noServer: true });
+    
+    // This is our shared state of windows (in a real app, store in DB or distributed store)
+    let globalWindowsState = {
+      // For example:
+      // win1: { position: { x:0, y:1, z:0 }, width: 3, height:2, minimized: false, ... },
+    };
+    
+    // Handle HTTP -> WS upgrade
+    server.on('upgrade', (request, socket, head) => {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    });
+    
+    // When a client connects
+    wss.on('connection', (ws) => {
+      console.log('New WebSocket connection');
+    
+      // 1) Immediately send the current globalWindowsState so the new user can sync
+      ws.send(JSON.stringify({ type: 'INIT_STATE', payload: globalWindowsState }));
+    
+      // 2) Listen for updates from this client
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message);
+    
+          if (data.type === 'WINDOW_UPDATE') {
+            // For instance, the client sends { type: 'WINDOW_UPDATE', windowId: 'win1', newState: {...} }
+            const { windowId, newState } = data;
+            // Merge or replace state
+            globalWindowsState[windowId] = {
+              ...globalWindowsState[windowId],
+              ...newState,
+            };
+    
+            // Broadcast to all clients
+            broadcastExcept(ws, {
+              type: 'WINDOW_UPDATE',
+              windowId,
+              newState: globalWindowsState[windowId],
+            });
+          }
+        } catch (err) {
+          console.error('Error parsing message', err);
+        }
+      });
+    
+      ws.on('close', () => {
+        console.log('WebSocket client disconnected');
+      });
+    });
+    
+    // Helper to broadcast a message to all connected clients except the sender
+    function broadcastExcept(senderSocket, msg) {
+      const dataString = JSON.stringify(msg);
+      wss.clients.forEach((client) => {
+        if (client !== senderSocket && client.readyState === 1) {
+          client.send(dataString);
+        }
+      });
     }
-  });
-
-  ws.on('close', () => {
-    console.log('WebSocket client disconnected');
-  });
-});
-
-// Helper to broadcast a message to all connected clients except the sender
-function broadcastExcept(senderSocket, msg) {
-  const dataString = JSON.stringify(msg);
-  wss.clients.forEach((client) => {
-    if (client !== senderSocket && client.readyState === 1) {
-      client.send(dataString);
-    }
-  });
-}
 
 How it works
 
@@ -1134,164 +1134,164 @@ In your frontend, we can modify the WindowManager so that whenever a window move
 
 We’ll add a simple “collab.js” or “networkManager.js” file in src/ to handle the WebSocket logic:
 
-// frontend/src/networkManager.js
-
-export class NetworkManager {
-  constructor(wsUrl) {
-    this.socket = new WebSocket(wsUrl);
-    this.socket.onopen = () => {
-      console.log('Collaboration WS connected');
-    };
-    this.socket.onmessage = (msgEvent) => {
-      this.onMessage(JSON.parse(msgEvent.data));
-    };
-    // We'll store a callback for receiving updates:
-    this.onWindowUpdate = null;
-    this.onInitState = null;
-  }
-
-  onMessage(data) {
-    if (data.type === 'INIT_STATE') {
-      if (this.onInitState) {
-        this.onInitState(data.payload);
+    // frontend/src/networkManager.js
+    
+    export class NetworkManager {
+      constructor(wsUrl) {
+        this.socket = new WebSocket(wsUrl);
+        this.socket.onopen = () => {
+          console.log('Collaboration WS connected');
+        };
+        this.socket.onmessage = (msgEvent) => {
+          this.onMessage(JSON.parse(msgEvent.data));
+        };
+        // We'll store a callback for receiving updates:
+        this.onWindowUpdate = null;
+        this.onInitState = null;
       }
-    } else if (data.type === 'WINDOW_UPDATE') {
-      if (this.onWindowUpdate) {
-        this.onWindowUpdate(data.windowId, data.newState);
+    
+      onMessage(data) {
+        if (data.type === 'INIT_STATE') {
+          if (this.onInitState) {
+            this.onInitState(data.payload);
+          }
+        } else if (data.type === 'WINDOW_UPDATE') {
+          if (this.onWindowUpdate) {
+            this.onWindowUpdate(data.windowId, data.newState);
+          }
+        }
+      }
+    
+      sendWindowUpdate(windowId, newState) {
+        this.socket.send(JSON.stringify({
+          type: 'WINDOW_UPDATE',
+          windowId,
+          newState,
+        }));
       }
     }
-  }
-
-  sendWindowUpdate(windowId, newState) {
-    this.socket.send(JSON.stringify({
-      type: 'WINDOW_UPDATE',
-      windowId,
-      newState,
-    }));
-  }
-}
 
 ### 1.2.2 Integrate with WindowManager
 
 In main.js (or wherever you create your scene), do something like:
-
-import { NetworkManager } from './networkManager.js';
-import { WindowManager } from './windowManager.js';
-// ...
-
-function init() {
-  // ... scene, camera, renderer
-  const network = new NetworkManager('ws://localhost:3000');
-  const windowManager = new WindowManager(scene, camera, renderer);
-
-  // When server sends INIT_STATE, we create or update windows accordingly
-  network.onInitState = (initialWindows) => {
-    // iterate the state object
-    for (const [windowId, winState] of Object.entries(initialWindows)) {
-      // If the window doesn't exist locally, create it
-      // else update position/size from the server state
+    
+    import { NetworkManager } from './networkManager.js';
+    import { WindowManager } from './windowManager.js';
+    // ...
+    
+    function init() {
+      // ... scene, camera, renderer
+      const network = new NetworkManager('ws://localhost:3000');
+      const windowManager = new WindowManager(scene, camera, renderer);
+    
+      // When server sends INIT_STATE, we create or update windows accordingly
+      network.onInitState = (initialWindows) => {
+        // iterate the state object
+        for (const [windowId, winState] of Object.entries(initialWindows)) {
+          // If the window doesn't exist locally, create it
+          // else update position/size from the server state
+          // ...
+          windowManager.syncWindow(windowId, winState);
+        }
+      };
+    
+      // When server notifies that some window changed
+      network.onWindowUpdate = (windowId, newState) => {
+        windowManager.syncWindow(windowId, newState);
+      };
+    
+      // Then, whenever we move or resize a window, we send an update
+      // We can modify `WindowManager.onMouseUp` or `Window3D` to do something like:
+      // network.sendWindowUpdate(windowId, { position, width, height, minimized, etc. });
+    
+      // For that, we need each window to have a unique ID. We can pass that into the constructor.
       // ...
-      windowManager.syncWindow(windowId, winState);
     }
-  };
-
-  // When server notifies that some window changed
-  network.onWindowUpdate = (windowId, newState) => {
-    windowManager.syncWindow(windowId, newState);
-  };
-
-  // Then, whenever we move or resize a window, we send an update
-  // We can modify `WindowManager.onMouseUp` or `Window3D` to do something like:
-  // network.sendWindowUpdate(windowId, { position, width, height, minimized, etc. });
-
-  // For that, we need each window to have a unique ID. We can pass that into the constructor.
-  // ...
-}
 
 ### 1.2.3 Storing a Window ID
 
 We can add an extra parameter in Window3D for id:
 
-constructor({ id, width, height, color, position, title }) {
-  this.id = id || 'win-' + Math.random().toString(36).slice(2); 
-  // ...
-}
+    constructor({ id, width, height, color, position, title }) {
+      this.id = id || 'win-' + Math.random().toString(36).slice(2); 
+      // ...
+    }
 
 Then, in WindowManager.onMouseUp (after finishing a drag or resize), we do something like:
-
-onMouseUp(event) {
-  if (this.draggedWindow) {
-    this.draggedWindow.isDragging = false;
-    // let's notify the server
-    if (window.__networkManager) {
-      window.__networkManager.sendWindowUpdate(this.draggedWindow.id, {
-        position: {
-          x: this.draggedWindow.mesh.position.x,
-          y: this.draggedWindow.mesh.position.y,
-          z: this.draggedWindow.mesh.position.z,
-        },
-        width: this.draggedWindow.width,
-        height: this.draggedWindow.height,
-        isMinimized: this.draggedWindow.isMinimized,
-      });
+    
+    onMouseUp(event) {
+      if (this.draggedWindow) {
+        this.draggedWindow.isDragging = false;
+        // let's notify the server
+        if (window.__networkManager) {
+          window.__networkManager.sendWindowUpdate(this.draggedWindow.id, {
+            position: {
+              x: this.draggedWindow.mesh.position.x,
+              y: this.draggedWindow.mesh.position.y,
+              z: this.draggedWindow.mesh.position.z,
+            },
+            width: this.draggedWindow.width,
+            height: this.draggedWindow.height,
+            isMinimized: this.draggedWindow.isMinimized,
+          });
+        }
+        this.draggedWindow = null;
+      }
+      if (this.resizingWindow) {
+        // do the same
+        if (window.__networkManager) {
+          window.__networkManager.sendWindowUpdate(this.resizingWindow.id, {
+            // ...
+          });
+        }
+        this.resizingWindow = null;
+      }
     }
-    this.draggedWindow = null;
-  }
-  if (this.resizingWindow) {
-    // do the same
-    if (window.__networkManager) {
-      window.__networkManager.sendWindowUpdate(this.resizingWindow.id, {
-        // ...
-      });
-    }
-    this.resizingWindow = null;
-  }
-}
 
     Alternatively, you can pass your NetworkManager reference into the WindowManager constructor instead of using a global.
 
 ### 1.2.4 Applying the Update (syncWindow)
 
 Add a method in WindowManager:
-
-syncWindow(windowId, newState) {
-  // Find an existing window by ID
-  let w3d = this.windows.find(w => w.id === windowId);
-  if (!w3d) {
-    // create a new window (some default type or a known type)
-    w3d = this.createWindow({
-      id: windowId,
-      // ... defaults
-      width: newState.width || 2,
-      height: newState.height || 1.5,
-      position: new THREE.Vector3(
-        newState.position?.x || 0,
-        newState.position?.y || 0,
-        newState.position?.z || 0
-      ),
-    });
-    // For specialized windows like FileListWindow or TerminalWindow,
-    // you'd need to figure out which type to create, or store "type" in newState.
-  }
-
-  // Update position/size
-  if (newState.position) {
-    w3d.mesh.position.set(
-      newState.position.x,
-      newState.position.y,
-      newState.position.z
-    );
-  }
-  if (newState.width && newState.height) {
-    // Rebuild geometry if needed
-    // ...
-  }
-  if (typeof newState.isMinimized === 'boolean') {
-    if (newState.isMinimized !== w3d.isMinimized) {
-      w3d.toggleMinimize();
+    
+    syncWindow(windowId, newState) {
+      // Find an existing window by ID
+      let w3d = this.windows.find(w => w.id === windowId);
+      if (!w3d) {
+        // create a new window (some default type or a known type)
+        w3d = this.createWindow({
+          id: windowId,
+          // ... defaults
+          width: newState.width || 2,
+          height: newState.height || 1.5,
+          position: new THREE.Vector3(
+            newState.position?.x || 0,
+            newState.position?.y || 0,
+            newState.position?.z || 0
+          ),
+        });
+        // For specialized windows like FileListWindow or TerminalWindow,
+        // you'd need to figure out which type to create, or store "type" in newState.
+      }
+    
+      // Update position/size
+      if (newState.position) {
+        w3d.mesh.position.set(
+          newState.position.x,
+          newState.position.y,
+          newState.position.z
+        );
+      }
+      if (newState.width && newState.height) {
+        // Rebuild geometry if needed
+        // ...
+      }
+      if (typeof newState.isMinimized === 'boolean') {
+        if (newState.isMinimized !== w3d.isMinimized) {
+          w3d.toggleMinimize();
+        }
+      }
     }
-  }
-}
 
 Now multiple users connecting to the same server will see window changes as they happen in real time.
 
@@ -1301,47 +1301,47 @@ Since you can open/close windows, run commands, etc., you need basic authenticat
 
 ### 2.1 Add a Login Route
 
-// backend/server.js
-const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'super-secret-key'; // store in env variable in production
-
-// Example login route
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  // Hardcode a user for demo
-  if (username === 'admin' && password === '1234') {
-    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
-    return res.json({ token });
-  }
-  return res.status(401).json({ error: 'Invalid credentials' });
-});
+    // backend/server.js
+    const jwt = require('jsonwebtoken');
+    const SECRET_KEY = 'super-secret-key'; // store in env variable in production
+    
+    // Example login route
+    app.post('/api/login', (req, res) => {
+      const { username, password } = req.body;
+      // Hardcode a user for demo
+      if (username === 'admin' && password === '1234') {
+        const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
+        return res.json({ token });
+      }
+      return res.status(401).json({ error: 'Invalid credentials' });
+    });
 
 ### 2.2 Protect Your WS Connections
 
 We can pass a token as a query param or header in the WebSocket handshake:
 
-// In the frontend, e.g. networkManager.js
-constructor(wsUrl, token) {
-  this.socket = new WebSocket(`${wsUrl}?token=${token}`);
-  // ...
-}
+    // In the frontend, e.g. networkManager.js
+    constructor(wsUrl, token) {
+      this.socket = new WebSocket(`${wsUrl}?token=${token}`);
+      // ...
+    }
 
 Then in the server:
 
-server.on('upgrade', (request, socket, head) => {
-  const urlParams = new URLSearchParams(request.url.replace('/?', ''));
-  const token = urlParams.get('token');
-  try {
-    const payload = jwt.verify(token, SECRET_KEY);
-    // success, proceed
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request, payload);
+    server.on('upgrade', (request, socket, head) => {
+      const urlParams = new URLSearchParams(request.url.replace('/?', ''));
+      const token = urlParams.get('token');
+      try {
+        const payload = jwt.verify(token, SECRET_KEY);
+        // success, proceed
+        wss.handleUpgrade(request, socket, head, (ws) => {
+          wss.emit('connection', ws, request, payload);
+        });
+      } catch (err) {
+        console.error('JWT verify failed', err);
+        socket.destroy(); // close the connection
+      }
     });
-  } catch (err) {
-    console.error('JWT verify failed', err);
-    socket.destroy(); // close the connection
-  }
-});
 
 Now only authenticated users can open the WebSocket. You can refine this with user roles, multi-user identity, etc.
 Part 3: Plugin Architecture
@@ -1354,59 +1354,60 @@ Let’s suppose you want third parties (or your future self) to easily create ne
 
 ### 3.1 Example PluginManager
 
-// frontend/src/pluginManager.js
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    // pluginClass must extend Window3D
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    if (!this.plugins[pluginType]) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
+    // frontend/src/pluginManager.js
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        // pluginClass must extend Window3D
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        if (!this.plugins[pluginType]) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        const PluginClass = this.plugins[pluginType];
+        return new PluginClass(options);
+      }
     }
-    const PluginClass = this.plugins[pluginType];
-    return new PluginClass(options);
-  }
-}
 
 ### 3.2 Usage
 
-    In your main code:
+In your main code:
 
-import { PluginManager } from './pluginManager.js';
-import { FileListWindow } from './fileListWindow.js';
-import { TerminalWindow } from './terminalWindow.js';
-
-const pluginManager = new PluginManager();
-pluginManager.registerPlugin('fileList', FileListWindow);
-pluginManager.registerPlugin('terminal', TerminalWindow);
-
-// ...
-// In syncWindow:
-syncWindow(windowId, newState) {
-  let w3d = this.windows.find(w => w.id === windowId);
-  if (!w3d) {
-    // we look at newState.type => e.g. 'fileList' or 'terminal'
-    const pluginType = newState.type || 'default';
-    w3d = pluginManager.createWindow(pluginType, {
-      id: windowId,
-      // other props
-    });
-    w3d.addToScene(this.scene);
-    this.windows.push(w3d);
-  }
-  // Then apply the rest (position, etc.)
-}
+    import { PluginManager } from './pluginManager.js';
+    import { FileListWindow } from './fileListWindow.js';
+    import { TerminalWindow } from './terminalWindow.js';
+    
+    const pluginManager = new PluginManager();
+    pluginManager.registerPlugin('fileList', FileListWindow);
+    pluginManager.registerPlugin('terminal', TerminalWindow);
+    
+    // ...
+    
+    // In syncWindow:
+    syncWindow(windowId, newState) {
+      let w3d = this.windows.find(w => w.id === windowId);
+      if (!w3d) {
+        // we look at newState.type => e.g. 'fileList' or 'terminal'
+        const pluginType = newState.type || 'default';
+        w3d = pluginManager.createWindow(pluginType, {
+          id: windowId,
+          // other props
+        });
+        w3d.addToScene(this.scene);
+        this.windows.push(w3d);
+      }
+      // Then apply the rest (position, etc.)
+    }
 
 Now adding a new window type (say, a “ChatWindow” or “CameraFeedWindow”) is as simple as:
 
-class ChatWindow extends Window3D { ... }
-pluginManager.registerPlugin('chat', ChatWindow);
+    class ChatWindow extends Window3D { ... }
+    pluginManager.registerPlugin('chat', ChatWindow);
 
 And you can create it from the server by sending { type: 'chat', ... } as part of the window state.
 
@@ -1447,20 +1448,20 @@ A natural evolution for your “Ghost in the Shell”–inspired environment is 
 
 ### 1.1 Enabling WebXR in Three.js
 
-    Import the WebXR VR/AR modules:
+Import the WebXR VR/AR modules:
 
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-// Or ARButton for AR
+    import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+    // Or ARButton for AR
 
 Enable WebXR on your renderer:
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.xr.enabled = true;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.xr.enabled = true;
 
 Add a VR or AR button to the DOM:
 
-document.body.appendChild(VRButton.createButton(renderer));
-// or ARButton.createButton(renderer) for AR
+    document.body.appendChild(VRButton.createButton(renderer));
+    // or ARButton.createButton(renderer) for AR
 
 Adapt your animation loop:
 
@@ -1481,20 +1482,20 @@ Once this is in place, users with compatible headsets can click the Enter VR (or
 
 If you want to let users drag windows via a VR controller, you’ll need to do raycasting from the controller’s pose in 3D space:
 
-// Suppose you have a reference to the XR controller
-const controller = renderer.xr.getController(0);
-// Listen for 'selectstart', 'selectend' events
-controller.addEventListener('selectstart', onSelectStart);
-controller.addEventListener('selectend', onSelectEnd);
-
-function onSelectStart(event) {
-  // Raycast from controller
-  // If it hits a window, store it as "draggedWindow"
-}
-
-function onSelectEnd(event) {
-  // Release the dragged window
-}
+    // Suppose you have a reference to the XR controller
+    const controller = renderer.xr.getController(0);
+    // Listen for 'selectstart', 'selectend' events
+    controller.addEventListener('selectstart', onSelectStart);
+    controller.addEventListener('selectend', onSelectEnd);
+    
+    function onSelectStart(event) {
+      // Raycast from controller
+      // If it hits a window, store it as "draggedWindow"
+    }
+    
+    function onSelectEnd(event) {
+      // Release the dragged window
+    }
 
 This can be integrated with your existing WindowManager logic, but you’ll swap out mouse-based events for VR controller events.
 
@@ -1510,8 +1511,8 @@ You already have basic user authentication (JWT or similar). The next step is fi
 
 You can store user roles in JWT tokens (e.g., "role": "admin" or "role": "viewer") and then:
 
-    In the server (WS logic), check a user’s role before letting them broadcast a WINDOW_UPDATE.
-    Keep an ACL (Access Control List) for each window:
+In the server (WS logic), check a user’s role before letting them broadcast a WINDOW_UPDATE.
+Keep an ACL (Access Control List) for each window:
 
     globalWindowsState[windowId] = {
       owner: 'alice',
@@ -1519,7 +1520,7 @@ You can store user roles in JWT tokens (e.g., "role": "admin" or "role": "viewer
       ...
     };
 
-    If a user attempts to move or close a window and they don’t have permission, the server rejects that action or doesn’t broadcast it.
+If a user attempts to move or close a window and they don’t have permission, the server rejects that action or doesn’t broadcast it.
 
 ### 2.2 Per-Window Encryption (Optional)
 
@@ -1556,10 +1557,10 @@ Three.js can handle these transitions with tween libraries like GSAP or tween.js
 
 Example using GSAP:
 
-import gsap from 'gsap';
-
-// On window creation, do:
-gsap.from(window3D.mesh.scale, { x: 0, y: 0, z: 0, duration: 0.3, ease: 'back.out(1.7)' });
+    import gsap from 'gsap';
+    
+    // On window creation, do:
+    gsap.from(window3D.mesh.scale, { x: 0, y: 0, z: 0, duration: 0.3, ease: 'back.out(1.7)' });
 
 ## 5. Conflict Resolution in Multi-User Editing
 
@@ -1571,10 +1572,10 @@ With multiple users dragging and resizing the same window, you can get conflicts
 
 A lock-based approach might look like:
 
-// On the server, each window has a "lockedBy" field
-// When user A picks it up, server sets lockedBy = A
-// If user B tries to move it, server denies it unless lockedBy = B or null
-// When A releases it, lockedBy = null
+    // On the server, each window has a "lockedBy" field
+    // When user A picks it up, server sets lockedBy = A
+    // If user B tries to move it, server denies it unless lockedBy = B or null
+    // When A releases it, lockedBy = null
 
 ## 6. Logging, Analytics & Monitoring
 
@@ -1839,122 +1840,122 @@ Below is an example implementation of several plugin windows—ChatWindow, White
 A real-time chat window that displays text messages from all connected users and lets the current user type messages.
 ### 1.1 ChatWindow Code
 
-// ChatWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll store chat messages in an array
-    this.messages = [];
-
-    // We'll create a canvas to display chat text
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // A local input line for typed messages (in real UI, you might use an HTML <input> overlay)
-    this.inputBuffer = '';
-
-    // Example multi-user approach: each ChatWindow might have a channel ID
-    this.channelId = options.channelId || 'global-chat';
-
-    // Render initial state
-    this._renderChat();
-
-    // If you have a global or shared WebSocket, subscribe to chat messages
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (channelId, msg) => {
-        if (channelId === this.channelId) {
-          this.messages.push(msg);
-          this._renderChat();
+    // ChatWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll store chat messages in an array
+        this.messages = [];
+    
+        // We'll create a canvas to display chat text
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // A local input line for typed messages (in real UI, you might use an HTML <input> overlay)
+        this.inputBuffer = '';
+    
+        // Example multi-user approach: each ChatWindow might have a channel ID
+        this.channelId = options.channelId || 'global-chat';
+    
+        // Render initial state
+        this._renderChat();
+    
+        // If you have a global or shared WebSocket, subscribe to chat messages
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (channelId, msg) => {
+            if (channelId === this.channelId) {
+              this.messages.push(msg);
+              this._renderChat();
+            }
+          };
         }
-      };
+      }
+    
+      // Called when user types in some form of input
+      userTyped(text) {
+        // In a real UI, you'd capture text from an HTML input or keystrokes in the 3D environment
+        this.inputBuffer += text;
+        if (text.includes('\n')) {
+          // "Enter" was pressed
+          const newMsg = this.inputBuffer.trim();
+          this.inputBuffer = '';
+          this._sendMessage(newMsg);
+        }
+      }
+    
+      _sendMessage(message) {
+        // Push to local
+        const msgObj = {
+          sender: 'Me', // or from your user info
+          text: message,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+    
+        // Broadcast over WebSocket
+        if (window.__networkManager) {
+          window.__networkManager.sendChatMessage(this.channelId, msgObj);
+        }
+      }
+    
+      _renderChat() {
+        // Clear canvas
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '20px monospace';
+    
+        let y = 20;
+        const lineHeight = 24;
+        // Render latest ~10 messages
+        const recentMessages = this.messages.slice(-10);
+        recentMessages.forEach((m) => {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        });
+        this.texture.needsUpdate = true;
+      }
     }
-  }
-
-  // Called when user types in some form of input
-  userTyped(text) {
-    // In a real UI, you'd capture text from an HTML input or keystrokes in the 3D environment
-    this.inputBuffer += text;
-    if (text.includes('\n')) {
-      // "Enter" was pressed
-      const newMsg = this.inputBuffer.trim();
-      this.inputBuffer = '';
-      this._sendMessage(newMsg);
-    }
-  }
-
-  _sendMessage(message) {
-    // Push to local
-    const msgObj = {
-      sender: 'Me', // or from your user info
-      text: message,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-
-    // Broadcast over WebSocket
-    if (window.__networkManager) {
-      window.__networkManager.sendChatMessage(this.channelId, msgObj);
-    }
-  }
-
-  _renderChat() {
-    // Clear canvas
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '20px monospace';
-
-    let y = 20;
-    const lineHeight = 24;
-    // Render latest ~10 messages
-    const recentMessages = this.messages.slice(-10);
-    recentMessages.forEach((m) => {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
-    });
-    this.texture.needsUpdate = true;
-  }
-}
 
 ### 1.2 Server or Network Manager Side
 
 In your WebSocket code (or a NetworkManager class), you might have:
 
-// networkManager.js (simplified)
-export class NetworkManager {
-  constructor(wsUrl) {
-    this.socket = new WebSocket(wsUrl);
-    this.socket.onmessage = (evt) => {
-      const data = JSON.parse(evt.data);
-      if (data.type === 'CHAT_MSG') {
-        if (this.onChatMessage) {
-          this.onChatMessage(data.channelId, data.msg);
-        }
+    // networkManager.js (simplified)
+    export class NetworkManager {
+      constructor(wsUrl) {
+        this.socket = new WebSocket(wsUrl);
+        this.socket.onmessage = (evt) => {
+          const data = JSON.parse(evt.data);
+          if (data.type === 'CHAT_MSG') {
+            if (this.onChatMessage) {
+              this.onChatMessage(data.channelId, data.msg);
+            }
+          }
+        };
       }
-    };
-  }
-
-  // Called by ChatWindow to send a message
-  sendChatMessage(channelId, msgObj) {
-    this.socket.send(JSON.stringify({
-      type: 'CHAT_MSG',
-      channelId,
-      msg: msgObj
-    }));
-  }
-}
+    
+      // Called by ChatWindow to send a message
+      sendChatMessage(channelId, msgObj) {
+        this.socket.send(JSON.stringify({
+          type: 'CHAT_MSG',
+          channelId,
+          msg: msgObj
+        }));
+      }
+    }
 
 Then on the server side, you’d broadcast that message to all other clients in the same channel, so everyone’s ChatWindow sees it.
 ## 2. WhiteboardWindow
@@ -1962,100 +1963,100 @@ Then on the server side, you’d broadcast that message to all other clients in 
 A shared drawing canvas. Each user can draw lines or scribbles, and all other clients see the strokes in real time.
 ### 2.1 WhiteboardWindow Code
 
-// WhiteboardWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class WhiteboardWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Stroke data
-    this.strokes = []; // Each stroke = { points: [ {x, y}, ... ], color, thickness }
-    this.currentStroke = null;
-
-    // channel or board ID
-    this.boardId = options.boardId || 'default-board';
-
-    // If we have a shared network manager, hook up stroke updates
-    if (window.__networkManager) {
-      window.__networkManager.onWhiteboardStroke = (boardId, stroke) => {
-        if (boardId === this.boardId) {
-          this.strokes.push(stroke);
-          this._drawAllStrokes();
+    // WhiteboardWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class WhiteboardWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Stroke data
+        this.strokes = []; // Each stroke = { points: [ {x, y}, ... ], color, thickness }
+        this.currentStroke = null;
+    
+        // channel or board ID
+        this.boardId = options.boardId || 'default-board';
+    
+        // If we have a shared network manager, hook up stroke updates
+        if (window.__networkManager) {
+          window.__networkManager.onWhiteboardStroke = (boardId, stroke) => {
+            if (boardId === this.boardId) {
+              this.strokes.push(stroke);
+              this._drawAllStrokes();
+            }
+          };
         }
-      };
-    }
-
-    this._clearBoard();
-  }
-
-  // For local user drawing
-  startStroke(x, y, color = '#ff0000', thickness = 2) {
-    this.currentStroke = {
-      points: [{x, y}],
-      color,
-      thickness
-    };
-  }
-
-  continueStroke(x, y) {
-    if (!this.currentStroke) return;
-    this.currentStroke.points.push({x, y});
-    this._drawAllStrokes(); // update local preview
-  }
-
-  endStroke() {
-    if (!this.currentStroke) return;
-    this.strokes.push(this.currentStroke);
-    // broadcast to others
-    if (window.__networkManager) {
-      window.__networkManager.sendWhiteboardStroke(this.boardId, this.currentStroke);
-    }
-    this.currentStroke = null;
-  }
-
-  _drawAllStrokes() {
-    this._clearBoard();
-    this.strokes.forEach((s) => {
-      this._drawStroke(s);
-    });
-    if (this.currentStroke) {
-      this._drawStroke(this.currentStroke);
-    }
-  }
-
-  _drawStroke(stroke) {
-    this.ctx.strokeStyle = stroke.color;
-    this.ctx.lineWidth = stroke.thickness;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-    this.ctx.beginPath();
-    const pts = stroke.points;
-    if (pts.length > 0) {
-      this.ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        this.ctx.lineTo(pts[i].x, pts[i].y);
+    
+        this._clearBoard();
+      }
+    
+      // For local user drawing
+      startStroke(x, y, color = '#ff0000', thickness = 2) {
+        this.currentStroke = {
+          points: [{x, y}],
+          color,
+          thickness
+        };
+      }
+    
+      continueStroke(x, y) {
+        if (!this.currentStroke) return;
+        this.currentStroke.points.push({x, y});
+        this._drawAllStrokes(); // update local preview
+      }
+    
+      endStroke() {
+        if (!this.currentStroke) return;
+        this.strokes.push(this.currentStroke);
+        // broadcast to others
+        if (window.__networkManager) {
+          window.__networkManager.sendWhiteboardStroke(this.boardId, this.currentStroke);
+        }
+        this.currentStroke = null;
+      }
+    
+      _drawAllStrokes() {
+        this._clearBoard();
+        this.strokes.forEach((s) => {
+          this._drawStroke(s);
+        });
+        if (this.currentStroke) {
+          this._drawStroke(this.currentStroke);
+        }
+      }
+    
+      _drawStroke(stroke) {
+        this.ctx.strokeStyle = stroke.color;
+        this.ctx.lineWidth = stroke.thickness;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        this.ctx.beginPath();
+        const pts = stroke.points;
+        if (pts.length > 0) {
+          this.ctx.moveTo(pts[0].x, pts[0].y);
+          for (let i = 1; i < pts.length; i++) {
+            this.ctx.lineTo(pts[i].x, pts[i].y);
+          }
+        }
+        this.ctx.stroke();
+        this.texture.needsUpdate = true;
+      }
+    
+      _clearBoard() {
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.texture.needsUpdate = true;
       }
     }
-    this.ctx.stroke();
-    this.texture.needsUpdate = true;
-  }
-
-  _clearBoard() {
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.texture.needsUpdate = true;
-  }
-}
 
 ### 2.2 Handling Pointer Events
 
@@ -2067,48 +2068,48 @@ A window that displays a live video—either from the user’s webcam (via getUs
 
 ### 3.1 CameraFeedWindow Code
 
-// CameraFeedWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class CameraFeedWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll assume 'ipUrl' or 'useWebcam'
-    this.ipUrl = options.ipUrl || null;
-    this.useWebcam = options.useWebcam || false;
-
-    // Create a video element
-    this.video = document.createElement('video');
-    this.video.autoplay = true;
-    this.video.muted = true; // avoid echo
-
-    this.texture = new THREE.VideoTexture(this.video);
-    this.material.map = this.texture;
-
-    if (this.useWebcam) {
-      this._initWebcamFeed();
-    } else if (this.ipUrl) {
-      this._initIpStream(this.ipUrl);
+    // CameraFeedWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class CameraFeedWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll assume 'ipUrl' or 'useWebcam'
+        this.ipUrl = options.ipUrl || null;
+        this.useWebcam = options.useWebcam || false;
+    
+        // Create a video element
+        this.video = document.createElement('video');
+        this.video.autoplay = true;
+        this.video.muted = true; // avoid echo
+    
+        this.texture = new THREE.VideoTexture(this.video);
+        this.material.map = this.texture;
+    
+        if (this.useWebcam) {
+          this._initWebcamFeed();
+        } else if (this.ipUrl) {
+          this._initIpStream(this.ipUrl);
+        }
+      }
+    
+      async _initWebcamFeed() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          this.video.srcObject = stream;
+        } catch (err) {
+          console.error('Webcam feed error:', err);
+        }
+      }
+    
+      _initIpStream(url) {
+        // If the IP camera feed is accessible as an <video> src
+        this.video.src = url;
+        // If it's a format not directly playable by <video>, you'll need a streaming library.
+      }
     }
-  }
-
-  async _initWebcamFeed() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      this.video.srcObject = stream;
-    } catch (err) {
-      console.error('Webcam feed error:', err);
-    }
-  }
-
-  _initIpStream(url) {
-    // If the IP camera feed is accessible as an <video> src
-    this.video.src = url;
-    // If it's a format not directly playable by <video>, you'll need a streaming library.
-  }
-}
 
 3.2 Multi-User Considerations
 
@@ -2122,92 +2123,92 @@ A window that can play/pause a shared audio track, with synchronized timestamps 
 
 ## 4.1 MusicPlayerWindow Code
 
-// MusicPlayerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class MusicPlayerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.audio = new Audio();
-    this.audio.src = options.src || 'path/to/music.mp3';
-    this.audio.loop = true;
-    this.audio.volume = 1.0;
-
-    // This is a minimal approach; no custom texture for controls, just color
-    this.material.color.setHex(0x8833aa);
-
-    this.isPlaying = false;
-    this.trackId = options.trackId || 'default-track';
-
-    // Listen for server updates to keep time in sync
-    if (window.__networkManager) {
-      window.__networkManager.onMusicSync = (trackId, state) => {
-        if (trackId === this.trackId) {
-          this._applySyncState(state);
+    // MusicPlayerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class MusicPlayerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.audio = new Audio();
+        this.audio.src = options.src || 'path/to/music.mp3';
+        this.audio.loop = true;
+        this.audio.volume = 1.0;
+    
+        // This is a minimal approach; no custom texture for controls, just color
+        this.material.color.setHex(0x8833aa);
+    
+        this.isPlaying = false;
+        this.trackId = options.trackId || 'default-track';
+    
+        // Listen for server updates to keep time in sync
+        if (window.__networkManager) {
+          window.__networkManager.onMusicSync = (trackId, state) => {
+            if (trackId === this.trackId) {
+              this._applySyncState(state);
+            }
+          };
         }
-      };
+      }
+    
+      play() {
+        this.audio.play();
+        this.isPlaying = true;
+        this._broadcastState();
+      }
+    
+      pause() {
+        this.audio.pause();
+        this.isPlaying = false;
+        this._broadcastState();
+      }
+    
+      seekTo(seconds) {
+        this.audio.currentTime = seconds;
+        this._broadcastState();
+      }
+    
+      _broadcastState() {
+        if (!window.__networkManager) return;
+        const state = {
+          isPlaying: this.isPlaying,
+          currentTime: this.audio.currentTime
+        };
+        window.__networkManager.sendMusicSync(this.trackId, state);
+      }
+    
+      _applySyncState(state) {
+        this.isPlaying = state.isPlaying;
+        if (Math.abs(this.audio.currentTime - state.currentTime) > 1) {
+          this.audio.currentTime = state.currentTime;
+        }
+        if (this.isPlaying) {
+          this.audio.play();
+        } else {
+          this.audio.pause();
+        }
+      }
     }
-  }
-
-  play() {
-    this.audio.play();
-    this.isPlaying = true;
-    this._broadcastState();
-  }
-
-  pause() {
-    this.audio.pause();
-    this.isPlaying = false;
-    this._broadcastState();
-  }
-
-  seekTo(seconds) {
-    this.audio.currentTime = seconds;
-    this._broadcastState();
-  }
-
-  _broadcastState() {
-    if (!window.__networkManager) return;
-    const state = {
-      isPlaying: this.isPlaying,
-      currentTime: this.audio.currentTime
-    };
-    window.__networkManager.sendMusicSync(this.trackId, state);
-  }
-
-  _applySyncState(state) {
-    this.isPlaying = state.isPlaying;
-    if (Math.abs(this.audio.currentTime - state.currentTime) > 1) {
-      this.audio.currentTime = state.currentTime;
-    }
-    if (this.isPlaying) {
-      this.audio.play();
-    } else {
-      this.audio.pause();
-    }
-  }
-}
 
 ### 4.2 Network Logic
 
 A simplistic approach:
 
-// networkManager.js
-class NetworkManager {
-  // ...
-  sendMusicSync(trackId, state) {
-    this.socket.send(JSON.stringify({
-      type: 'MUSIC_SYNC',
-      trackId,
-      state
-    }));
-  }
-
-  // onmessage ...
-  // if data.type === 'MUSIC_SYNC': this.onMusicSync(data.trackId, data.state);
-}
+    // networkManager.js
+    class NetworkManager {
+      // ...
+      sendMusicSync(trackId, state) {
+        this.socket.send(JSON.stringify({
+          type: 'MUSIC_SYNC',
+          trackId,
+          state
+        }));
+      }
+    
+      // onmessage ...
+      // if data.type === 'MUSIC_SYNC': this.onMusicSync(data.trackId, data.state);
+    }
 
 You can enhance with timestamps and a drift-correction algorithm to keep all clients in near-perfect sync.
 
@@ -2217,68 +2218,68 @@ A window to load .glb, .gltf, or .obj files and display them in a 3D subscene. P
 
 ### 5.1 ModelViewerWindow Code
 
-// ModelViewerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// or OBJLoader / FBXLoader as needed
-
-export class ModelViewerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // Create an offscreen scene or a small subscene
-    this.subScene = new THREE.Scene();
-    this.subCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    this.subCamera.position.set(0, 1, 3);
-
-    // Basic lighting
-    const light = new THREE.AmbientLight(0xffffff, 1);
-    this.subScene.add(light);
-
-    // Render target
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
-    this.texture = this.renderTarget.texture;
-    this.material.map = this.texture;
-
-    // Load the model
-    if (options.modelUrl) {
-      this._loadModel(options.modelUrl);
+    // ModelViewerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    // or OBJLoader / FBXLoader as needed
+    
+    export class ModelViewerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // Create an offscreen scene or a small subscene
+        this.subScene = new THREE.Scene();
+        this.subCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        this.subCamera.position.set(0, 1, 3);
+    
+        // Basic lighting
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        this.subScene.add(light);
+    
+        // Render target
+        this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
+        this.texture = this.renderTarget.texture;
+        this.material.map = this.texture;
+    
+        // Load the model
+        if (options.modelUrl) {
+          this._loadModel(options.modelUrl);
+        }
+    
+        // Animate the sub-scene
+        this._animateSubScene();
+      }
+    
+      _loadModel(url) {
+        const loader = new GLTFLoader();
+        loader.load(url, (gltf) => {
+          this.subScene.add(gltf.scene);
+          gltf.scene.position.set(0, 0, 0);
+          this.model = gltf.scene;
+        }, undefined, (err) => {
+          console.error('Model load error:', err);
+        });
+      }
+    
+      _animateSubScene() {
+        if (this.isClosed) return;
+        requestAnimationFrame(() => this._animateSubScene());
+    
+        // If we have a globalThreeRenderer or pass a reference in
+        if (!window.__globalThreeRenderer) return;
+    
+        // Optionally rotate the model
+        if (this.model) {
+          this.model.rotation.y += 0.01;
+        }
+    
+        // Render subScene to renderTarget
+        window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
+        window.__globalThreeRenderer.render(this.subScene, this.subCamera);
+        window.__globalThreeRenderer.setRenderTarget(null);
+      }
     }
-
-    // Animate the sub-scene
-    this._animateSubScene();
-  }
-
-  _loadModel(url) {
-    const loader = new GLTFLoader();
-    loader.load(url, (gltf) => {
-      this.subScene.add(gltf.scene);
-      gltf.scene.position.set(0, 0, 0);
-      this.model = gltf.scene;
-    }, undefined, (err) => {
-      console.error('Model load error:', err);
-    });
-  }
-
-  _animateSubScene() {
-    if (this.isClosed) return;
-    requestAnimationFrame(() => this._animateSubScene());
-
-    // If we have a globalThreeRenderer or pass a reference in
-    if (!window.__globalThreeRenderer) return;
-
-    // Optionally rotate the model
-    if (this.model) {
-      this.model.rotation.y += 0.01;
-    }
-
-    // Render subScene to renderTarget
-    window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
-    window.__globalThreeRenderer.render(this.subScene, this.subCamera);
-    window.__globalThreeRenderer.setRenderTarget(null);
-  }
-}
 
 ### 5.2 Multi-User Collaboration?
 
@@ -2292,88 +2293,88 @@ If you want multiple users to see the same rotation or manipulations:
 
 If you have a PluginManager, you might do something like:
 
-// pluginManager.js
-import { ChatWindow } from './ChatWindow.js';
-import { WhiteboardWindow } from './WhiteboardWindow.js';
-import { CameraFeedWindow } from './CameraFeedWindow.js';
-import { MusicPlayerWindow } from './MusicPlayerWindow.js';
-import { ModelViewerWindow } from './ModelViewerWindow.js';
-
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerDefaults() {
-    this.registerPlugin('chat', ChatWindow);
-    this.registerPlugin('whiteboard', WhiteboardWindow);
-    this.registerPlugin('cameraFeed', CameraFeedWindow);
-    this.registerPlugin('musicPlayer', MusicPlayerWindow);
-    this.registerPlugin('modelViewer', ModelViewerWindow);
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    const PluginClass = this.plugins[pluginType];
-    if (!PluginClass) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
+    // pluginManager.js
+    import { ChatWindow } from './ChatWindow.js';
+    import { WhiteboardWindow } from './WhiteboardWindow.js';
+    import { CameraFeedWindow } from './CameraFeedWindow.js';
+    import { MusicPlayerWindow } from './MusicPlayerWindow.js';
+    import { ModelViewerWindow } from './ModelViewerWindow.js';
+    
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerDefaults() {
+        this.registerPlugin('chat', ChatWindow);
+        this.registerPlugin('whiteboard', WhiteboardWindow);
+        this.registerPlugin('cameraFeed', CameraFeedWindow);
+        this.registerPlugin('musicPlayer', MusicPlayerWindow);
+        this.registerPlugin('modelViewer', ModelViewerWindow);
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        const PluginClass = this.plugins[pluginType];
+        if (!PluginClass) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        return new PluginClass(options);
+      }
     }
-    return new PluginClass(options);
-  }
-}
 
 Then in your main code:
 
-// main.js
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-// plus your network logic
-
-function init() {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(...);
-  const renderer = new THREE.WebGLRenderer(...);
-
-  document.body.appendChild(renderer.domElement);
-
-  // Make it globally available for sub-scene rendering (ModelViewer, etc.)
-  window.__globalThreeRenderer = renderer;
-
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-  pluginManager.registerDefaults();
-
-  // Example usage:
-  const chatWin = pluginManager.createWindow('chat', { position: new THREE.Vector3(0,1,0), channelId: 'global' });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  const boardWin = pluginManager.createWindow('whiteboard', { position: new THREE.Vector3(2,1,0) });
-  boardWin.addToScene(scene);
-  windowManager.windows.push(boardWin);
-
-  const camWin = pluginManager.createWindow('cameraFeed', { position: new THREE.Vector3(-2,1,0), useWebcam: true });
-  camWin.addToScene(scene);
-  windowManager.windows.push(camWin);
-
-  const musicWin = pluginManager.createWindow('musicPlayer', { position: new THREE.Vector3(0, -1, 0), src: 'path/to/song.mp3' });
-  musicWin.addToScene(scene);
-  windowManager.windows.push(musicWin);
-
-  const modelWin = pluginManager.createWindow('modelViewer', { position: new THREE.Vector3(4,1,0), modelUrl: 'models/helmet.glb' });
-  modelWin.addToScene(scene);
-  windowManager.windows.push(modelWin);
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
-}
-init();
+    // main.js
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    // plus your network logic
+    
+    function init() {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(...);
+      const renderer = new THREE.WebGLRenderer(...);
+    
+      document.body.appendChild(renderer.domElement);
+    
+      // Make it globally available for sub-scene rendering (ModelViewer, etc.)
+      window.__globalThreeRenderer = renderer;
+    
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+      pluginManager.registerDefaults();
+    
+      // Example usage:
+      const chatWin = pluginManager.createWindow('chat', { position: new THREE.Vector3(0,1,0), channelId: 'global' });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      const boardWin = pluginManager.createWindow('whiteboard', { position: new THREE.Vector3(2,1,0) });
+      boardWin.addToScene(scene);
+      windowManager.windows.push(boardWin);
+    
+      const camWin = pluginManager.createWindow('cameraFeed', { position: new THREE.Vector3(-2,1,0), useWebcam: true });
+      camWin.addToScene(scene);
+      windowManager.windows.push(camWin);
+    
+      const musicWin = pluginManager.createWindow('musicPlayer', { position: new THREE.Vector3(0, -1, 0), src: 'path/to/song.mp3' });
+      musicWin.addToScene(scene);
+      windowManager.windows.push(musicWin);
+    
+      const modelWin = pluginManager.createWindow('modelViewer', { position: new THREE.Vector3(4,1,0), modelUrl: 'models/helmet.glb' });
+      modelWin.addToScene(scene);
+      windowManager.windows.push(modelWin);
+    
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+    init();
 
 Final Thoughts
 
@@ -2410,147 +2411,147 @@ Let’s enhance ChatWindow by adding:
     Commands or “slash commands.”
     User presence (list of who’s online).
 
-// ChatWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-/**
- * Enhanced ChatWindow that has:
- *  - A user presence list
- *  - Slash commands (/help, /me, etc.)
- *  - HTML input overlay for easier text typing
- */
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.messages = [];
-    this.usersOnline = [];
-
-    // Canvas for chat display
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 300;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Create an HTML input overlay for chat
-    this._createChatInputOverlay();
-
-    // Subscribe to network events
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (channelId, msg) => {
-        if (channelId === (this.channelId || 'global')) {
-          this._onMessageReceived(msg);
+    // ChatWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    /**
+     * Enhanced ChatWindow that has:
+     *  - A user presence list
+     *  - Slash commands (/help, /me, etc.)
+     *  - HTML input overlay for easier text typing
+     */
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.messages = [];
+        this.usersOnline = [];
+    
+        // Canvas for chat display
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 300;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Create an HTML input overlay for chat
+        this._createChatInputOverlay();
+    
+        // Subscribe to network events
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (channelId, msg) => {
+            if (channelId === (this.channelId || 'global')) {
+              this._onMessageReceived(msg);
+            }
+          };
+          window.__networkManager.onUserPresence = (userList) => {
+            this._updateUserList(userList);
+          };
         }
-      };
-      window.__networkManager.onUserPresence = (userList) => {
-        this._updateUserList(userList);
-      };
-    }
-
-    this._renderChat();
-  }
-
-  _createChatInputOverlay() {
-    // Creates an absolutely positioned text box near the 3D window
-    this.chatInput = document.createElement('input');
-    this.chatInput.type = 'text';
-    this.chatInput.placeholder = 'Type a message, press Enter...';
-    this.chatInput.style.position = 'absolute';
-    this.chatInput.style.bottom = '50px';
-    this.chatInput.style.left = '50px';
-    this.chatInput.style.width = '200px';
-    document.body.appendChild(this.chatInput);
-
-    // Listen for "Enter"
-    this.chatInput.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const text = this.chatInput.value.trim();
-        if (text) {
-          this._sendChat(text);
-        }
-        this.chatInput.value = '';
+    
+        this._renderChat();
       }
-    });
-  }
-
-  _sendChat(text) {
-    // Check for slash commands
-    if (text.startsWith('/')) {
-      this._handleSlashCommand(text);
-      return;
+    
+      _createChatInputOverlay() {
+        // Creates an absolutely positioned text box near the 3D window
+        this.chatInput = document.createElement('input');
+        this.chatInput.type = 'text';
+        this.chatInput.placeholder = 'Type a message, press Enter...';
+        this.chatInput.style.position = 'absolute';
+        this.chatInput.style.bottom = '50px';
+        this.chatInput.style.left = '50px';
+        this.chatInput.style.width = '200px';
+        document.body.appendChild(this.chatInput);
+    
+        // Listen for "Enter"
+        this.chatInput.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            const text = this.chatInput.value.trim();
+            if (text) {
+              this._sendChat(text);
+            }
+            this.chatInput.value = '';
+          }
+        });
+      }
+    
+      _sendChat(text) {
+        // Check for slash commands
+        if (text.startsWith('/')) {
+          this._handleSlashCommand(text);
+          return;
+        }
+        const msgObj = {
+          sender: window.__networkManager?.username || 'Me',
+          text,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+        window.__networkManager?.sendChatMessage(this.channelId || 'global', msgObj);
+      }
+    
+      _handleSlashCommand(cmdText) {
+        // E.g. /help, /me, /shrug, etc.
+        if (cmdText === '/help') {
+          this.messages.push({ sender: 'System', text: 'Available commands: /help, /me', timestamp: Date.now() });
+          this._renderChat();
+        } else if (cmdText.startsWith('/me')) {
+          // e.g. /me is dancing
+          const action = cmdText.replace('/me', '').trim();
+          const msgObj = {
+            sender: window.__networkManager?.username || 'Me',
+            text: `* ${action} *`,
+            timestamp: Date.now()
+          };
+          this.messages.push(msgObj);
+          this._renderChat();
+          window.__networkManager?.sendChatMessage(this.channelId || 'global', msgObj);
+        } else {
+          // Unknown command
+          this.messages.push({ sender: 'System', text: 'Unknown command.', timestamp: Date.now() });
+          this._renderChat();
+        }
+      }
+    
+      _onMessageReceived(msgObj) {
+        this.messages.push(msgObj);
+        this._renderChat();
+      }
+    
+      _updateUserList(userList) {
+        // For example, store it and re-render chat with a presence section
+        this.usersOnline = userList;
+        this._renderChat();
+      }
+    
+      _renderChat() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        const lineHeight = 20;
+        // Draw up to ~10 messages
+        const recent = this.messages.slice(-10);
+        for (const m of recent) {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        }
+    
+        // Draw presence info
+        y += 30;
+        this.ctx.fillStyle = '#ff0';
+        this.ctx.fillText(`Online: ${this.usersOnline.join(', ')}`, 10, y);
+    
+        this.texture.needsUpdate = true;
+      }
     }
-    const msgObj = {
-      sender: window.__networkManager?.username || 'Me',
-      text,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-    window.__networkManager?.sendChatMessage(this.channelId || 'global', msgObj);
-  }
-
-  _handleSlashCommand(cmdText) {
-    // E.g. /help, /me, /shrug, etc.
-    if (cmdText === '/help') {
-      this.messages.push({ sender: 'System', text: 'Available commands: /help, /me', timestamp: Date.now() });
-      this._renderChat();
-    } else if (cmdText.startsWith('/me')) {
-      // e.g. /me is dancing
-      const action = cmdText.replace('/me', '').trim();
-      const msgObj = {
-        sender: window.__networkManager?.username || 'Me',
-        text: `* ${action} *`,
-        timestamp: Date.now()
-      };
-      this.messages.push(msgObj);
-      this._renderChat();
-      window.__networkManager?.sendChatMessage(this.channelId || 'global', msgObj);
-    } else {
-      // Unknown command
-      this.messages.push({ sender: 'System', text: 'Unknown command.', timestamp: Date.now() });
-      this._renderChat();
-    }
-  }
-
-  _onMessageReceived(msgObj) {
-    this.messages.push(msgObj);
-    this._renderChat();
-  }
-
-  _updateUserList(userList) {
-    // For example, store it and re-render chat with a presence section
-    this.usersOnline = userList;
-    this._renderChat();
-  }
-
-  _renderChat() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    const lineHeight = 20;
-    // Draw up to ~10 messages
-    const recent = this.messages.slice(-10);
-    for (const m of recent) {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
-    }
-
-    // Draw presence info
-    y += 30;
-    this.ctx.fillStyle = '#ff0';
-    this.ctx.fillText(`Online: ${this.usersOnline.join(', ')}`, 10, y);
-
-    this.texture.needsUpdate = true;
-  }
-}
 
 Server/Networking: You would also broadcast user presence (who connected, disconnected) as onUserPresence(userList) events so each ChatWindow can update its usersOnline.
 
@@ -2562,92 +2563,92 @@ We add:
     Brush size slider.
     Eraser (treated as a stroke with white color, or remove strokes).
 
-// WhiteboardWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class WhiteboardWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Stroke data
-    this.strokes = [];
-    this.currentStroke = null;
-
-    // Tools
-    this.currentColor = '#ff0000';
-    this.currentThickness = 3;
-    this.isEraser = false;
-
-    // Setup HTML tool overlay
-    this._createToolUI();
-
-    this._clearBoard();
-  }
-
-  _createToolUI() {
-    // Color picker
-    this.colorInput = document.createElement('input');
-    this.colorInput.type = 'color';
-    this.colorInput.value = this.currentColor;
-    this.colorInput.style.position = 'absolute';
-    this.colorInput.style.top = '60px';
-    this.colorInput.style.left = '50px';
-    document.body.appendChild(this.colorInput);
-
-    this.colorInput.addEventListener('input', () => {
-      this.currentColor = this.colorInput.value;
-      this.isEraser = false;
-    });
-
-    // Brush size
-    this.sizeInput = document.createElement('input');
-    this.sizeInput.type = 'range';
-    this.sizeInput.min = '1';
-    this.sizeInput.max = '10';
-    this.sizeInput.value = String(this.currentThickness);
-    this.sizeInput.style.position = 'absolute';
-    this.sizeInput.style.top = '90px';
-    this.sizeInput.style.left = '50px';
-    document.body.appendChild(this.sizeInput);
-
-    this.sizeInput.addEventListener('input', () => {
-      this.currentThickness = parseInt(this.sizeInput.value, 10);
-      this.isEraser = false;
-    });
-
-    // Eraser button
-    this.eraserBtn = document.createElement('button');
-    this.eraserBtn.textContent = 'Eraser';
-    this.eraserBtn.style.position = 'absolute';
-    this.eraserBtn.style.top = '120px';
-    this.eraserBtn.style.left = '50px';
-    document.body.appendChild(this.eraserBtn);
-
-    this.eraserBtn.addEventListener('click', () => {
-      this.isEraser = true;
-    });
-  }
-
-  // startStroke, continueStroke, endStroke as before
-  startStroke(x, y) {
-    this.currentStroke = {
-      points: [{x, y}],
-      color: this.isEraser ? '#ffffff' : this.currentColor,
-      thickness: this.isEraser ? 10 : this.currentThickness
-    };
-  }
-
-  // ... plus the rest, same as in earlier code ...
-}
+    // WhiteboardWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class WhiteboardWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Stroke data
+        this.strokes = [];
+        this.currentStroke = null;
+    
+        // Tools
+        this.currentColor = '#ff0000';
+        this.currentThickness = 3;
+        this.isEraser = false;
+    
+        // Setup HTML tool overlay
+        this._createToolUI();
+    
+        this._clearBoard();
+      }
+    
+      _createToolUI() {
+        // Color picker
+        this.colorInput = document.createElement('input');
+        this.colorInput.type = 'color';
+        this.colorInput.value = this.currentColor;
+        this.colorInput.style.position = 'absolute';
+        this.colorInput.style.top = '60px';
+        this.colorInput.style.left = '50px';
+        document.body.appendChild(this.colorInput);
+    
+        this.colorInput.addEventListener('input', () => {
+          this.currentColor = this.colorInput.value;
+          this.isEraser = false;
+        });
+    
+        // Brush size
+        this.sizeInput = document.createElement('input');
+        this.sizeInput.type = 'range';
+        this.sizeInput.min = '1';
+        this.sizeInput.max = '10';
+        this.sizeInput.value = String(this.currentThickness);
+        this.sizeInput.style.position = 'absolute';
+        this.sizeInput.style.top = '90px';
+        this.sizeInput.style.left = '50px';
+        document.body.appendChild(this.sizeInput);
+    
+        this.sizeInput.addEventListener('input', () => {
+          this.currentThickness = parseInt(this.sizeInput.value, 10);
+          this.isEraser = false;
+        });
+    
+        // Eraser button
+        this.eraserBtn = document.createElement('button');
+        this.eraserBtn.textContent = 'Eraser';
+        this.eraserBtn.style.position = 'absolute';
+        this.eraserBtn.style.top = '120px';
+        this.eraserBtn.style.left = '50px';
+        document.body.appendChild(this.eraserBtn);
+    
+        this.eraserBtn.addEventListener('click', () => {
+          this.isEraser = true;
+        });
+      }
+    
+      // startStroke, continueStroke, endStroke as before
+      startStroke(x, y) {
+        this.currentStroke = {
+          points: [{x, y}],
+          color: this.isEraser ? '#ffffff' : this.currentColor,
+          thickness: this.isEraser ? 10 : this.currentThickness
+        };
+      }
+    
+      // ... plus the rest, same as in earlier code ...
+    }
 
 You might store whether a stroke is an eraser stroke in the data structure, or simply use a large white stroke. Also, you can add undo by removing the last stroke from your array and re-drawing.
 
@@ -2658,92 +2659,92 @@ We extend CameraFeedWindow so that multiple remote user videos can be displayed 
     You’d need a WebRTC or SFU approach server-side to gather multiple video streams.
     Locally, you draw each user’s video feed into a split portion of the same <canvas>.
 
-// CameraFeedWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-/**
- * Extended to handle multiple user streams. 
- * We'll keep a map of userId -> <video> element, 
- * and tile them in a 2x2 or 3x3 grid on the canvas.
- */
-export class CameraFeedWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.usersStreams = {}; // userId -> { videoEl, stream }
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.VideoTexture(this.canvas); 
-    // Actually, we can't do direct VideoTexture from multiple <video> merges.
-    // We'll do a CanvasTexture approach:
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Example: subscribe to an event that says "user X joined with a stream"
-    // then we create a <video> element for them
-    if (window.__networkManager) {
-      window.__networkManager.onNewStream = (userId, stream) => {
-        this._addUserStream(userId, stream);
-      };
-      window.__networkManager.onRemoveStream = (userId) => {
-        this._removeUserStream(userId);
-      };
-    }
-
-    this._renderLoop();
-  }
-
-  _addUserStream(userId, stream) {
-    const video = document.createElement('video');
-    video.autoplay = true;
-    video.srcObject = stream;
-    this.usersStreams[userId] = { videoEl: video, stream };
-  }
-
-  _removeUserStream(userId) {
-    delete this.usersStreams[userId];
-  }
-
-  _renderLoop() {
-    if (this.isClosed) return;
-    requestAnimationFrame(() => this._renderLoop());
-
-    // Draw each video in a grid
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    const userIds = Object.keys(this.usersStreams);
-    const count = userIds.length;
-    // For a 2x2 grid, e.g.
-    const cols = Math.ceil(Math.sqrt(count));
-    const rows = Math.ceil(count / cols);
-
-    let i = 0;
-    userIds.forEach((uid) => {
-      const { videoEl } = this.usersStreams[uid];
-      if (videoEl.readyState >= videoEl.HAVE_ENOUGH_DATA) {
-        const xIdx = i % cols;
-        const yIdx = Math.floor(i / cols);
-        const cellWidth = this.canvas.width / cols;
-        const cellHeight = this.canvas.height / rows;
-        this.ctx.drawImage(
-          videoEl,
-          xIdx * cellWidth,
-          yIdx * cellHeight,
-          cellWidth,
-          cellHeight
-        );
+    // CameraFeedWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    /**
+     * Extended to handle multiple user streams. 
+     * We'll keep a map of userId -> <video> element, 
+     * and tile them in a 2x2 or 3x3 grid on the canvas.
+     */
+    export class CameraFeedWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.usersStreams = {}; // userId -> { videoEl, stream }
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.VideoTexture(this.canvas); 
+        // Actually, we can't do direct VideoTexture from multiple <video> merges.
+        // We'll do a CanvasTexture approach:
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Example: subscribe to an event that says "user X joined with a stream"
+        // then we create a <video> element for them
+        if (window.__networkManager) {
+          window.__networkManager.onNewStream = (userId, stream) => {
+            this._addUserStream(userId, stream);
+          };
+          window.__networkManager.onRemoveStream = (userId) => {
+            this._removeUserStream(userId);
+          };
+        }
+    
+        this._renderLoop();
       }
-      i++;
-    });
-
-    this.texture.needsUpdate = true;
-  }
-}
+    
+      _addUserStream(userId, stream) {
+        const video = document.createElement('video');
+        video.autoplay = true;
+        video.srcObject = stream;
+        this.usersStreams[userId] = { videoEl: video, stream };
+      }
+    
+      _removeUserStream(userId) {
+        delete this.usersStreams[userId];
+      }
+    
+      _renderLoop() {
+        if (this.isClosed) return;
+        requestAnimationFrame(() => this._renderLoop());
+    
+        // Draw each video in a grid
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        const userIds = Object.keys(this.usersStreams);
+        const count = userIds.length;
+        // For a 2x2 grid, e.g.
+        const cols = Math.ceil(Math.sqrt(count));
+        const rows = Math.ceil(count / cols);
+    
+        let i = 0;
+        userIds.forEach((uid) => {
+          const { videoEl } = this.usersStreams[uid];
+          if (videoEl.readyState >= videoEl.HAVE_ENOUGH_DATA) {
+            const xIdx = i % cols;
+            const yIdx = Math.floor(i / cols);
+            const cellWidth = this.canvas.width / cols;
+            const cellHeight = this.canvas.height / rows;
+            this.ctx.drawImage(
+              videoEl,
+              xIdx * cellWidth,
+              yIdx * cellHeight,
+              cellWidth,
+              cellHeight
+            );
+          }
+          i++;
+        });
+    
+        this.texture.needsUpdate = true;
+      }
+    }
 
 Server: You’d manage multi-user calls, using WebRTC or some SFU library. Each user’s stream is broadcast to the others.
 
@@ -2751,83 +2752,83 @@ Server: You’d manage multi-user calls, using WebRTC or some SFU library. Each 
 
 Let’s add a playlist and a volume slider:
 
-// MusicPlayerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class MusicPlayerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.playlist = options.playlist || [
-      { title: 'Song A', src: 'songA.mp3' },
-      { title: 'Song B', src: 'songB.mp3' }
-    ];
-    this.currentIndex = 0;
-
-    this.audio = new Audio();
-    this.audio.loop = false;
-    this.audio.volume = 1.0;
-    this.isPlaying = false;
-
-    this._loadTrack(this.currentIndex);
-
-    // Volume slider
-    this._createControls();
-  }
-
-  _createControls() {
-    this.volumeSlider = document.createElement('input');
-    this.volumeSlider.type = 'range';
-    this.volumeSlider.min = '0';
-    this.volumeSlider.max = '1';
-    this.volumeSlider.step = '0.01';
-    this.volumeSlider.value = '1.0';
-    this.volumeSlider.style.position = 'absolute';
-    this.volumeSlider.style.top = '200px';
-    this.volumeSlider.style.left = '50px';
-    document.body.appendChild(this.volumeSlider);
-
-    this.volumeSlider.addEventListener('input', () => {
-      this.audio.volume = parseFloat(this.volumeSlider.value);
-    });
-  }
-
-  _loadTrack(index) {
-    if (index < 0 || index >= this.playlist.length) return;
-    const track = this.playlist[index];
-    this.audio.src = track.src;
-    this.currentIndex = index;
-  }
-
-  play() {
-    this.audio.play();
-    this.isPlaying = true;
-    // Broadcast state if multi-user
-  }
-
-  pause() {
-    this.audio.pause();
-    this.isPlaying = false;
-    // Broadcast state if multi-user
-  }
-
-  next() {
-    if (this.currentIndex < this.playlist.length - 1) {
-      this.currentIndex++;
-      this._loadTrack(this.currentIndex);
-      if (this.isPlaying) this.play();
+    // MusicPlayerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class MusicPlayerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.playlist = options.playlist || [
+          { title: 'Song A', src: 'songA.mp3' },
+          { title: 'Song B', src: 'songB.mp3' }
+        ];
+        this.currentIndex = 0;
+    
+        this.audio = new Audio();
+        this.audio.loop = false;
+        this.audio.volume = 1.0;
+        this.isPlaying = false;
+    
+        this._loadTrack(this.currentIndex);
+    
+        // Volume slider
+        this._createControls();
+      }
+    
+      _createControls() {
+        this.volumeSlider = document.createElement('input');
+        this.volumeSlider.type = 'range';
+        this.volumeSlider.min = '0';
+        this.volumeSlider.max = '1';
+        this.volumeSlider.step = '0.01';
+        this.volumeSlider.value = '1.0';
+        this.volumeSlider.style.position = 'absolute';
+        this.volumeSlider.style.top = '200px';
+        this.volumeSlider.style.left = '50px';
+        document.body.appendChild(this.volumeSlider);
+    
+        this.volumeSlider.addEventListener('input', () => {
+          this.audio.volume = parseFloat(this.volumeSlider.value);
+        });
+      }
+    
+      _loadTrack(index) {
+        if (index < 0 || index >= this.playlist.length) return;
+        const track = this.playlist[index];
+        this.audio.src = track.src;
+        this.currentIndex = index;
+      }
+    
+      play() {
+        this.audio.play();
+        this.isPlaying = true;
+        // Broadcast state if multi-user
+      }
+    
+      pause() {
+        this.audio.pause();
+        this.isPlaying = false;
+        // Broadcast state if multi-user
+      }
+    
+      next() {
+        if (this.currentIndex < this.playlist.length - 1) {
+          this.currentIndex++;
+          this._loadTrack(this.currentIndex);
+          if (this.isPlaying) this.play();
+        }
+      }
+    
+      prev() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this._loadTrack(this.currentIndex);
+          if (this.isPlaying) this.play();
+        }
+      }
     }
-  }
-
-  prev() {
-    if (this.currentIndex > 0) {
-      this.currentIndex--;
-      this._loadTrack(this.currentIndex);
-      if (this.isPlaying) this.play();
-    }
-  }
-}
 
 ## 5. ModelViewerWindow – Animations & Controls
 
@@ -2836,73 +2837,73 @@ We add:
     OrbitControls style interaction for rotating/zooming the model.
     Animation if the model has animation clips.
 
-// ModelViewerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
-export class ModelViewerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.subScene = new THREE.Scene();
-    this.subCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    this.subCamera.position.set(0, 1, 3);
-
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(1,1,1);
-    this.subScene.add(light);
-
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
-    this.texture = this.renderTarget.texture;
-    this.material.map = this.texture;
-
-    this.loader = new GLTFLoader();
-    if (options.modelUrl) {
-      this._loadModel(options.modelUrl);
-    }
-
-    // OrbitControls requires a reference to a real canvas & camera
-    // We'll create "virtual" controls but we need globalThreeRenderer
-    this.controls = new OrbitControls(this.subCamera, window.__globalThreeRenderer?.domElement);
-    this.controls.enableDamping = true;
-    this.controls.update();
-
-    this.mixer = null; // for animations
-    this.clock = new THREE.Clock();
-
-    this._animate();
-  }
-
-  _loadModel(url) {
-    this.loader.load(url, (gltf) => {
-      this.model = gltf.scene;
-      this.subScene.add(this.model);
-      // If it has animations
-      if (gltf.animations && gltf.animations.length > 0) {
-        this.mixer = new THREE.AnimationMixer(this.model);
-        const action = this.mixer.clipAction(gltf.animations[0]);
-        action.play();
+    // ModelViewerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    
+    export class ModelViewerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.subScene = new THREE.Scene();
+        this.subCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        this.subCamera.position.set(0, 1, 3);
+    
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(1,1,1);
+        this.subScene.add(light);
+    
+        this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
+        this.texture = this.renderTarget.texture;
+        this.material.map = this.texture;
+    
+        this.loader = new GLTFLoader();
+        if (options.modelUrl) {
+          this._loadModel(options.modelUrl);
+        }
+    
+        // OrbitControls requires a reference to a real canvas & camera
+        // We'll create "virtual" controls but we need globalThreeRenderer
+        this.controls = new OrbitControls(this.subCamera, window.__globalThreeRenderer?.domElement);
+        this.controls.enableDamping = true;
+        this.controls.update();
+    
+        this.mixer = null; // for animations
+        this.clock = new THREE.Clock();
+    
+        this._animate();
       }
-    });
-  }
-
-  _animate() {
-    if (this.isClosed) return;
-    requestAnimationFrame(() => this._animate());
-
-    const delta = this.clock.getDelta();
-    if (this.mixer) this.mixer.update(delta);
-
-    this.controls.update();
-
-    if (!window.__globalThreeRenderer) return;
-    window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
-    window.__globalThreeRenderer.render(this.subScene, this.subCamera);
-    window.__globalThreeRenderer.setRenderTarget(null);
-  }
-}
+    
+      _loadModel(url) {
+        this.loader.load(url, (gltf) => {
+          this.model = gltf.scene;
+          this.subScene.add(this.model);
+          // If it has animations
+          if (gltf.animations && gltf.animations.length > 0) {
+            this.mixer = new THREE.AnimationMixer(this.model);
+            const action = this.mixer.clipAction(gltf.animations[0]);
+            action.play();
+          }
+        });
+      }
+    
+      _animate() {
+        if (this.isClosed) return;
+        requestAnimationFrame(() => this._animate());
+    
+        const delta = this.clock.getDelta();
+        if (this.mixer) this.mixer.update(delta);
+    
+        this.controls.update();
+    
+        if (!window.__globalThreeRenderer) return;
+        window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
+        window.__globalThreeRenderer.render(this.subScene, this.subCamera);
+        window.__globalThreeRenderer.setRenderTarget(null);
+      }
+    }
 
 We’ve added OrbitControls for a more interactive model view and AnimationMixer for .glb files that include animations.
 
@@ -2910,51 +2911,51 @@ We’ve added OrbitControls for a more interactive model view and AnimationMixer
 
 In your main code, you register these plugins in your PluginManager:
 
-import { PluginManager } from './pluginManager.js';
-import { ChatWindow } from './ChatWindow.js';
-import { WhiteboardWindow } from './WhiteboardWindow.js';
-import { CameraFeedWindow } from './CameraFeedWindow.js';
-import { MusicPlayerWindow } from './MusicPlayerWindow.js';
-import { ModelViewerWindow } from './ModelViewerWindow.js';
-
-function init() {
-  // Scene, camera, renderer...
-  const pluginManager = new PluginManager();
-  pluginManager.registerPlugin('chat', ChatWindow);
-  pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
-  pluginManager.registerPlugin('cameraFeed', CameraFeedWindow);
-  pluginManager.registerPlugin('musicPlayer', MusicPlayerWindow);
-  pluginManager.registerPlugin('modelViewer', ModelViewerWindow);
-
-  // Then create windows as needed
-  const chatWin = pluginManager.createWindow('chat', { position: new THREE.Vector3(-3, 1, 0) });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  const boardWin = pluginManager.createWindow('whiteboard', { position: new THREE.Vector3(0,1,0) });
-  boardWin.addToScene(scene);
-  windowManager.windows.push(boardWin);
-
-  const camWin = pluginManager.createWindow('cameraFeed', { position: new THREE.Vector3(3,1,0) });
-  camWin.addToScene(scene);
-  windowManager.windows.push(camWin);
-
-  const musicWin = pluginManager.createWindow('musicPlayer', { position: new THREE.Vector3(-3,-1,0),
-    playlist: [
-      { title: 'Epic Song', src: 'songs/epic.mp3' },
-      { title: 'Chill Track', src: 'songs/chill.mp3' }
-    ]
-  });
-  musicWin.addToScene(scene);
-  windowManager.windows.push(musicWin);
-
-  const modelWin = pluginManager.createWindow('modelViewer', { position: new THREE.Vector3(2,-1,0), modelUrl: 'models/animated.gltf' });
-  modelWin.addToScene(scene);
-  windowManager.windows.push(modelWin);
-
-  // Animate the main scene...
-}
-init();
+    import { PluginManager } from './pluginManager.js';
+    import { ChatWindow } from './ChatWindow.js';
+    import { WhiteboardWindow } from './WhiteboardWindow.js';
+    import { CameraFeedWindow } from './CameraFeedWindow.js';
+    import { MusicPlayerWindow } from './MusicPlayerWindow.js';
+    import { ModelViewerWindow } from './ModelViewerWindow.js';
+    
+    function init() {
+      // Scene, camera, renderer...
+      const pluginManager = new PluginManager();
+      pluginManager.registerPlugin('chat', ChatWindow);
+      pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
+      pluginManager.registerPlugin('cameraFeed', CameraFeedWindow);
+      pluginManager.registerPlugin('musicPlayer', MusicPlayerWindow);
+      pluginManager.registerPlugin('modelViewer', ModelViewerWindow);
+    
+      // Then create windows as needed
+      const chatWin = pluginManager.createWindow('chat', { position: new THREE.Vector3(-3, 1, 0) });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      const boardWin = pluginManager.createWindow('whiteboard', { position: new THREE.Vector3(0,1,0) });
+      boardWin.addToScene(scene);
+      windowManager.windows.push(boardWin);
+    
+      const camWin = pluginManager.createWindow('cameraFeed', { position: new THREE.Vector3(3,1,0) });
+      camWin.addToScene(scene);
+      windowManager.windows.push(camWin);
+    
+      const musicWin = pluginManager.createWindow('musicPlayer', { position: new THREE.Vector3(-3,-1,0),
+        playlist: [
+          { title: 'Epic Song', src: 'songs/epic.mp3' },
+          { title: 'Chill Track', src: 'songs/chill.mp3' }
+        ]
+      });
+      musicWin.addToScene(scene);
+      windowManager.windows.push(musicWin);
+    
+      const modelWin = pluginManager.createWindow('modelViewer', { position: new THREE.Vector3(2,-1,0), modelUrl: 'models/animated.gltf' });
+      modelWin.addToScene(scene);
+      windowManager.windows.push(modelWin);
+    
+      // Animate the main scene...
+    }
+    init();
 
 Further Enhancements
 
@@ -3000,54 +3001,54 @@ As mentioned in earlier steps, you can enable WebXR for VR or AR. Below is a mor
 
 ### 1.1 Enabling WebXR in Main Code
 
-// main.js
-import * as THREE from 'three';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-// or ARButton if you want AR
-
-function init() {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.xr.enabled = true;  // Enable WebXR
-  document.body.appendChild(renderer.domElement);
-
-  // Add the VR button
-  document.body.appendChild(VRButton.createButton(renderer));
-
-  // Basic lighting, environment, etc.
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444);
-  scene.add(light);
-
-  // Setup your WindowManager, plugin windows, etc...
-  // e.g. let windowManager = new WindowManager(scene, camera, renderer);
-  // let pluginManager = new PluginManager()...
-
-  // VR controllers for window interaction
-  const controller1 = renderer.xr.getController(0);
-  controller1.addEventListener('selectstart', onSelectStart);
-  controller1.addEventListener('selectend', onSelectEnd);
-  scene.add(controller1);
-
-  const controller2 = renderer.xr.getController(1);
-  controller2.addEventListener('selectstart', onSelectStart);
-  controller2.addEventListener('selectend', onSelectEnd);
-  scene.add(controller2);
-
-  function onSelectStart(event) {
-    // Raycast from the controller to see if it hit a window
-    // If so, store that as "draggedWindow"
-  }
-  function onSelectEnd(event) {
-    // Release any grabbed window
-  }
-
-  renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
-  });
-}
-init();
+    // main.js
+    import * as THREE from 'three';
+    import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+    // or ARButton if you want AR
+    
+    function init() {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true;  // Enable WebXR
+      document.body.appendChild(renderer.domElement);
+    
+      // Add the VR button
+      document.body.appendChild(VRButton.createButton(renderer));
+    
+      // Basic lighting, environment, etc.
+      const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+      scene.add(light);
+    
+      // Setup your WindowManager, plugin windows, etc...
+      // e.g. let windowManager = new WindowManager(scene, camera, renderer);
+      // let pluginManager = new PluginManager()...
+    
+      // VR controllers for window interaction
+      const controller1 = renderer.xr.getController(0);
+      controller1.addEventListener('selectstart', onSelectStart);
+      controller1.addEventListener('selectend', onSelectEnd);
+      scene.add(controller1);
+    
+      const controller2 = renderer.xr.getController(1);
+      controller2.addEventListener('selectstart', onSelectStart);
+      controller2.addEventListener('selectend', onSelectEnd);
+      scene.add(controller2);
+    
+      function onSelectStart(event) {
+        // Raycast from the controller to see if it hit a window
+        // If so, store that as "draggedWindow"
+      }
+      function onSelectEnd(event) {
+        // Release any grabbed window
+      }
+    
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+    }
+    init();
 
 ### 1.2 Optional Hand-Tracking
 
@@ -3062,50 +3063,50 @@ If your device supports hand-tracking, you can detect “pinch” gestures to pi
 When many windows appear in 3D, they can clutter or overlap. A snap/docking system can help organize them:
 ### 2.1 DockManager (Basic Concept)
 
-// dockManager.js
-export class DockManager {
-  constructor(scene, windowManager) {
-    this.scene = scene;
-    this.windowManager = windowManager;
-    this.snapDistance = 0.5; // distance within which windows snap
-  }
-
-  update() {
-    // Called each frame or after a window moves
-    const wins = this.windowManager.windows;
-    for (let i = 0; i < wins.length; i++) {
-      const wA = wins[i];
-      for (let j = i+1; j < wins.length; j++) {
-        const wB = wins[j];
-        this._maybeSnap(wA, wB);
+    // dockManager.js
+    export class DockManager {
+      constructor(scene, windowManager) {
+        this.scene = scene;
+        this.windowManager = windowManager;
+        this.snapDistance = 0.5; // distance within which windows snap
+      }
+    
+      update() {
+        // Called each frame or after a window moves
+        const wins = this.windowManager.windows;
+        for (let i = 0; i < wins.length; i++) {
+          const wA = wins[i];
+          for (let j = i+1; j < wins.length; j++) {
+            const wB = wins[j];
+            this._maybeSnap(wA, wB);
+          }
+        }
+      }
+    
+      _maybeSnap(wA, wB) {
+        // If the windows are close on the x-axis or y-axis, snap them
+        const posA = wA.mesh.position;
+        const posB = wB.mesh.position;
+    
+        const dx = Math.abs(posA.x - posB.x);
+        const dy = Math.abs(posA.y - posB.y);
+    
+        // Snap horizontally if close
+        if (dx < this.snapDistance && dy < 1) {
+          // e.g., align them in x
+          const midX = (posA.x + posB.x)/2;
+          posA.x = midX;
+          posB.x = midX;
+        }
+        // Snap vertically if close
+        if (dy < this.snapDistance && dx < 1) {
+          // align them in y
+          const midY = (posA.y + posB.y)/2;
+          posA.y = midY;
+          posB.y = midY;
+        }
       }
     }
-  }
-
-  _maybeSnap(wA, wB) {
-    // If the windows are close on the x-axis or y-axis, snap them
-    const posA = wA.mesh.position;
-    const posB = wB.mesh.position;
-
-    const dx = Math.abs(posA.x - posB.x);
-    const dy = Math.abs(posA.y - posB.y);
-
-    // Snap horizontally if close
-    if (dx < this.snapDistance && dy < 1) {
-      // e.g., align them in x
-      const midX = (posA.x + posB.x)/2;
-      posA.x = midX;
-      posB.x = midX;
-    }
-    // Snap vertically if close
-    if (dy < this.snapDistance && dx < 1) {
-      // align them in y
-      const midY = (posA.y + posB.y)/2;
-      posA.y = midY;
-      posB.y = midY;
-    }
-  }
-}
 
 You can refine this logic to handle docking edges or corners, or create “magnetic lines” to help the user align windows neatly. You might call dockManager.update() whenever a user finishes dragging a window.
 
@@ -3113,60 +3114,60 @@ You can refine this logic to handle docking edges or corners, or create “magne
 
 Some windows should disappear automatically after a time or event—like temporary notifications or ephemeral chat threads. Let’s define a TimedEphemeralWindow:
 
-// TimedEphemeralWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class TimedEphemeralWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // Draw some ephemeral message on a canvas
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.lifetime = options.lifetime || 5000; // default 5 seconds
-    this.startTime = Date.now();
-
-    this.message = options.message || 'Ephemeral Notice!';
-    this._drawMessage();
-
-    // Setup a check to remove the window after lifetime
-    requestAnimationFrame(() => this._checkLifetime());
-  }
-
-  _drawMessage() {
-    this.ctx.fillStyle = '#222';
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '18px sans-serif';
-    this.ctx.fillText(this.message, 10, 50);
-    this.texture.needsUpdate = true;
-  }
-
-  _checkLifetime() {
-    if (this.isClosed) return;
-    const now = Date.now();
-    if (now - this.startTime > this.lifetime) {
-      // remove from scene
-      if (this.sceneRef) {
-        this.removeFromScene(this.sceneRef);
+    // TimedEphemeralWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class TimedEphemeralWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // Draw some ephemeral message on a canvas
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.lifetime = options.lifetime || 5000; // default 5 seconds
+        this.startTime = Date.now();
+    
+        this.message = options.message || 'Ephemeral Notice!';
+        this._drawMessage();
+    
+        // Setup a check to remove the window after lifetime
+        requestAnimationFrame(() => this._checkLifetime());
       }
-      return;
+    
+      _drawMessage() {
+        this.ctx.fillStyle = '#222';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '18px sans-serif';
+        this.ctx.fillText(this.message, 10, 50);
+        this.texture.needsUpdate = true;
+      }
+    
+      _checkLifetime() {
+        if (this.isClosed) return;
+        const now = Date.now();
+        if (now - this.startTime > this.lifetime) {
+          // remove from scene
+          if (this.sceneRef) {
+            this.removeFromScene(this.sceneRef);
+          }
+          return;
+        }
+        requestAnimationFrame(() => this._checkLifetime());
+      }
+    
+      addToScene(scene) {
+        super.addToScene(scene);
+        this.sceneRef = scene;  // store reference so we can remove ourselves
+      }
     }
-    requestAnimationFrame(() => this._checkLifetime());
-  }
-
-  addToScene(scene) {
-    super.addToScene(scene);
-    this.sceneRef = scene;  // store reference so we can remove ourselves
-  }
-}
 
 This window automatically removes itself from the scene after a set time. You can also do ephemeral by event—once a user interacts with it, it vanishes, etc.
 
@@ -3174,67 +3175,67 @@ This window automatically removes itself from the scene after a set time. You ca
 
 A plugin that displays FPS, memory usage, or network stats. This is useful for diagnosing performance issues in real time.
 
-// PerformanceMonitorWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class PerformanceMonitorWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.lastTime = performance.now();
-    this.frameCount = 0;
-    this.fps = 0;
-
-    this._updateLoop();
-  }
-
-  _updateLoop() {
-    if (this.isClosed) return;
-    requestAnimationFrame(() => this._updateLoop());
-
-    // FPS calculation
-    this.frameCount++;
-    const now = performance.now();
-    const delta = now - this.lastTime;
-    if (delta >= 1000) {
-      this.fps = (this.frameCount / (delta / 1000)).toFixed(1);
-      this.frameCount = 0;
-      this.lastTime = now;
+    // PerformanceMonitorWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class PerformanceMonitorWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.lastTime = performance.now();
+        this.frameCount = 0;
+        this.fps = 0;
+    
+        this._updateLoop();
+      }
+    
+      _updateLoop() {
+        if (this.isClosed) return;
+        requestAnimationFrame(() => this._updateLoop());
+    
+        // FPS calculation
+        this.frameCount++;
+        const now = performance.now();
+        const delta = now - this.lastTime;
+        if (delta >= 1000) {
+          this.fps = (this.frameCount / (delta / 1000)).toFixed(1);
+          this.frameCount = 0;
+          this.lastTime = now;
+        }
+    
+        // Memory usage (Chrome-only)
+        let memStr = 'N/A';
+        if (performance && performance.memory) {
+          const usedMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+          const totalMB = (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
+          memStr = `${usedMB} / ${totalMB} MB`;
+        }
+    
+        // Could also show latency, user count, etc.
+        this._drawPerformance(memStr);
+      }
+    
+      _drawPerformance(memStr) {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+        this.ctx.fillText(`FPS: ${this.fps}`, 10, 20);
+        this.ctx.fillText(`Memory: ${memStr}`, 10, 40);
+        // additional stats if desired
+    
+        this.texture.needsUpdate = true;
+      }
     }
-
-    // Memory usage (Chrome-only)
-    let memStr = 'N/A';
-    if (performance && performance.memory) {
-      const usedMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
-      const totalMB = (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
-      memStr = `${usedMB} / ${totalMB} MB`;
-    }
-
-    // Could also show latency, user count, etc.
-    this._drawPerformance(memStr);
-  }
-
-  _drawPerformance(memStr) {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-    this.ctx.fillText(`FPS: ${this.fps}`, 10, 20);
-    this.ctx.fillText(`Memory: ${memStr}`, 10, 40);
-    // additional stats if desired
-
-    this.texture.needsUpdate = true;
-  }
-}
 
 If you have server-side stats (CPU usage, active connections), you could broadcast them to clients, and each PerformanceMonitorWindow updates in real-time.
 
@@ -3242,30 +3243,30 @@ If you have server-side stats (CPU usage, active connections), you could broadca
 
 In your pluginManager.js, you might register them:
 
-import { TimedEphemeralWindow } from './TimedEphemeralWindow.js';
-import { PerformanceMonitorWindow } from './PerformanceMonitorWindow.js';
-
-// ...
-pluginManager.registerPlugin('timedEphemeral', TimedEphemeralWindow);
-pluginManager.registerPlugin('performanceMonitor', PerformanceMonitorWindow);
-// ...
+    import { TimedEphemeralWindow } from './TimedEphemeralWindow.js';
+    import { PerformanceMonitorWindow } from './PerformanceMonitorWindow.js';
+    
+    // ...
+    pluginManager.registerPlugin('timedEphemeral', TimedEphemeralWindow);
+    pluginManager.registerPlugin('performanceMonitor', PerformanceMonitorWindow);
+    // ...
 
 Then in your main code:
 
-// main.js
-const ephemeralWin = pluginManager.createWindow('timedEphemeral', {
-  position: new THREE.Vector3(0, 2, 0),
-  message: 'Hello, I will disappear in 5s',
-  lifetime: 5000
-});
-ephemeralWin.addToScene(scene);
-windowManager.windows.push(ephemeralWin);
-
-const perfWin = pluginManager.createWindow('performanceMonitor', {
-  position: new THREE.Vector3(2, 2, 0)
-});
-perfWin.addToScene(scene);
-windowManager.windows.push(perfWin);
+    // main.js
+    const ephemeralWin = pluginManager.createWindow('timedEphemeral', {
+      position: new THREE.Vector3(0, 2, 0),
+      message: 'Hello, I will disappear in 5s',
+      lifetime: 5000
+    });
+    ephemeralWin.addToScene(scene);
+    windowManager.windows.push(ephemeralWin);
+    
+    const perfWin = pluginManager.createWindow('performanceMonitor', {
+      position: new THREE.Vector3(2, 2, 0)
+    });
+    perfWin.addToScene(scene);
+    windowManager.windows.push(perfWin);
 
 ## 6. Putting It All Together
 
@@ -3338,79 +3339,79 @@ Having multiple users collaborate on windows (chat, whiteboard, music playback, 
 
 ### 1.1 Server-Side Example (Rooms)
 
-// server.js (simplified pseudo-code)
-const rooms = {}; 
-// rooms[roomId] = { clients: Set of WebSocket connections }
-
-wss.on('connection', (ws) => {
-  let currentRoomId = null;
-
-  ws.on('message', (message) => {
-    const data = JSON.parse(message);
-    if (data.type === 'JOIN_ROOM') {
-      // join or create a room
-      currentRoomId = data.roomId;
-      if (!rooms[currentRoomId]) {
-        rooms[currentRoomId] = { clients: new Set() };
+    // server.js (simplified pseudo-code)
+    const rooms = {}; 
+    // rooms[roomId] = { clients: Set of WebSocket connections }
+    
+    wss.on('connection', (ws) => {
+      let currentRoomId = null;
+    
+      ws.on('message', (message) => {
+        const data = JSON.parse(message);
+        if (data.type === 'JOIN_ROOM') {
+          // join or create a room
+          currentRoomId = data.roomId;
+          if (!rooms[currentRoomId]) {
+            rooms[currentRoomId] = { clients: new Set() };
+          }
+          rooms[currentRoomId].clients.add(ws);
+    
+          // Optionally send back any existing state for that room
+          // ...
+        } else {
+          // handle updates
+          if (currentRoomId) {
+            // broadcast to that room only
+            broadcastToRoom(currentRoomId, data, ws);
+          }
+        }
+      });
+    
+      ws.on('close', () => {
+        if (currentRoomId && rooms[currentRoomId]) {
+          rooms[currentRoomId].clients.delete(ws);
+        }
+      });
+    });
+    
+    function broadcastToRoom(roomId, data, senderSocket) {
+      const room = rooms[roomId];
+      if (!room) return;
+      const json = JSON.stringify(data);
+      for (const client of room.clients) {
+        if (client !== senderSocket && client.readyState === 1) {
+          client.send(json);
+        }
       }
-      rooms[currentRoomId].clients.add(ws);
-
-      // Optionally send back any existing state for that room
-      // ...
-    } else {
-      // handle updates
-      if (currentRoomId) {
-        // broadcast to that room only
-        broadcastToRoom(currentRoomId, data, ws);
-      }
     }
-  });
-
-  ws.on('close', () => {
-    if (currentRoomId && rooms[currentRoomId]) {
-      rooms[currentRoomId].clients.delete(ws);
-    }
-  });
-});
-
-function broadcastToRoom(roomId, data, senderSocket) {
-  const room = rooms[roomId];
-  if (!room) return;
-  const json = JSON.stringify(data);
-  for (const client of room.clients) {
-    if (client !== senderSocket && client.readyState === 1) {
-      client.send(json);
-    }
-  }
-}
 
 ### 1.2 Client-Side: Handling Rooms & Specialized Messages
 
 Each plugin can be assigned a roomId (or channel). For instance, the WhiteboardWindow might do:
 
-// whiteboardWindow.js (pseudo-code)
-constructor(options) {
-  super(options);
-  this.roomId = options.roomId || 'default-whiteboard-room';
-  // After creating the window, request join:
-  window.__networkManager.joinRoom(this.roomId);
-}
+    // whiteboardWindow.js (pseudo-code)
+    constructor(options) {
+      super(options);
+      this.roomId = options.roomId || 'default-whiteboard-room';
+      // After creating the window, request join:
+      window.__networkManager.joinRoom(this.roomId);
+    }
+    
+    handleStroke(stroke) {
+      // local add stroke
+      this.strokes.push(stroke);
+      // broadcast
+      window.__networkManager.sendToRoom(this.roomId, {
+        type: 'WHITEBOARD_STROKE',
+        stroke
+      });
+    }
 
-handleStroke(stroke) {
-  // local add stroke
-  this.strokes.push(stroke);
-  // broadcast
-  window.__networkManager.sendToRoom(this.roomId, {
-    type: 'WHITEBOARD_STROKE',
-    stroke
-  });
-}
-
-// on receiving WHITEBOARD_STROKE from network:
-onNetworkStroke(stroke) {
-  this.strokes.push(stroke);
-  this._renderBoard();
-}
+    // on receiving WHITEBOARD_STROKE from network:
+    onNetworkStroke(stroke) {
+      this.strokes.push(stroke);
+      this._renderBoard();
+    }
 
 Key point: each plugin type must implement both how to send updates and how to apply them (like chat messages, strokes, music commands, etc.).
 
@@ -3427,21 +3428,21 @@ Some windows or actions require restricted access:
 
 If you store user roles in JWT or another auth system:
 
-// server.js
-function handleMessage(ws, data, userInfo) {
-  // userInfo might have userId, roles, etc.
-  switch (data.type) {
-    case 'MUSIC_SYNC':
-      if (!userInfo.roles.includes('dj')) {
-        // reject
-        return;
+    // server.js
+    function handleMessage(ws, data, userInfo) {
+      // userInfo might have userId, roles, etc.
+      switch (data.type) {
+        case 'MUSIC_SYNC':
+          if (!userInfo.roles.includes('dj')) {
+            // reject
+            return;
+          }
+          // else broadcast
+          broadcastToRoom(userInfo.roomId, data, ws);
+          break;
+        // ...
       }
-      // else broadcast
-      broadcastToRoom(userInfo.roomId, data, ws);
-      break;
-    // ...
-  }
-}
+    }
 
 ### 2.2 Private Windows
 
@@ -3468,30 +3469,30 @@ Using HTML overlays is quick, but for a polished approach:
 
 For a chat window, instead of a <canvas> for text rendering, you might do:
 
-// chatWindow.js
-import { MeshUIBaseWindow } from './meshUIWindowBase.js';
-import { Block, Text } from 'three-mesh-ui';
-
-export class ChatWindow extends MeshUIBaseWindow {
-  constructor(options) {
-    super(options);
-
-    const container = new Block({
-      width: 1.5,
-      height: 2,
-      backgroundColor: new THREE.Color(0x000000),
-      // ...
-    });
-    this.mesh.add(container);
-
-    // A text child for messages
-    this.textBlock = new Text({ content: 'Hello world' });
-    container.add(this.textBlock);
-
-    // Later, update content:
-    // this.textBlock.set({ content: 'New messages\nLine 2...' });
-  }
-}
+    // chatWindow.js
+    import { MeshUIBaseWindow } from './meshUIWindowBase.js';
+    import { Block, Text } from 'three-mesh-ui';
+    
+    export class ChatWindow extends MeshUIBaseWindow {
+      constructor(options) {
+        super(options);
+    
+        const container = new Block({
+          width: 1.5,
+          height: 2,
+          backgroundColor: new THREE.Color(0x000000),
+          // ...
+        });
+        this.mesh.add(container);
+    
+        // A text child for messages
+        this.textBlock = new Text({ content: 'Hello world' });
+        container.add(this.textBlock);
+    
+        // Later, update content:
+        // this.textBlock.set({ content: 'New messages\nLine 2...' });
+      }
+    }
 
 three-mesh-ui automatically handles text line-wrapping, font rendering, etc., directly in 3D. However, it has its own performance considerations.
 
@@ -3526,35 +3527,35 @@ Large canvases or frequent texture updates can degrade framerate. Some strategie
 
 If you want an automated approach so windows don’t overlap:
 
-// layoutManager.js
-export class LayoutManager {
-  constructor(windowManager) {
-    this.windowManager = windowManager;
-  }
-
-  arrangeInGrid(rows, cols, spacing = 2) {
-    const wins = this.windowManager.windows;
-    let i = 0;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (i >= wins.length) return;
-        const w = wins[i++];
-        w.mesh.position.set(c * spacing, -r * spacing, 0);
+    // layoutManager.js
+    export class LayoutManager {
+      constructor(windowManager) {
+        this.windowManager = windowManager;
+      }
+    
+      arrangeInGrid(rows, cols, spacing = 2) {
+        const wins = this.windowManager.windows;
+        let i = 0;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (i >= wins.length) return;
+            const w = wins[i++];
+            w.mesh.position.set(c * spacing, -r * spacing, 0);
+          }
+        }
+      }
+    
+      arrangeInCircle(radius = 5) {
+        const wins = this.windowManager.windows;
+        const angleStep = (2 * Math.PI) / wins.length;
+        for (let i = 0; i < wins.length; i++) {
+          const angle = i * angleStep;
+          const x = radius * Math.cos(angle);
+          const y = radius * Math.sin(angle);
+          wins[i].mesh.position.set(x, y, 0);
+        }
       }
     }
-  }
-
-  arrangeInCircle(radius = 5) {
-    const wins = this.windowManager.windows;
-    const angleStep = (2 * Math.PI) / wins.length;
-    for (let i = 0; i < wins.length; i++) {
-      const angle = i * angleStep;
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-      wins[i].mesh.position.set(x, y, 0);
-    }
-  }
-}
 
 Use these methods after creating windows to place them automatically. A more dynamic approach might recalculate positions whenever a new window is added or an old one is removed.
 
@@ -3654,185 +3655,185 @@ npm install
 
 A minimal multi-user chat server that broadcasts messages to all connected clients. For more advanced features, you’d store rooms, user info, etc.
 
-// backend/server.js
-const express = require('express');
-const cors = require('cors');
-const { WebSocketServer } = require('ws');
-const path = require('path');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// (Optional) A sample route
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
-
-// Serve this on any port you like
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-});
-
-// WebSocket
-const wss = new WebSocketServer({ noServer: true });
-
-// We track all connected clients in a set
-const clients = new Set();
-
-server.on('upgrade', (req, socket, head) => {
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req);
-  });
-});
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('New WebSocket connection. Total clients:', clients.size);
-
-  // When a client sends a message
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      // e.g. { type: 'CHAT_MSG', msg: { sender, text, timestamp } }
-      if (parsed.type === 'CHAT_MSG') {
-        // Broadcast to all except sender
-        broadcastToAll(parsed, ws);
+    // backend/server.js
+    const express = require('express');
+    const cors = require('cors');
+    const { WebSocketServer } = require('ws');
+    const path = require('path');
+    
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    
+    // (Optional) A sample route
+    app.get('/api/hello', (req, res) => {
+      res.json({ message: 'Hello from backend!' });
+    });
+    
+    // Serve this on any port you like
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Backend listening on http://localhost:${PORT}`);
+    });
+    
+    // WebSocket
+    const wss = new WebSocketServer({ noServer: true });
+    
+    // We track all connected clients in a set
+    const clients = new Set();
+    
+    server.on('upgrade', (req, socket, head) => {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+    });
+    
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+      console.log('New WebSocket connection. Total clients:', clients.size);
+    
+      // When a client sends a message
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+          // e.g. { type: 'CHAT_MSG', msg: { sender, text, timestamp } }
+          if (parsed.type === 'CHAT_MSG') {
+            // Broadcast to all except sender
+            broadcastToAll(parsed, ws);
+          }
+        } catch (err) {
+          console.error('Invalid message:', data);
+        }
+      });
+    
+      ws.on('close', () => {
+        clients.delete(ws);
+        console.log('WebSocket disconnected. Total clients:', clients.size);
+      });
+    });
+    
+    function broadcastToAll(messageObj, senderSocket) {
+      const str = JSON.stringify(messageObj);
+      for (const client of clients) {
+        if (client !== senderSocket && client.readyState === 1) {
+          client.send(str);
+        }
       }
-    } catch (err) {
-      console.error('Invalid message:', data);
     }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    console.log('WebSocket disconnected. Total clients:', clients.size);
-  });
-});
-
-function broadcastToAll(messageObj, senderSocket) {
-  const str = JSON.stringify(messageObj);
-  for (const client of clients) {
-    if (client !== senderSocket && client.readyState === 1) {
-      client.send(str);
-    }
-  }
-}
 
 ## 3. index.html (Frontend Entry)
 
 A minimal HTML file that loads Three.js (via CDN), plus our scripts. In production, you might bundle everything with Webpack/Vite, but here we do it simply.
 
-<!-- frontend/public/index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mindspace Example</title>
-  <style>
-    body, html {
-      margin: 0; padding: 0; overflow: hidden;
-      width: 100%; height: 100%; background: #000;
-    }
-    #appCanvas {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <!-- The 3D canvas -->
-  <canvas id="appCanvas"></canvas>
-
-  <!-- Three.js CDN (rXXX might vary) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-
-  <!-- Our scripts (ES modules) -->
-  <script type="module" src="../src/networkManager.js"></script>
-  <script type="module" src="../src/pluginManager.js"></script>
-  <script type="module" src="../src/windowManager.js"></script>
-  <script type="module" src="../src/chatWindow.js"></script>
-  <script type="module" src="../src/main.js"></script>
-</body>
-</html>
+    <!-- frontend/public/index.html -->
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Mindspace Example</title>
+      <style>
+        body, html {
+          margin: 0; padding: 0; overflow: hidden;
+          width: 100%; height: 100%; background: #000;
+        }
+        #appCanvas {
+          display: block;
+        }
+      </style>
+    </head>
+    <body>
+      <!-- The 3D canvas -->
+      <canvas id="appCanvas"></canvas>
+    
+      <!-- Three.js CDN (rXXX might vary) -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    
+      <!-- Our scripts (ES modules) -->
+      <script type="module" src="../src/networkManager.js"></script>
+      <script type="module" src="../src/pluginManager.js"></script>
+      <script type="module" src="../src/windowManager.js"></script>
+      <script type="module" src="../src/chatWindow.js"></script>
+      <script type="module" src="../src/main.js"></script>
+    </body>
+    </html>
 
 ## 4. networkManager.js (Client WebSocket Logic)
 
 Handles connecting to the server and sending/receiving messages.
 
-// frontend/src/networkManager.js
-
-export class NetworkManager {
-  constructor(serverUrl) {
-    this.serverUrl = serverUrl;
-    this.socket = null;
-
-    // Chat message callback
-    this.onChatMessage = null;
-
-    this._initWebSocket();
-  }
-
-  _initWebSocket() {
-    this.socket = new WebSocket(this.serverUrl);
-
-    this.socket.onopen = () => {
-      console.log('WebSocket connected to', this.serverUrl);
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'CHAT_MSG') {
-          if (this.onChatMessage) {
-            this.onChatMessage(data.msg);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to parse incoming WS message', err);
+    // frontend/src/networkManager.js
+    
+    export class NetworkManager {
+      constructor(serverUrl) {
+        this.serverUrl = serverUrl;
+        this.socket = null;
+    
+        // Chat message callback
+        this.onChatMessage = null;
+    
+        this._initWebSocket();
       }
-    };
-
-    this.socket.onclose = () => {
-      console.log('WebSocket closed');
-    };
-  }
-
-  sendChatMessage(msgObj) {
-    // msgObj = { sender, text, timestamp }
-    const packet = {
-      type: 'CHAT_MSG',
-      msg: msgObj
-    };
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(packet));
+    
+      _initWebSocket() {
+        this.socket = new WebSocket(this.serverUrl);
+    
+        this.socket.onopen = () => {
+          console.log('WebSocket connected to', this.serverUrl);
+        };
+    
+        this.socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'CHAT_MSG') {
+              if (this.onChatMessage) {
+                this.onChatMessage(data.msg);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to parse incoming WS message', err);
+          }
+        };
+    
+        this.socket.onclose = () => {
+          console.log('WebSocket closed');
+        };
+      }
+    
+      sendChatMessage(msgObj) {
+        // msgObj = { sender, text, timestamp }
+        const packet = {
+          type: 'CHAT_MSG',
+          msg: msgObj
+        };
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify(packet));
+        }
+      }
     }
-  }
-}
 
 ## 5. pluginManager.js
 
 A simple plugin system: you register plugin classes by a string key, then create windows by type.
 
-// frontend/src/pluginManager.js
-
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    const PluginClass = this.plugins[pluginType];
-    if (!PluginClass) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
+    // frontend/src/pluginManager.js
+    
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        const PluginClass = this.plugins[pluginType];
+        if (!PluginClass) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        return new PluginClass(options);
+      }
     }
-    return new PluginClass(options);
-  }
-}
 
 ## 6. windowManager.js
 
@@ -3841,291 +3842,291 @@ Contains:
     A base Window3D class.
     WindowManager that tracks all windows, handles dragging, etc.
 
-// frontend/src/windowManager.js
-import * as THREE from 'three';
-
-export class Window3D {
-  constructor({
-    width = 2,
-    height = 1.5,
-    color = 0x00ff00,
-    position = new THREE.Vector3(0,0,0),
-    title = 'Untitled'
-  }) {
-    this.width = width;
-    this.height = height;
-    this.title = title;
-    this.isDragging = false;
-    this.isClosed = false;
-
-    // Main plane
-    this.geometry = new THREE.PlaneGeometry(width, height);
-    this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position.copy(position);
-  }
-
-  addToScene(scene) {
-    scene.add(this.mesh);
-  }
-
-  removeFromScene(scene) {
-    scene.remove(this.mesh);
-    this.isClosed = true;
-  }
-}
-
-export class WindowManager {
-  constructor(scene, camera, renderer) {
-    this.scene = scene;
-    this.camera = camera;
-    this.renderer = renderer;
-    this.windows = [];
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
-    this.draggedWindow = null;
-    this.dragOffset = new THREE.Vector3();
-
-    this._initEvents();
-  }
-
-  _initEvents() {
-    const canvas = this.renderer.domElement;
-    canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
-    canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
-    canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
-  }
-
-  _onMouseDown(event) {
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // Raycast against all window meshes
-    const meshes = this.windows.map(w => w.mesh);
-    const intersects = this.raycaster.intersectObjects(meshes);
-
-    if (intersects.length > 0) {
-      const { object, point } = intersects[0];
-      const foundWin = this.windows.find(w => w.mesh === object);
-      if (foundWin) {
-        this.draggedWindow = foundWin;
-        foundWin.isDragging = true;
-        this.dragOffset.copy(point).sub(foundWin.mesh.position);
+    // frontend/src/windowManager.js
+    import * as THREE from 'three';
+    
+    export class Window3D {
+      constructor({
+        width = 2,
+        height = 1.5,
+        color = 0x00ff00,
+        position = new THREE.Vector3(0,0,0),
+        title = 'Untitled'
+      }) {
+        this.width = width;
+        this.height = height;
+        this.title = title;
+        this.isDragging = false;
+        this.isClosed = false;
+    
+        // Main plane
+        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.position.copy(position);
+      }
+    
+      addToScene(scene) {
+        scene.add(this.mesh);
+      }
+    
+      removeFromScene(scene) {
+        scene.remove(this.mesh);
+        this.isClosed = true;
       }
     }
-  }
-
-  _onMouseMove(event) {
-    if (!this.draggedWindow) return;
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const planeZ = this.draggedWindow.mesh.position.z;
-    const pointOnPlane = this._getPointOnZPlane(planeZ);
-    if (pointOnPlane) {
-      const newPos = pointOnPlane.sub(this.dragOffset);
-      this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
+    
+    export class WindowManager {
+      constructor(scene, camera, renderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.windows = [];
+    
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+    
+        this.draggedWindow = null;
+        this.dragOffset = new THREE.Vector3();
+    
+        this._initEvents();
+      }
+    
+      _initEvents() {
+        const canvas = this.renderer.domElement;
+        canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
+        canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
+      }
+    
+      _onMouseDown(event) {
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        // Raycast against all window meshes
+        const meshes = this.windows.map(w => w.mesh);
+        const intersects = this.raycaster.intersectObjects(meshes);
+    
+        if (intersects.length > 0) {
+          const { object, point } = intersects[0];
+          const foundWin = this.windows.find(w => w.mesh === object);
+          if (foundWin) {
+            this.draggedWindow = foundWin;
+            foundWin.isDragging = true;
+            this.dragOffset.copy(point).sub(foundWin.mesh.position);
+          }
+        }
+      }
+    
+      _onMouseMove(event) {
+        if (!this.draggedWindow) return;
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const planeZ = this.draggedWindow.mesh.position.z;
+        const pointOnPlane = this._getPointOnZPlane(planeZ);
+        if (pointOnPlane) {
+          const newPos = pointOnPlane.sub(this.dragOffset);
+          this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
+        }
+      }
+    
+      _onMouseUp(event) {
+        if (this.draggedWindow) {
+          this.draggedWindow.isDragging = false;
+          this.draggedWindow = null;
+        }
+      }
+    
+      _setMouseCoords(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+    
+      _getPointOnZPlane(zValue) {
+        const ray = this.raycaster.ray;
+        const t = (zValue - ray.origin.z) / ray.direction.z;
+        if (t < 0) return null;
+        return new THREE.Vector3(
+          ray.origin.x + t * ray.direction.x,
+          ray.origin.y + t * ray.direction.y,
+          zValue
+        );
+      }
     }
-  }
-
-  _onMouseUp(event) {
-    if (this.draggedWindow) {
-      this.draggedWindow.isDragging = false;
-      this.draggedWindow = null;
-    }
-  }
-
-  _setMouseCoords(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
-  _getPointOnZPlane(zValue) {
-    const ray = this.raycaster.ray;
-    const t = (zValue - ray.origin.z) / ray.direction.z;
-    if (t < 0) return null;
-    return new THREE.Vector3(
-      ray.origin.x + t * ray.direction.x,
-      ray.origin.y + t * ray.direction.y,
-      zValue
-    );
-  }
-}
 
 ## 7. chatWindow.js
 
 Implements a chat window using a CanvasTexture for message display, plus an optional HTML <input> for message entry. We’ll keep it simple here.
 
-// frontend/src/chatWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // Basic chat settings
-    this.messages = [];
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // We'll create a basic HTML input for typing chat messages
-    this.inputEl = document.createElement('input');
-    this.inputEl.type = 'text';
-    this.inputEl.placeholder = 'Type a message...';
-    this.inputEl.style.position = 'absolute';
-    this.inputEl.style.bottom = '40px';
-    this.inputEl.style.left = '40px';
-    this.inputEl.style.width = '200px';
-    document.body.appendChild(this.inputEl);
-
-    // Listen for "Enter"
-    this.inputEl.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const text = this.inputEl.value.trim();
-        if (text) {
-          this._sendChatMessage(text);
+    // frontend/src/chatWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // Basic chat settings
+        this.messages = [];
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // We'll create a basic HTML input for typing chat messages
+        this.inputEl = document.createElement('input');
+        this.inputEl.type = 'text';
+        this.inputEl.placeholder = 'Type a message...';
+        this.inputEl.style.position = 'absolute';
+        this.inputEl.style.bottom = '40px';
+        this.inputEl.style.left = '40px';
+        this.inputEl.style.width = '200px';
+        document.body.appendChild(this.inputEl);
+    
+        // Listen for "Enter"
+        this.inputEl.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            const text = this.inputEl.value.trim();
+            if (text) {
+              this._sendChatMessage(text);
+            }
+            this.inputEl.value = '';
+          }
+        });
+    
+        // If there's a network manager, subscribe to chat messages
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (msgObj) => {
+            this._onMessageReceived(msgObj);
+          };
         }
-        this.inputEl.value = '';
+    
+        this._renderChat();
       }
-    });
-
-    // If there's a network manager, subscribe to chat messages
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (msgObj) => {
-        this._onMessageReceived(msgObj);
-      };
+    
+      _sendChatMessage(text) {
+        const msgObj = {
+          sender: 'Me',
+          text,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+    
+        // Send to server
+        if (window.__networkManager) {
+          window.__networkManager.sendChatMessage(msgObj);
+        }
+      }
+    
+      _onMessageReceived(msgObj) {
+        // if the message is from someone else
+        this.messages.push(msgObj);
+        this._renderChat();
+      }
+    
+      _renderChat() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        const lineHeight = 20;
+        const recent = this.messages.slice(-8); // show last 8 messages
+        for (const m of recent) {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        }
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      // Clean up: remove the input from DOM if closed
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.inputEl);
+      }
     }
-
-    this._renderChat();
-  }
-
-  _sendChatMessage(text) {
-    const msgObj = {
-      sender: 'Me',
-      text,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-
-    // Send to server
-    if (window.__networkManager) {
-      window.__networkManager.sendChatMessage(msgObj);
-    }
-  }
-
-  _onMessageReceived(msgObj) {
-    // if the message is from someone else
-    this.messages.push(msgObj);
-    this._renderChat();
-  }
-
-  _renderChat() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    const lineHeight = 20;
-    const recent = this.messages.slice(-8); // show last 8 messages
-    for (const m of recent) {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
-    }
-
-    this.texture.needsUpdate = true;
-  }
-
-  // Clean up: remove the input from DOM if closed
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.inputEl);
-  }
-}
 
 ## 8. main.js – Putting It All Together
 
 Initializes the 3D scene, the WindowManager, the PluginManager, and creates a ChatWindow.
 
-// frontend/src/main.js
-import { NetworkManager } from './networkManager.js';
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-import { ChatWindow } from './chatWindow.js';
-
-function init() {
-  // 1. Setup basic Three.js scene
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // Add a reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // 2. Create our managers
-  window.__networkManager = new NetworkManager('ws://localhost:3000'); // or your server IP
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-
-  // Register the ChatWindow plugin
-  pluginManager.registerPlugin('chat', ChatWindow);
-
-  // 3. Create a chat window
-  const chatWin = pluginManager.createWindow('chat', {
-    width: 3,
-    height: 2,
-    color: 0x2222cc,
-    position: new THREE.Vector3(-2,1,0),
-    title: 'Chat Window'
-  });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  // 4. Animation loop
-  function animate() {
-    requestAnimationFrame(animate);
-    // Rotate the cube
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // 5. Handle window resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-init();
+    // frontend/src/main.js
+    import { NetworkManager } from './networkManager.js';
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    import { ChatWindow } from './chatWindow.js';
+    
+    function init() {
+      // 1. Setup basic Three.js scene
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      // Add a reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // 2. Create our managers
+      window.__networkManager = new NetworkManager('ws://localhost:3000'); // or your server IP
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+    
+      // Register the ChatWindow plugin
+      pluginManager.registerPlugin('chat', ChatWindow);
+    
+      // 3. Create a chat window
+      const chatWin = pluginManager.createWindow('chat', {
+        width: 3,
+        height: 2,
+        color: 0x2222cc,
+        position: new THREE.Vector3(-2,1,0),
+        title: 'Chat Window'
+      });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      // 4. Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        // Rotate the cube
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      // 5. Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    init();
 
 9. Running the App
 
     Backend:
 
-cd backend
-npm install
-npm start
+    cd backend
+    npm install
+    npm start
 
 This launches server.js on port 3000.
 
@@ -4147,435 +4148,436 @@ Frontend:
 Full Functional Code (Consolidated)
 
 Below is a single listing that mirrors the file structure described above. You can copy/paste into separate files:
-<details> <summary><strong>server.js (backend/server.js)</strong></summary>
-
-const express = require('express');
-const cors = require('cors');
-const { WebSocketServer } = require('ws');
-const path = require('path');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
-
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-});
-
-const wss = new WebSocketServer({ noServer: true });
-const clients = new Set();
-
-server.on('upgrade', (req, socket, head) => {
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req);
-  });
-});
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('WS connected. Clients:', clients.size);
-
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      if (parsed.type === 'CHAT_MSG') {
-        broadcastToAll(parsed, ws);
+    <details> <summary><strong>server.js (backend/server.js)</strong></summary>
+    
+    const express = require('express');
+    const cors = require('cors');
+    const { WebSocketServer } = require('ws');
+    const path = require('path');
+    
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    
+    app.get('/api/hello', (req, res) => {
+      res.json({ message: 'Hello from backend!' });
+    });
+    
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Backend listening on http://localhost:${PORT}`);
+    });
+    
+    const wss = new WebSocketServer({ noServer: true });
+    const clients = new Set();
+    
+    server.on('upgrade', (req, socket, head) => {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+    });
+    
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+      console.log('WS connected. Clients:', clients.size);
+    
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'CHAT_MSG') {
+            broadcastToAll(parsed, ws);
+          }
+        } catch (err) {
+          console.error('Message parse error:', err);
+        }
+      });
+    
+      ws.on('close', () => {
+        clients.delete(ws);
+        console.log('WS disconnected. Clients:', clients.size);
+      });
+    });
+    
+    function broadcastToAll(messageObj, sender) {
+      const str = JSON.stringify(messageObj);
+      for (const client of clients) {
+        if (client !== sender && client.readyState === 1) {
+          client.send(str);
+        }
       }
-    } catch (err) {
-      console.error('Message parse error:', err);
     }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    console.log('WS disconnected. Clients:', clients.size);
-  });
-});
-
-function broadcastToAll(messageObj, sender) {
-  const str = JSON.stringify(messageObj);
-  for (const client of clients) {
-    if (client !== sender && client.readyState === 1) {
-      client.send(str);
+    
+    </details> <details> <summary><strong>index.html (frontend/public/index.html)</strong></summary>
+    
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Mindspace Example</title>
+      <style>
+        body, html {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          width: 100%;
+          height: 100%;
+          background: #000;
+        }
+        #appCanvas {
+          display: block;
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="appCanvas"></canvas>
+    
+      <!-- Three.js from CDN -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    
+      <!-- Our scripts in ES modules -->
+      <script type="module" src="../src/networkManager.js"></script>
+      <script type="module" src="../src/pluginManager.js"></script>
+      <script type="module" src="../src/windowManager.js"></script>
+      <script type="module" src="../src/chatWindow.js"></script>
+      <script type="module" src="../src/main.js"></script>
+    </body>
+    </html>
+    
+    </details> <details> <summary><strong>networkManager.js (frontend/src/networkManager.js)</strong></summary>
+    
+    export class NetworkManager {
+      constructor(serverUrl) {
+        this.serverUrl = serverUrl;
+        this.socket = null;
+        this.onChatMessage = null;
+        this._initWebSocket();
+      }
+    
+      _initWebSocket() {
+        this.socket = new WebSocket(this.serverUrl);
+        this.socket.onopen = () => {
+          console.log('WebSocket connected to', this.serverUrl);
+        };
+        this.socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'CHAT_MSG') {
+              if (this.onChatMessage) {
+                this.onChatMessage(data.msg);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to parse incoming WS message', err);
+          }
+        };
+        this.socket.onclose = () => {
+          console.log('WebSocket closed');
+        };
+      }
+    
+      sendChatMessage(msgObj) {
+        const packet = {
+          type: 'CHAT_MSG',
+          msg: msgObj
+        };
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify(packet));
+        }
+      }
     }
-  }
-}
-
-</details> <details> <summary><strong>index.html (frontend/public/index.html)</strong></summary>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mindspace Example</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background: #000;
+    
+    </details> <details> <summary><strong>pluginManager.js (frontend/src/pluginManager.js)</strong></summary>
+    
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        const PluginClass = this.plugins[pluginType];
+        if (!PluginClass) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        return new PluginClass(options);
+      }
     }
-    #appCanvas {
-      display: block;
+    
+    </details> <details> <summary><strong>windowManager.js (frontend/src/windowManager.js)</strong></summary>
+    
+    import * as THREE from 'three';
+    
+    export class Window3D {
+      constructor({
+        width = 2,
+        height = 1.5,
+        color = 0x00ff00,
+        position = new THREE.Vector3(0,0,0),
+        title = 'Untitled'
+      }) {
+        this.width = width;
+        this.height = height;
+        this.title = title;
+        this.isDragging = false;
+        this.isClosed = false;
+    
+        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.position.copy(position);
+      }
+    
+      addToScene(scene) {
+        scene.add(this.mesh);
+      }
+    
+      removeFromScene(scene) {
+        scene.remove(this.mesh);
+        this.isClosed = true;
+      }
     }
-  </style>
-</head>
-<body>
-  <canvas id="appCanvas"></canvas>
-
-  <!-- Three.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-
-  <!-- Our scripts in ES modules -->
-  <script type="module" src="../src/networkManager.js"></script>
-  <script type="module" src="../src/pluginManager.js"></script>
-  <script type="module" src="../src/windowManager.js"></script>
-  <script type="module" src="../src/chatWindow.js"></script>
-  <script type="module" src="../src/main.js"></script>
-</body>
-</html>
-
-</details> <details> <summary><strong>networkManager.js (frontend/src/networkManager.js)</strong></summary>
-
-export class NetworkManager {
-  constructor(serverUrl) {
-    this.serverUrl = serverUrl;
-    this.socket = null;
-    this.onChatMessage = null;
-    this._initWebSocket();
-  }
-
-  _initWebSocket() {
-    this.socket = new WebSocket(this.serverUrl);
-    this.socket.onopen = () => {
-      console.log('WebSocket connected to', this.serverUrl);
-    };
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'CHAT_MSG') {
-          if (this.onChatMessage) {
-            this.onChatMessage(data.msg);
+    
+    export class WindowManager {
+      constructor(scene, camera, renderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.windows = [];
+    
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+    
+        this.draggedWindow = null;
+        this.dragOffset = new THREE.Vector3();
+    
+        this._initEvents();
+      }
+    
+      _initEvents() {
+        const canvas = this.renderer.domElement;
+        canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
+        canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
+      }
+    
+      _onMouseDown(event) {
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const meshes = this.windows.map(w => w.mesh);
+        const intersects = this.raycaster.intersectObjects(meshes);
+        if (intersects.length > 0) {
+          const { object, point } = intersects[0];
+          const foundWin = this.windows.find(w => w.mesh === object);
+          if (foundWin) {
+            this.draggedWindow = foundWin;
+            foundWin.isDragging = true;
+            this.dragOffset.copy(point).sub(foundWin.mesh.position);
           }
         }
-      } catch (err) {
-        console.error('Failed to parse incoming WS message', err);
       }
-    };
-    this.socket.onclose = () => {
-      console.log('WebSocket closed');
-    };
-  }
-
-  sendChatMessage(msgObj) {
-    const packet = {
-      type: 'CHAT_MSG',
-      msg: msgObj
-    };
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(packet));
-    }
-  }
-}
-
-</details> <details> <summary><strong>pluginManager.js (frontend/src/pluginManager.js)</strong></summary>
-
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    const PluginClass = this.plugins[pluginType];
-    if (!PluginClass) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
-    }
-    return new PluginClass(options);
-  }
-}
-
-</details> <details> <summary><strong>windowManager.js (frontend/src/windowManager.js)</strong></summary>
-
-import * as THREE from 'three';
-
-export class Window3D {
-  constructor({
-    width = 2,
-    height = 1.5,
-    color = 0x00ff00,
-    position = new THREE.Vector3(0,0,0),
-    title = 'Untitled'
-  }) {
-    this.width = width;
-    this.height = height;
-    this.title = title;
-    this.isDragging = false;
-    this.isClosed = false;
-
-    this.geometry = new THREE.PlaneGeometry(width, height);
-    this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position.copy(position);
-  }
-
-  addToScene(scene) {
-    scene.add(this.mesh);
-  }
-
-  removeFromScene(scene) {
-    scene.remove(this.mesh);
-    this.isClosed = true;
-  }
-}
-
-export class WindowManager {
-  constructor(scene, camera, renderer) {
-    this.scene = scene;
-    this.camera = camera;
-    this.renderer = renderer;
-    this.windows = [];
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
-    this.draggedWindow = null;
-    this.dragOffset = new THREE.Vector3();
-
-    this._initEvents();
-  }
-
-  _initEvents() {
-    const canvas = this.renderer.domElement;
-    canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
-    canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
-    canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
-  }
-
-  _onMouseDown(event) {
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const meshes = this.windows.map(w => w.mesh);
-    const intersects = this.raycaster.intersectObjects(meshes);
-    if (intersects.length > 0) {
-      const { object, point } = intersects[0];
-      const foundWin = this.windows.find(w => w.mesh === object);
-      if (foundWin) {
-        this.draggedWindow = foundWin;
-        foundWin.isDragging = true;
-        this.dragOffset.copy(point).sub(foundWin.mesh.position);
-      }
-    }
-  }
-
-  _onMouseMove(event) {
-    if (!this.draggedWindow) return;
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const planeZ = this.draggedWindow.mesh.position.z;
-    const pointOnPlane = this._getPointOnZPlane(planeZ);
-    if (pointOnPlane) {
-      const newPos = pointOnPlane.sub(this.dragOffset);
-      this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
-    }
-  }
-
-  _onMouseUp(event) {
-    if (this.draggedWindow) {
-      this.draggedWindow.isDragging = false;
-      this.draggedWindow = null;
-    }
-  }
-
-  _setMouseCoords(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
-  _getPointOnZPlane(zValue) {
-    const ray = this.raycaster.ray;
-    const t = (zValue - ray.origin.z) / ray.direction.z;
-    if (t < 0) return null;
-    return new THREE.Vector3(
-      ray.origin.x + t * ray.direction.x,
-      ray.origin.y + t * ray.direction.y,
-      zValue
-    );
-  }
-}
-
-</details> <details> <summary><strong>chatWindow.js (frontend/src/chatWindow.js)</strong></summary>
-
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.messages = [];
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.inputEl = document.createElement('input');
-    this.inputEl.type = 'text';
-    this.inputEl.placeholder = 'Type a message...';
-    this.inputEl.style.position = 'absolute';
-    this.inputEl.style.bottom = '40px';
-    this.inputEl.style.left = '40px';
-    this.inputEl.style.width = '200px';
-    document.body.appendChild(this.inputEl);
-
-    this.inputEl.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const text = this.inputEl.value.trim();
-        if (text) {
-          this._sendChatMessage(text);
+    
+      _onMouseMove(event) {
+        if (!this.draggedWindow) return;
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const planeZ = this.draggedWindow.mesh.position.z;
+        const pointOnPlane = this._getPointOnZPlane(planeZ);
+        if (pointOnPlane) {
+          const newPos = pointOnPlane.sub(this.dragOffset);
+          this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
         }
-        this.inputEl.value = '';
       }
-    });
-
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (msgObj) => {
-        this._onMessageReceived(msgObj);
-      };
+    
+      _onMouseUp(event) {
+        if (this.draggedWindow) {
+          this.draggedWindow.isDragging = false;
+          this.draggedWindow = null;
+        }
+      }
+    
+      _setMouseCoords(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+    
+      _getPointOnZPlane(zValue) {
+        const ray = this.raycaster.ray;
+        const t = (zValue - ray.origin.z) / ray.direction.z;
+        if (t < 0) return null;
+        return new THREE.Vector3(
+          ray.origin.x + t * ray.direction.x,
+          ray.origin.y + t * ray.direction.y,
+          zValue
+        );
+      }
     }
-
-    this._renderChat();
-  }
-
-  _sendChatMessage(text) {
-    const msgObj = {
-      sender: 'Me',
-      text,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-
-    if (window.__networkManager) {
-      window.__networkManager.sendChatMessage(msgObj);
+    
+    </details> <details> <summary><strong>chatWindow.js (frontend/src/chatWindow.js)</strong></summary>
+    
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.messages = [];
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.inputEl = document.createElement('input');
+        this.inputEl.type = 'text';
+        this.inputEl.placeholder = 'Type a message...';
+        this.inputEl.style.position = 'absolute';
+        this.inputEl.style.bottom = '40px';
+        this.inputEl.style.left = '40px';
+        this.inputEl.style.width = '200px';
+        document.body.appendChild(this.inputEl);
+    
+        this.inputEl.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            const text = this.inputEl.value.trim();
+            if (text) {
+              this._sendChatMessage(text);
+            }
+            this.inputEl.value = '';
+          }
+        });
+    
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (msgObj) => {
+            this._onMessageReceived(msgObj);
+          };
+        }
+    
+        this._renderChat();
+      }
+    
+      _sendChatMessage(text) {
+        const msgObj = {
+          sender: 'Me',
+          text,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+    
+        if (window.__networkManager) {
+          window.__networkManager.sendChatMessage(msgObj);
+        }
+      }
+    
+      _onMessageReceived(msgObj) {
+        // if not from me, add to chat
+        this.messages.push(msgObj);
+        this._renderChat();
+      }
+    
+      _renderChat() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        const lineHeight = 20;
+        const recent = this.messages.slice(-8);
+        for (const m of recent) {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        }
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.inputEl);
+      }
     }
-  }
-
-  _onMessageReceived(msgObj) {
-    // if not from me, add to chat
-    this.messages.push(msgObj);
-    this._renderChat();
-  }
-
-  _renderChat() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    const lineHeight = 20;
-    const recent = this.messages.slice(-8);
-    for (const m of recent) {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
+    
+    </details> <details> <summary><strong>main.js (frontend/src/main.js)</strong></summary>
+    
+    import { NetworkManager } from './networkManager.js';
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    import { ChatWindow } from './chatWindow.js';
+    
+    function init() {
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      // A rotating reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // Setup managers
+      window.__networkManager = new NetworkManager('ws://localhost:3000');
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+    
+      // Register ChatWindow
+      pluginManager.registerPlugin('chat', ChatWindow);
+    
+      // Create a chat window
+      const chatWin = pluginManager.createWindow('chat', {
+        width: 3,
+        height: 2,
+        color: 0x2222cc,
+        position: new THREE.Vector3(-2,1,0),
+        title: 'Chat Window'
+      });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      // Animate loop
+      function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      // Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     }
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.inputEl);
-  }
-}
-
-</details> <details> <summary><strong>main.js (frontend/src/main.js)</strong></summary>
-
-import { NetworkManager } from './networkManager.js';
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-import { ChatWindow } from './chatWindow.js';
-
-function init() {
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // A rotating reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // Setup managers
-  window.__networkManager = new NetworkManager('ws://localhost:3000');
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-
-  // Register ChatWindow
-  pluginManager.registerPlugin('chat', ChatWindow);
-
-  // Create a chat window
-  const chatWin = pluginManager.createWindow('chat', {
-    width: 3,
-    height: 2,
-    color: 0x2222cc,
-    position: new THREE.Vector3(-2,1,0),
-    title: 'Chat Window'
-  });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  // Animate loop
-  function animate() {
-    requestAnimationFrame(animate);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // Resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-init();
-
-</details>
+    init();
+    
+    </details>
+    
 Usage Instructions
 
     Install & Run Backend:
 
-cd backend
-npm install
-npm start
-# => Server on http://localhost:3000
+    cd backend
+    npm install
+    npm start
+    # => Server on http://localhost:3000
 
 Serve Frontend:
 
@@ -4601,19 +4603,20 @@ Below is a complete, minimal, and functional example of the entire project codeb
 You can extend this code to include WhiteboardWindow, MusicPlayerWindow, ModelViewerWindow, etc. The example focuses on Chat to illustrate the pattern.
 Directory Structure
 
-mindspace-project
-├─ backend
-│  ├─ package.json
-│  └─ server.js
-└─ frontend
-   ├─ public
-   │  └─ index.html
-   └─ src
-      ├─ networkManager.js
-      ├─ pluginManager.js
-      ├─ windowManager.js
-      ├─ chatWindow.js
-      └─ main.js
+    mindspace-project
+    ├─ backend
+    │  ├─ package.json
+    │  └─ server.js
+    └─ frontend
+       ├─ public
+       │  └─ index.html
+       └─ src
+          ├─ networkManager.js
+          ├─ pluginManager.js
+          ├─ windowManager.js
+          ├─ chatWindow.js
+          └─ main.js
+
 
     backend/: The Node.js server.
     frontend/public/index.html: The single HTML file that loads your JavaScript modules.
@@ -4623,92 +4626,92 @@ mindspace-project
 
 Below is a minimal Node.js + WebSockets server that broadcasts chat messages to all connected clients. For production, you’d add rooms, auth, etc.
 
-// backend/server.js
-const express = require('express');
-const cors = require('cors');
-const { WebSocketServer } = require('ws');
-const path = require('path');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Example API route
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
-
-// Start HTTP server
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-});
-
-// WebSocket server
-const wss = new WebSocketServer({ noServer: true });
-
-// Track connected clients
-const clients = new Set();
-
-server.on('upgrade', (req, socket, head) => {
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req);
-  });
-});
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('WebSocket connected. Current clients:', clients.size);
-
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      // For example, a chat message: { type: 'CHAT_MSG', msg: {...} }
-      if (parsed.type === 'CHAT_MSG') {
-        broadcastToAll(parsed, ws);
+    // backend/server.js
+    const express = require('express');
+    const cors = require('cors');
+    const { WebSocketServer } = require('ws');
+    const path = require('path');
+    
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    
+    // Example API route
+    app.get('/api/hello', (req, res) => {
+      res.json({ message: 'Hello from backend!' });
+    });
+    
+    // Start HTTP server
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Backend listening on http://localhost:${PORT}`);
+    });
+    
+    // WebSocket server
+    const wss = new WebSocketServer({ noServer: true });
+    
+    // Track connected clients
+    const clients = new Set();
+    
+    server.on('upgrade', (req, socket, head) => {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+    });
+    
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+      console.log('WebSocket connected. Current clients:', clients.size);
+    
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+          // For example, a chat message: { type: 'CHAT_MSG', msg: {...} }
+          if (parsed.type === 'CHAT_MSG') {
+            broadcastToAll(parsed, ws);
+          }
+        } catch (err) {
+          console.error('Message parse error:', err);
+        }
+      });
+    
+      ws.on('close', () => {
+        clients.delete(ws);
+        console.log('WebSocket disconnected. Current clients:', clients.size);
+      });
+    });
+    
+    function broadcastToAll(messageObj, sender) {
+      const str = JSON.stringify(messageObj);
+      for (const client of clients) {
+        // Send to everyone except the sender
+        if (client !== sender && client.readyState === 1) {
+          client.send(str);
+        }
       }
-    } catch (err) {
-      console.error('Message parse error:', err);
     }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    console.log('WebSocket disconnected. Current clients:', clients.size);
-  });
-});
-
-function broadcastToAll(messageObj, sender) {
-  const str = JSON.stringify(messageObj);
-  for (const client of clients) {
-    // Send to everyone except the sender
-    if (client !== sender && client.readyState === 1) {
-      client.send(str);
-    }
-  }
-}
 
 (Optional) package.json in backend/
 
-{
-  "name": "mindspace-backend",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "ws": "^8.13.0",
-    "cors": "^2.8.5",
-    "express": "^4.18.2"
-  }
-}
+    {
+      "name": "mindspace-backend",
+      "version": "1.0.0",
+      "main": "server.js",
+      "scripts": {
+        "start": "node server.js"
+      },
+      "dependencies": {
+        "ws": "^8.13.0",
+        "cors": "^2.8.5",
+        "express": "^4.18.2"
+      }
+    }
 
 Install & run:
 
-cd backend
-npm install
-npm start
+    cd backend
+    npm install
+    npm start
 
 This will run your server on http://localhost:3000.
 2. Frontend:
@@ -4716,43 +4719,43 @@ This will run your server on http://localhost:3000.
 
 A basic HTML page that:
 
-    Loads Three.js from a CDN.
-    Includes our custom modules via <script type="module">.
-
-<!-- frontend/public/index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mindspace Example</title>
-  <style>
-    body, html {
-      margin: 0; 
-      padding: 0; 
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background: #000;
-    }
-    #appCanvas {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="appCanvas"></canvas>
-
-  <!-- Three.js from CDN (version can vary) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-
-  <!-- Our modules -->
-  <script type="module" src="../src/networkManager.js"></script>
-  <script type="module" src="../src/pluginManager.js"></script>
-  <script type="module" src="../src/windowManager.js"></script>
-  <script type="module" src="../src/chatWindow.js"></script>
-  <script type="module" src="../src/main.js"></script>
-</body>
-</html>
+Loads Three.js from a CDN.
+Includes our custom modules via <script type="module">.
+    
+    <!-- frontend/public/index.html -->
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Mindspace Example</title>
+      <style>
+        body, html {
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+          width: 100%;
+          height: 100%;
+          background: #000;
+        }
+        #appCanvas {
+          display: block;
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="appCanvas"></canvas>
+    
+      <!-- Three.js from CDN (version can vary) -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    
+      <!-- Our modules -->
+      <script type="module" src="../src/networkManager.js"></script>
+      <script type="module" src="../src/pluginManager.js"></script>
+      <script type="module" src="../src/windowManager.js"></script>
+      <script type="module" src="../src/chatWindow.js"></script>
+      <script type="module" src="../src/main.js"></script>
+    </body>
+    </html>
 
 Serve this directory (e.g., cd frontend && npx http-server public -p 8080), then open http://localhost:8080.
 
@@ -4760,80 +4763,80 @@ Serve this directory (e.g., cd frontend && npx http-server public -p 8080), then
 
 Handles the WebSocket client logic, including sending/receiving chat messages.
 
-// frontend/src/networkManager.js
-
-export class NetworkManager {
-  constructor(serverUrl) {
-    this.serverUrl = serverUrl;
-    this.socket = null;
-    // Chat callback
-    this.onChatMessage = null;
-
-    this._initWebSocket();
-  }
-
-  _initWebSocket() {
-    this.socket = new WebSocket(this.serverUrl);
-
-    this.socket.onopen = () => {
-      console.log('WebSocket connected to', this.serverUrl);
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'CHAT_MSG') {
-          // data.msg = { sender, text, timestamp }
-          if (this.onChatMessage) {
-            this.onChatMessage(data.msg);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to parse incoming WS message', err);
+    // frontend/src/networkManager.js
+    
+    export class NetworkManager {
+      constructor(serverUrl) {
+        this.serverUrl = serverUrl;
+        this.socket = null;
+        // Chat callback
+        this.onChatMessage = null;
+    
+        this._initWebSocket();
       }
-    };
-
-    this.socket.onclose = () => {
-      console.log('WebSocket closed');
-    };
-  }
-
-  // Send a chat message to the server
-  sendChatMessage(msgObj) {
-    // msgObj = { sender, text, timestamp }
-    const packet = {
-      type: 'CHAT_MSG',
-      msg: msgObj
-    };
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(packet));
+    
+      _initWebSocket() {
+        this.socket = new WebSocket(this.serverUrl);
+    
+        this.socket.onopen = () => {
+          console.log('WebSocket connected to', this.serverUrl);
+        };
+    
+        this.socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'CHAT_MSG') {
+              // data.msg = { sender, text, timestamp }
+              if (this.onChatMessage) {
+                this.onChatMessage(data.msg);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to parse incoming WS message', err);
+          }
+        };
+    
+        this.socket.onclose = () => {
+          console.log('WebSocket closed');
+        };
+      }
+    
+      // Send a chat message to the server
+      sendChatMessage(msgObj) {
+        // msgObj = { sender, text, timestamp }
+        const packet = {
+          type: 'CHAT_MSG',
+          msg: msgObj
+        };
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify(packet));
+        }
+      }
     }
-  }
-}
 
 ## 2.3 pluginManager.js
 
 A simple plugin mechanism: register plugin classes by a string key, then create windows with createWindow(type, options).
 
-// frontend/src/pluginManager.js
-
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    const PluginClass = this.plugins[pluginType];
-    if (!PluginClass) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
+    // frontend/src/pluginManager.js
+    
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        const PluginClass = this.plugins[pluginType];
+        if (!PluginClass) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        return new PluginClass(options);
+      }
     }
-    return new PluginClass(options);
-  }
-}
 
 ## 2.4 windowManager.js
 
@@ -4842,301 +4845,301 @@ Contains:
     Window3D – a base class representing a 3D plane as a “window.”
     WindowManager – manages a list of windows, handles mouse-based dragging, etc.
 
-// frontend/src/windowManager.js
-import * as THREE from 'three';
-
-export class Window3D {
-  constructor({
-    width = 2,
-    height = 1.5,
-    color = 0x00ff00,
-    position = new THREE.Vector3(0, 0, 0),
-    title = 'Untitled'
-  }) {
-    this.width = width;
-    this.height = height;
-    this.title = title;
-    this.isDragging = false;
-    this.isClosed = false;
-
-    // Create a plane for the window
-    this.geometry = new THREE.PlaneGeometry(width, height);
-    this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-    // Position it
-    this.mesh.position.copy(position);
-  }
-
-  addToScene(scene) {
-    scene.add(this.mesh);
-  }
-
-  removeFromScene(scene) {
-    scene.remove(this.mesh);
-    this.isClosed = true;
-  }
-}
-
-export class WindowManager {
-  constructor(scene, camera, renderer) {
-    this.scene = scene;
-    this.camera = camera;
-    this.renderer = renderer;
-    this.windows = [];
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
-    this.draggedWindow = null;
-    this.dragOffset = new THREE.Vector3();
-
-    this._initEvents();
-  }
-
-  _initEvents() {
-    const canvas = this.renderer.domElement;
-    canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
-    canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
-    canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
-  }
-
-  _onMouseDown(event) {
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // Check intersection with each window's mesh
-    const meshes = this.windows.map(w => w.mesh);
-    const intersects = this.raycaster.intersectObjects(meshes);
-    if (intersects.length > 0) {
-      const { object, point } = intersects[0];
-      const foundWin = this.windows.find(w => w.mesh === object);
-      if (foundWin) {
-        this.draggedWindow = foundWin;
-        foundWin.isDragging = true;
-        // Save offset so window doesn't jump
-        this.dragOffset.copy(point).sub(foundWin.mesh.position);
+    // frontend/src/windowManager.js
+    import * as THREE from 'three';
+    
+    export class Window3D {
+      constructor({
+        width = 2,
+        height = 1.5,
+        color = 0x00ff00,
+        position = new THREE.Vector3(0, 0, 0),
+        title = 'Untitled'
+      }) {
+        this.width = width;
+        this.height = height;
+        this.title = title;
+        this.isDragging = false;
+        this.isClosed = false;
+    
+        // Create a plane for the window
+        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+    
+        // Position it
+        this.mesh.position.copy(position);
+      }
+    
+      addToScene(scene) {
+        scene.add(this.mesh);
+      }
+    
+      removeFromScene(scene) {
+        scene.remove(this.mesh);
+        this.isClosed = true;
       }
     }
-  }
-
-  _onMouseMove(event) {
-    if (!this.draggedWindow) return;
-
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const zValue = this.draggedWindow.mesh.position.z;
-    const planePoint = this._getPointOnZPlane(zValue);
-    if (planePoint) {
-      const newPos = planePoint.sub(this.dragOffset);
-      this.draggedWindow.mesh.position.set(newPos.x, newPos.y, zValue);
+    
+    export class WindowManager {
+      constructor(scene, camera, renderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.windows = [];
+    
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+    
+        this.draggedWindow = null;
+        this.dragOffset = new THREE.Vector3();
+    
+        this._initEvents();
+      }
+    
+      _initEvents() {
+        const canvas = this.renderer.domElement;
+        canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
+        canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
+      }
+    
+      _onMouseDown(event) {
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        // Check intersection with each window's mesh
+        const meshes = this.windows.map(w => w.mesh);
+        const intersects = this.raycaster.intersectObjects(meshes);
+        if (intersects.length > 0) {
+          const { object, point } = intersects[0];
+          const foundWin = this.windows.find(w => w.mesh === object);
+          if (foundWin) {
+            this.draggedWindow = foundWin;
+            foundWin.isDragging = true;
+            // Save offset so window doesn't jump
+            this.dragOffset.copy(point).sub(foundWin.mesh.position);
+          }
+        }
+      }
+    
+      _onMouseMove(event) {
+        if (!this.draggedWindow) return;
+    
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const zValue = this.draggedWindow.mesh.position.z;
+        const planePoint = this._getPointOnZPlane(zValue);
+        if (planePoint) {
+          const newPos = planePoint.sub(this.dragOffset);
+          this.draggedWindow.mesh.position.set(newPos.x, newPos.y, zValue);
+        }
+      }
+    
+      _onMouseUp(event) {
+        if (this.draggedWindow) {
+          this.draggedWindow.isDragging = false;
+          this.draggedWindow = null;
+        }
+      }
+    
+      _setMouseCoords(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+    
+      _getPointOnZPlane(zValue) {
+        const ray = this.raycaster.ray;
+        const t = (zValue - ray.origin.z) / ray.direction.z;
+        if (t < 0) return null;
+        return new THREE.Vector3(
+          ray.origin.x + t * ray.direction.x,
+          ray.origin.y + t * ray.direction.y,
+          zValue
+        );
+      }
     }
-  }
-
-  _onMouseUp(event) {
-    if (this.draggedWindow) {
-      this.draggedWindow.isDragging = false;
-      this.draggedWindow = null;
-    }
-  }
-
-  _setMouseCoords(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
-  _getPointOnZPlane(zValue) {
-    const ray = this.raycaster.ray;
-    const t = (zValue - ray.origin.z) / ray.direction.z;
-    if (t < 0) return null;
-    return new THREE.Vector3(
-      ray.origin.x + t * ray.direction.x,
-      ray.origin.y + t * ray.direction.y,
-      zValue
-    );
-  }
-}
 
 ## 2.5 chatWindow.js
 
 Implements a ChatWindow plugin that displays messages on a CanvasTexture and uses an HTML <input> for text entry.
 
-// frontend/src/chatWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // Array to store chat messages
-    this.messages = [];
-
-    // A canvas for rendering text
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    // Use the canvas as a texture on the window plane
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // An HTML <input> for message entry
-    this.inputEl = document.createElement('input');
-    this.inputEl.type = 'text';
-    this.inputEl.placeholder = 'Type a message...';
-    this.inputEl.style.position = 'absolute';
-    this.inputEl.style.bottom = '40px';
-    this.inputEl.style.left = '40px';
-    this.inputEl.style.width = '200px';
-    document.body.appendChild(this.inputEl);
-
-    // Listen for 'Enter' in the input
-    this.inputEl.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const text = this.inputEl.value.trim();
-        if (text) {
-          this._sendChatMessage(text);
+    // frontend/src/chatWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // Array to store chat messages
+        this.messages = [];
+    
+        // A canvas for rendering text
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        // Use the canvas as a texture on the window plane
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // An HTML <input> for message entry
+        this.inputEl = document.createElement('input');
+        this.inputEl.type = 'text';
+        this.inputEl.placeholder = 'Type a message...';
+        this.inputEl.style.position = 'absolute';
+        this.inputEl.style.bottom = '40px';
+        this.inputEl.style.left = '40px';
+        this.inputEl.style.width = '200px';
+        document.body.appendChild(this.inputEl);
+    
+        // Listen for 'Enter' in the input
+        this.inputEl.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            const text = this.inputEl.value.trim();
+            if (text) {
+              this._sendChatMessage(text);
+            }
+            this.inputEl.value = '';
+          }
+        });
+    
+        // Subscribe to incoming chat messages if a NetworkManager is set
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (msgObj) => {
+            this._onMessageReceived(msgObj);
+          };
         }
-        this.inputEl.value = '';
+    
+        // Initial render
+        this._renderChat();
       }
-    });
-
-    // Subscribe to incoming chat messages if a NetworkManager is set
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (msgObj) => {
-        this._onMessageReceived(msgObj);
-      };
+    
+      _sendChatMessage(text) {
+        const msgObj = {
+          sender: 'Me',
+          text,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+    
+        // Send to server
+        if (window.__networkManager) {
+          window.__networkManager.sendChatMessage(msgObj);
+        }
+      }
+    
+      _onMessageReceived(msgObj) {
+        // If the message is from someone else, add it to the list
+        this.messages.push(msgObj);
+        this._renderChat();
+      }
+    
+      _renderChat() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        const lineHeight = 20;
+        const recent = this.messages.slice(-8); // show last 8 messages
+        for (const m of recent) {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        }
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        // Remove the HTML input from the DOM
+        document.body.removeChild(this.inputEl);
+      }
     }
-
-    // Initial render
-    this._renderChat();
-  }
-
-  _sendChatMessage(text) {
-    const msgObj = {
-      sender: 'Me',
-      text,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-
-    // Send to server
-    if (window.__networkManager) {
-      window.__networkManager.sendChatMessage(msgObj);
-    }
-  }
-
-  _onMessageReceived(msgObj) {
-    // If the message is from someone else, add it to the list
-    this.messages.push(msgObj);
-    this._renderChat();
-  }
-
-  _renderChat() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    const lineHeight = 20;
-    const recent = this.messages.slice(-8); // show last 8 messages
-    for (const m of recent) {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
-    }
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    // Remove the HTML input from the DOM
-    document.body.removeChild(this.inputEl);
-  }
-}
 
 ## 2.6 main.js
 
 The entry point: sets up Three.js, creates a rotating reference cube, initializes the managers, and spawns a ChatWindow.
 
-// frontend/src/main.js
-import { NetworkManager } from './networkManager.js';
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-import { ChatWindow } from './chatWindow.js';
-
-function init() {
-  // 1. Setup Three.js scene & camera
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // A rotating reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // 2. Setup managers
-  window.__networkManager = new NetworkManager('ws://localhost:3000');  // or your server IP
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-
-  // Register the ChatWindow plugin
-  pluginManager.registerPlugin('chat', ChatWindow);
-
-  // 3. Create a ChatWindow
-  const chatWin = pluginManager.createWindow('chat', {
-    width: 3,
-    height: 2,
-    color: 0x2222cc,
-    position: new THREE.Vector3(-2, 1, 0),
-    title: 'Chat Window'
-  });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  // 4. Animation loop
-  function animate() {
-    requestAnimationFrame(animate);
-
-    // Rotate the cube
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // 5. Resize handling
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-init();
+    // frontend/src/main.js
+    import { NetworkManager } from './networkManager.js';
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    import { ChatWindow } from './chatWindow.js';
+    
+    function init() {
+      // 1. Setup Three.js scene & camera
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      // A rotating reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // 2. Setup managers
+      window.__networkManager = new NetworkManager('ws://localhost:3000');  // or your server IP
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+    
+      // Register the ChatWindow plugin
+      pluginManager.registerPlugin('chat', ChatWindow);
+    
+      // 3. Create a ChatWindow
+      const chatWin = pluginManager.createWindow('chat', {
+        width: 3,
+        height: 2,
+        color: 0x2222cc,
+        position: new THREE.Vector3(-2, 1, 0),
+        title: 'Chat Window'
+      });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      // 4. Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+    
+        // Rotate the cube
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+    
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      // 5. Resize handling
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    init();
 
 3. Running Everything
 
     Backend
         In the backend folder:
 
-    npm install
-    npm start
+        npm install
+        npm start
 
     The WebSocket server will run on ws://localhost:3000.
 
@@ -5176,22 +5179,22 @@ These windows can coexist with the previously demonstrated ChatWindow. You’ll 
 
 Project Structure
 
-mindspace-project
-├─ backend
-│  ├─ package.json
-│  └─ server.js
-└─ frontend
-   ├─ public
-   │  └─ index.html
-   └─ src
-      ├─ networkManager.js
-      ├─ pluginManager.js
-      ├─ windowManager.js
-      ├─ chatWindow.js
-      ├─ whiteboardWindow.js
-      ├─ musicPlayerWindow.js
-      ├─ modelViewerWindow.js
-      └─ main.js
+    mindspace-project
+    ├─ backend
+    │  ├─ package.json
+    │  └─ server.js
+    └─ frontend
+       ├─ public
+       │  └─ index.html
+       └─ src
+          ├─ networkManager.js
+          ├─ pluginManager.js
+          ├─ windowManager.js
+          ├─ chatWindow.js
+          ├─ whiteboardWindow.js
+          ├─ musicPlayerWindow.js
+          ├─ modelViewerWindow.js
+          └─ main.js
 
 We’ll focus on frontend changes for Whiteboard, Music, and Model plugins. The backend remains the same as before, broadcasting only chat messages. You can expand your server to handle additional message types (like strokes, music sync, model transforms) if desired.
 
@@ -5203,163 +5206,163 @@ A minimal shared drawing plugin. Currently it’s local-only; multi-user collabo
     Track strokes in an array.
     Offer a color input & brush size.
 
-// frontend/src/whiteboardWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class WhiteboardWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // The drawing canvas
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Strokes
-    this.strokes = [];
-    this.currentStroke = null;
-
-    // Basic controls
-    this.color = '#ff0000';
-    this.brushSize = 3;
-
-    // Clear canvas
-    this._clearCanvas();
-
-    // Setup an HTML color input & brush size
-    this._createToolUI();
-  }
-
-  _createToolUI() {
-    // Color picker
-    this.colorInput = document.createElement('input');
-    this.colorInput.type = 'color';
-    this.colorInput.value = this.color;
-    this.colorInput.style.position = 'absolute';
-    this.colorInput.style.top = '40px';
-    this.colorInput.style.left = '250px';
-    document.body.appendChild(this.colorInput);
-
-    this.colorInput.addEventListener('input', () => {
-      this.color = this.colorInput.value;
-    });
-
-    // Brush size
-    this.sizeInput = document.createElement('input');
-    this.sizeInput.type = 'range';
-    this.sizeInput.min = '1';
-    this.sizeInput.max = '10';
-    this.sizeInput.value = String(this.brushSize);
-    this.sizeInput.style.position = 'absolute';
-    this.sizeInput.style.top = '70px';
-    this.sizeInput.style.left = '250px';
-    document.body.appendChild(this.sizeInput);
-
-    this.sizeInput.addEventListener('input', () => {
-      this.brushSize = parseInt(this.sizeInput.value, 10);
-    });
-
-    // Let’s listen for mouse events on the main canvas for drawing
-    // For a real system, you might do more advanced picking, or restrict pointer areas
-    window.addEventListener('mousedown', (ev) => this._onMouseDown(ev));
-    window.addEventListener('mousemove', (ev) => this._onMouseMove(ev));
-    window.addEventListener('mouseup', (ev) => this._onMouseUp(ev));
-  }
-
-  _onMouseDown(ev) {
-    // Convert screen coords to our texture coords
-    const pos = this._screenToCanvas(ev.clientX, ev.clientY);
-    if (!pos) return;
-    this.currentStroke = {
-      color: this.color,
-      brush: this.brushSize,
-      points: [pos]
-    };
-  }
-
-  _onMouseMove(ev) {
-    if (!this.currentStroke) return;
-    const pos = this._screenToCanvas(ev.clientX, ev.clientY);
-    if (!pos) return;
-    this.currentStroke.points.push(pos);
-    this._drawAll();
-  }
-
-  _onMouseUp(ev) {
-    if (this.currentStroke) {
-      this.strokes.push(this.currentStroke);
-      this.currentStroke = null;
-      this._drawAll();
-    }
-  }
-
-  _drawAll() {
-    this._clearCanvas();
-    for (const stroke of this.strokes) {
-      this._drawStroke(stroke);
-    }
-    if (this.currentStroke) {
-      this._drawStroke(this.currentStroke);
-    }
-    this.texture.needsUpdate = true;
-  }
-
-  _drawStroke(stroke) {
-    this.ctx.strokeStyle = stroke.color;
-    this.ctx.lineWidth = stroke.brush;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-
-    const pts = stroke.points;
-    this.ctx.beginPath();
-    if (pts.length > 0) {
-      this.ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i=1; i<pts.length; i++) {
-        this.ctx.lineTo(pts[i].x, pts[i].y);
+    // frontend/src/whiteboardWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class WhiteboardWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // The drawing canvas
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Strokes
+        this.strokes = [];
+        this.currentStroke = null;
+    
+        // Basic controls
+        this.color = '#ff0000';
+        this.brushSize = 3;
+    
+        // Clear canvas
+        this._clearCanvas();
+    
+        // Setup an HTML color input & brush size
+        this._createToolUI();
+      }
+    
+      _createToolUI() {
+        // Color picker
+        this.colorInput = document.createElement('input');
+        this.colorInput.type = 'color';
+        this.colorInput.value = this.color;
+        this.colorInput.style.position = 'absolute';
+        this.colorInput.style.top = '40px';
+        this.colorInput.style.left = '250px';
+        document.body.appendChild(this.colorInput);
+    
+        this.colorInput.addEventListener('input', () => {
+          this.color = this.colorInput.value;
+        });
+    
+        // Brush size
+        this.sizeInput = document.createElement('input');
+        this.sizeInput.type = 'range';
+        this.sizeInput.min = '1';
+        this.sizeInput.max = '10';
+        this.sizeInput.value = String(this.brushSize);
+        this.sizeInput.style.position = 'absolute';
+        this.sizeInput.style.top = '70px';
+        this.sizeInput.style.left = '250px';
+        document.body.appendChild(this.sizeInput);
+    
+        this.sizeInput.addEventListener('input', () => {
+          this.brushSize = parseInt(this.sizeInput.value, 10);
+        });
+    
+        // Let’s listen for mouse events on the main canvas for drawing
+        // For a real system, you might do more advanced picking, or restrict pointer areas
+        window.addEventListener('mousedown', (ev) => this._onMouseDown(ev));
+        window.addEventListener('mousemove', (ev) => this._onMouseMove(ev));
+        window.addEventListener('mouseup', (ev) => this._onMouseUp(ev));
+      }
+    
+      _onMouseDown(ev) {
+        // Convert screen coords to our texture coords
+        const pos = this._screenToCanvas(ev.clientX, ev.clientY);
+        if (!pos) return;
+        this.currentStroke = {
+          color: this.color,
+          brush: this.brushSize,
+          points: [pos]
+        };
+      }
+    
+      _onMouseMove(ev) {
+        if (!this.currentStroke) return;
+        const pos = this._screenToCanvas(ev.clientX, ev.clientY);
+        if (!pos) return;
+        this.currentStroke.points.push(pos);
+        this._drawAll();
+      }
+    
+      _onMouseUp(ev) {
+        if (this.currentStroke) {
+          this.strokes.push(this.currentStroke);
+          this.currentStroke = null;
+          this._drawAll();
+        }
+      }
+    
+      _drawAll() {
+        this._clearCanvas();
+        for (const stroke of this.strokes) {
+          this._drawStroke(stroke);
+        }
+        if (this.currentStroke) {
+          this._drawStroke(this.currentStroke);
+        }
+        this.texture.needsUpdate = true;
+      }
+    
+      _drawStroke(stroke) {
+        this.ctx.strokeStyle = stroke.color;
+        this.ctx.lineWidth = stroke.brush;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+    
+        const pts = stroke.points;
+        this.ctx.beginPath();
+        if (pts.length > 0) {
+          this.ctx.moveTo(pts[0].x, pts[0].y);
+          for (let i=1; i<pts.length; i++) {
+            this.ctx.lineTo(pts[i].x, pts[i].y);
+          }
+        }
+        this.ctx.stroke();
+      }
+    
+      _clearCanvas() {
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.texture.needsUpdate = true;
+      }
+    
+      _screenToCanvas(sx, sy) {
+        // 1) Raycast if user actually drew on the Whiteboard plane? (More advanced)
+        // 2) Simpler approach: check if the mouse is near our color/size UI
+        // We'll do a naive bounding check if you prefer or assume the user draws anywhere
+        // on screen, which is not typical but easy for demonstration.
+    
+        // For real usage, you'd do some 2D coordinate mapping or check if the user clicked the window plane specifically.
+        // We'll just track a region for demonstration. If outside, return null.
+        // Let's say if (sx>0 && sx<500 and sy>0 && sy<500) for quick demo:
+        if (sx < 0 || sx > 500 || sy < 0 || sy > 500) {
+          return null;
+        }
+        // Map screen coords to canvas (0..512 range)
+        const cx = (sx / 500) * 512;  
+        const cy = (sy / 500) * 512;
+        return { x: cx, y: cy };
+      }
+    
+      // Clean up
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.colorInput);
+        document.body.removeChild(this.sizeInput);
+        window.removeEventListener('mousedown', this._onMouseDown);
+        window.removeEventListener('mousemove', this._onMouseMove);
+        window.removeEventListener('mouseup', this._onMouseUp);
       }
     }
-    this.ctx.stroke();
-  }
-
-  _clearCanvas() {
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-    this.texture.needsUpdate = true;
-  }
-
-  _screenToCanvas(sx, sy) {
-    // 1) Raycast if user actually drew on the Whiteboard plane? (More advanced)
-    // 2) Simpler approach: check if the mouse is near our color/size UI
-    // We'll do a naive bounding check if you prefer or assume the user draws anywhere
-    // on screen, which is not typical but easy for demonstration.
-
-    // For real usage, you'd do some 2D coordinate mapping or check if the user clicked the window plane specifically.
-    // We'll just track a region for demonstration. If outside, return null.
-    // Let's say if (sx>0 && sx<500 and sy>0 && sy<500) for quick demo:
-    if (sx < 0 || sx > 500 || sy < 0 || sy > 500) {
-      return null;
-    }
-    // Map screen coords to canvas (0..512 range)
-    const cx = (sx / 500) * 512;  
-    const cy = (sy / 500) * 512;
-    return { x: cx, y: cy };
-  }
-
-  // Clean up
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.colorInput);
-    document.body.removeChild(this.sizeInput);
-    window.removeEventListener('mousedown', this._onMouseDown);
-    window.removeEventListener('mousemove', this._onMouseMove);
-    window.removeEventListener('mouseup', this._onMouseUp);
-  }
-}
 
 Multi-user note: you could broadcast each stroke the same way you broadcast chat messages, or just broadcast each stroke’s start/end, then reconstruct them on each client.
 
@@ -5367,98 +5370,98 @@ Multi-user note: you could broadcast each stroke the same way you broadcast chat
 
 A simple audio player plugin that loads a track and offers play/pause control. Multi-user sync would require you to broadcast events like “PLAY” or “SEEK” to all participants.
 
-// frontend/src/musicPlayerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class MusicPlayerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll keep a single track for demonstration
-    this.audio = new Audio(options.src || 'path/to/music.mp3');
-    this.audio.loop = false;
-    this.isPlaying = false;
-
-    // Minimal canvas label
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // A basic UI with play/pause
-    this.playBtn = document.createElement('button');
-    this.playBtn.textContent = 'Play';
-    this.playBtn.style.position = 'absolute';
-    this.playBtn.style.top = '40px';
-    this.playBtn.style.right = '40px';
-    document.body.appendChild(this.playBtn);
-
-    this.playBtn.addEventListener('click', () => {
-      if (this.isPlaying) {
-        this.pause();
-      } else {
-        this.play();
+    // frontend/src/musicPlayerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class MusicPlayerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll keep a single track for demonstration
+        this.audio = new Audio(options.src || 'path/to/music.mp3');
+        this.audio.loop = false;
+        this.isPlaying = false;
+    
+        // Minimal canvas label
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // A basic UI with play/pause
+        this.playBtn = document.createElement('button');
+        this.playBtn.textContent = 'Play';
+        this.playBtn.style.position = 'absolute';
+        this.playBtn.style.top = '40px';
+        this.playBtn.style.right = '40px';
+        document.body.appendChild(this.playBtn);
+    
+        this.playBtn.addEventListener('click', () => {
+          if (this.isPlaying) {
+            this.pause();
+          } else {
+            this.play();
+          }
+        });
+    
+        // Volume slider
+        this.volumeSlider = document.createElement('input');
+        this.volumeSlider.type = 'range';
+        this.volumeSlider.min = '0';
+        this.volumeSlider.max = '1';
+        this.volumeSlider.step = '0.01';
+        this.volumeSlider.value = '1.0';
+        this.volumeSlider.style.position = 'absolute';
+        this.volumeSlider.style.top = '70px';
+        this.volumeSlider.style.right = '40px';
+        document.body.appendChild(this.volumeSlider);
+    
+        this.volumeSlider.addEventListener('input', () => {
+          this.audio.volume = parseFloat(this.volumeSlider.value);
+        });
+    
+        // Initial draw
+        this._renderUI();
       }
-    });
-
-    // Volume slider
-    this.volumeSlider = document.createElement('input');
-    this.volumeSlider.type = 'range';
-    this.volumeSlider.min = '0';
-    this.volumeSlider.max = '1';
-    this.volumeSlider.step = '0.01';
-    this.volumeSlider.value = '1.0';
-    this.volumeSlider.style.position = 'absolute';
-    this.volumeSlider.style.top = '70px';
-    this.volumeSlider.style.right = '40px';
-    document.body.appendChild(this.volumeSlider);
-
-    this.volumeSlider.addEventListener('input', () => {
-      this.audio.volume = parseFloat(this.volumeSlider.value);
-    });
-
-    // Initial draw
-    this._renderUI();
-  }
-
-  play() {
-    this.audio.play();
-    this.isPlaying = true;
-    this.playBtn.textContent = 'Pause';
-    this._renderUI();
-  }
-
-  pause() {
-    this.audio.pause();
-    this.isPlaying = false;
-    this.playBtn.textContent = 'Play';
-    this._renderUI();
-  }
-
-  _renderUI() {
-    this.ctx.fillStyle = '#333';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '16px sans-serif';
-    this.ctx.fillText(`Music: ${this.isPlaying ? 'Playing' : 'Paused'}`, 10, 30);
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    // Cleanup HTML elements
-    document.body.removeChild(this.playBtn);
-    document.body.removeChild(this.volumeSlider);
-    // Also consider stopping audio
-    this.audio.pause();
-    this.audio.src = '';
-  }
-}
+    
+      play() {
+        this.audio.play();
+        this.isPlaying = true;
+        this.playBtn.textContent = 'Pause';
+        this._renderUI();
+      }
+    
+      pause() {
+        this.audio.pause();
+        this.isPlaying = false;
+        this.playBtn.textContent = 'Play';
+        this._renderUI();
+      }
+    
+      _renderUI() {
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px sans-serif';
+        this.ctx.fillText(`Music: ${this.isPlaying ? 'Playing' : 'Paused'}`, 10, 30);
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        // Cleanup HTML elements
+        document.body.removeChild(this.playBtn);
+        document.body.removeChild(this.volumeSlider);
+        // Also consider stopping audio
+        this.audio.pause();
+        this.audio.src = '';
+      }
+    }
 
 ## 3. ModelViewerWindow
 
@@ -5466,71 +5469,71 @@ Loads a .gltf or .glb model into a subscene rendered to a texture. The user can 
 
 For simplicity, we only do local rotation. You can incorporate user interactions or multi-user transforms if desired.
 
-// frontend/src/modelViewerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-export class ModelViewerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.subScene = new THREE.Scene();
-    this.subCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    this.subCamera.position.set(0, 1, 3);
-
-    const light = new THREE.AmbientLight(0xffffff, 1);
-    this.subScene.add(light);
-
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
-    this.texture = this.renderTarget.texture;
-    this.material.map = this.texture;
-
-    this.loader = new GLTFLoader();
-    if (options.modelUrl) {
-      this._loadModel(options.modelUrl);
-    }
-
-    this.clock = new THREE.Clock();
-    this.model = null;
-
-    // Kick off a loop to render subScene to the texture
-    this._animateSubScene();
-  }
-
-  _loadModel(url) {
-    this.loader.load(
-      url,
-      (gltf) => {
-        this.model = gltf.scene;
-        this.subScene.add(this.model);
-        this.model.position.set(0, 0, 0);
-      },
-      undefined,
-      (err) => {
-        console.error('Model load error:', err);
+    // frontend/src/modelViewerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    
+    export class ModelViewerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.subScene = new THREE.Scene();
+        this.subCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        this.subCamera.position.set(0, 1, 3);
+    
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        this.subScene.add(light);
+    
+        this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
+        this.texture = this.renderTarget.texture;
+        this.material.map = this.texture;
+    
+        this.loader = new GLTFLoader();
+        if (options.modelUrl) {
+          this._loadModel(options.modelUrl);
+        }
+    
+        this.clock = new THREE.Clock();
+        this.model = null;
+    
+        // Kick off a loop to render subScene to the texture
+        this._animateSubScene();
       }
-    );
-  }
-
-  _animateSubScene() {
-    if (this.isClosed) return;
-    requestAnimationFrame(() => this._animateSubScene());
-
-    // Example rotation
-    const delta = this.clock.getDelta();
-    if (this.model) {
-      this.model.rotation.y += delta;
+    
+      _loadModel(url) {
+        this.loader.load(
+          url,
+          (gltf) => {
+            this.model = gltf.scene;
+            this.subScene.add(this.model);
+            this.model.position.set(0, 0, 0);
+          },
+          undefined,
+          (err) => {
+            console.error('Model load error:', err);
+          }
+        );
+      }
+    
+      _animateSubScene() {
+        if (this.isClosed) return;
+        requestAnimationFrame(() => this._animateSubScene());
+    
+        // Example rotation
+        const delta = this.clock.getDelta();
+        if (this.model) {
+          this.model.rotation.y += delta;
+        }
+    
+        // Render into the render target
+        if (window.__globalThreeRenderer) {
+          window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
+          window.__globalThreeRenderer.render(this.subScene, this.subCamera);
+          window.__globalThreeRenderer.setRenderTarget(null);
+        }
+      }
     }
-
-    // Render into the render target
-    if (window.__globalThreeRenderer) {
-      window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
-      window.__globalThreeRenderer.render(this.subScene, this.subCamera);
-      window.__globalThreeRenderer.setRenderTarget(null);
-    }
-  }
-}
 
 Note: We rely on a global reference to the main Three.js renderer (window.__globalThreeRenderer) so we can do a second pass render for the subscene. We’ll set it in main.js soon.
 
@@ -5540,108 +5543,108 @@ We’ll register these new windows in our pluginManager.js or in main.js, then w
 
 ## 4.1 Registering in main.js
 
-// frontend/src/main.js
-import { NetworkManager } from './networkManager.js';
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-import { ChatWindow } from './chatWindow.js';
-import { WhiteboardWindow } from './whiteboardWindow.js';
-import { MusicPlayerWindow } from './musicPlayerWindow.js';
-import { ModelViewerWindow } from './modelViewerWindow.js';
-
-function init() {
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // Expose the renderer globally for ModelViewerWindow usage
-  window.__globalThreeRenderer = renderer;
-
-  // Basic reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // Setup managers
-  window.__networkManager = new NetworkManager('ws://localhost:3000');
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-
-  // Register all plugin windows
-  pluginManager.registerPlugin('chat', ChatWindow);
-  pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
-  pluginManager.registerPlugin('music', MusicPlayerWindow);
-  pluginManager.registerPlugin('model', ModelViewerWindow);
-
-  // Create the ChatWindow
-  const chatWin = pluginManager.createWindow('chat', {
-    width: 3,
-    height: 2,
-    color: 0x2222cc,
-    position: new THREE.Vector3(-4, 1, 0),
-    title: 'Chat Window'
-  });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  // Create the WhiteboardWindow
-  const whiteboardWin = pluginManager.createWindow('whiteboard', {
-    width: 3,
-    height: 3,
-    color: 0x888888,
-    position: new THREE.Vector3(0, 1, 0),
-    title: 'Whiteboard'
-  });
-  whiteboardWin.addToScene(scene);
-  windowManager.windows.push(whiteboardWin);
-
-  // Create the MusicPlayerWindow
-  const musicWin = pluginManager.createWindow('music', {
-    width: 3,
-    height: 2,
-    color: 0xaa3366,
-    position: new THREE.Vector3(-4, -2, 0),
-    title: 'Music Player',
-    src: 'path/to/music.mp3'
-  });
-  musicWin.addToScene(scene);
-  windowManager.windows.push(musicWin);
-
-  // Create the ModelViewerWindow
-  const modelWin = pluginManager.createWindow('model', {
-    width: 3,
-    height: 2,
-    color: 0x444444,
-    position: new THREE.Vector3(3, 1, 0),
-    title: '3D Model',
-    modelUrl: 'models/scene.gltf' // or glb
-  });
-  modelWin.addToScene(scene);
-  windowManager.windows.push(modelWin);
-
-  // Animate loop
-  function animate() {
-    requestAnimationFrame(animate);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // Resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-init();
+    // frontend/src/main.js
+    import { NetworkManager } from './networkManager.js';
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    import { ChatWindow } from './chatWindow.js';
+    import { WhiteboardWindow } from './whiteboardWindow.js';
+    import { MusicPlayerWindow } from './musicPlayerWindow.js';
+    import { ModelViewerWindow } from './modelViewerWindow.js';
+    
+    function init() {
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      // Expose the renderer globally for ModelViewerWindow usage
+      window.__globalThreeRenderer = renderer;
+    
+      // Basic reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // Setup managers
+      window.__networkManager = new NetworkManager('ws://localhost:3000');
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+    
+      // Register all plugin windows
+      pluginManager.registerPlugin('chat', ChatWindow);
+      pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
+      pluginManager.registerPlugin('music', MusicPlayerWindow);
+      pluginManager.registerPlugin('model', ModelViewerWindow);
+    
+      // Create the ChatWindow
+      const chatWin = pluginManager.createWindow('chat', {
+        width: 3,
+        height: 2,
+        color: 0x2222cc,
+        position: new THREE.Vector3(-4, 1, 0),
+        title: 'Chat Window'
+      });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      // Create the WhiteboardWindow
+      const whiteboardWin = pluginManager.createWindow('whiteboard', {
+        width: 3,
+        height: 3,
+        color: 0x888888,
+        position: new THREE.Vector3(0, 1, 0),
+        title: 'Whiteboard'
+      });
+      whiteboardWin.addToScene(scene);
+      windowManager.windows.push(whiteboardWin);
+    
+      // Create the MusicPlayerWindow
+      const musicWin = pluginManager.createWindow('music', {
+        width: 3,
+        height: 2,
+        color: 0xaa3366,
+        position: new THREE.Vector3(-4, -2, 0),
+        title: 'Music Player',
+        src: 'path/to/music.mp3'
+      });
+      musicWin.addToScene(scene);
+      windowManager.windows.push(musicWin);
+    
+      // Create the ModelViewerWindow
+      const modelWin = pluginManager.createWindow('model', {
+        width: 3,
+        height: 2,
+        color: 0x444444,
+        position: new THREE.Vector3(3, 1, 0),
+        title: '3D Model',
+        modelUrl: 'models/scene.gltf' // or glb
+      });
+      modelWin.addToScene(scene);
+      windowManager.windows.push(modelWin);
+    
+      // Animate loop
+      function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      // Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    init();
 
 ## 5. Summary of the Full Code
 
@@ -5649,783 +5652,783 @@ Below is a consolidated listing, mirroring the full final code. You can paste th
 
 ## 5.1 backend/server.js
 
-const express = require('express');
-const cors = require('cors');
-const { WebSocketServer } = require('ws');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
-
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-});
-
-const wss = new WebSocketServer({ noServer: true });
-const clients = new Set();
-
-server.on('upgrade', (req, socket, head) => {
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req);
-  });
-});
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-  console.log('WS connected. Clients:', clients.size);
-
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      // We'll only handle chat messages here for demonstration
-      if (parsed.type === 'CHAT_MSG') {
-        broadcastToAll(parsed, ws);
+    const express = require('express');
+    const cors = require('cors');
+    const { WebSocketServer } = require('ws');
+    
+    const app = express();
+    app.use(cors());
+    app.use(express.json());
+    
+    app.get('/api/hello', (req, res) => {
+      res.json({ message: 'Hello from backend!' });
+    });
+    
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Backend listening on http://localhost:${PORT}`);
+    });
+    
+    const wss = new WebSocketServer({ noServer: true });
+    const clients = new Set();
+    
+    server.on('upgrade', (req, socket, head) => {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+    });
+    
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+      console.log('WS connected. Clients:', clients.size);
+    
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+          // We'll only handle chat messages here for demonstration
+          if (parsed.type === 'CHAT_MSG') {
+            broadcastToAll(parsed, ws);
+          }
+        } catch (err) {
+          console.error('Message parse error:', err);
+        }
+      });
+    
+      ws.on('close', () => {
+        clients.delete(ws);
+        console.log('WS disconnected. Clients:', clients.size);
+      });
+    });
+    
+    function broadcastToAll(messageObj, sender) {
+      const str = JSON.stringify(messageObj);
+      for (const client of clients) {
+        if (client !== sender && client.readyState === 1) {
+          client.send(str);
+        }
       }
-    } catch (err) {
-      console.error('Message parse error:', err);
     }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    console.log('WS disconnected. Clients:', clients.size);
-  });
-});
-
-function broadcastToAll(messageObj, sender) {
-  const str = JSON.stringify(messageObj);
-  for (const client of clients) {
-    if (client !== sender && client.readyState === 1) {
-      client.send(str);
-    }
-  }
-}
 
 ## 5.2 index.html
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mindspace Example</title>
-  <style>
-    body, html {
-      margin: 0; 
-      padding: 0; 
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background: #000;
-    }
-    #appCanvas {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="appCanvas"></canvas>
-
-  <!-- Three.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-
-  <script type="module" src="../src/networkManager.js"></script>
-  <script type="module" src="../src/pluginManager.js"></script>
-  <script type="module" src="../src/windowManager.js"></script>
-  <script type="module" src="../src/chatWindow.js"></script>
-  <script type="module" src="../src/whiteboardWindow.js"></script>
-  <script type="module" src="../src/musicPlayerWindow.js"></script>
-  <script type="module" src="../src/modelViewerWindow.js"></script>
-  <script type="module" src="../src/main.js"></script>
-</body>
-</html>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Mindspace Example</title>
+      <style>
+        body, html {
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+          width: 100%;
+          height: 100%;
+          background: #000;
+        }
+        #appCanvas {
+          display: block;
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="appCanvas"></canvas>
+    
+      <!-- Three.js from CDN -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+    
+      <script type="module" src="../src/networkManager.js"></script>
+      <script type="module" src="../src/pluginManager.js"></script>
+      <script type="module" src="../src/windowManager.js"></script>
+      <script type="module" src="../src/chatWindow.js"></script>
+      <script type="module" src="../src/whiteboardWindow.js"></script>
+      <script type="module" src="../src/musicPlayerWindow.js"></script>
+      <script type="module" src="../src/modelViewerWindow.js"></script>
+      <script type="module" src="../src/main.js"></script>
+    </body>
+    </html>
 
 ## 5.3 Frontend Modules
-<details> <summary><strong>networkManager.js</strong></summary>
-
-export class NetworkManager {
-  constructor(serverUrl) {
-    this.serverUrl = serverUrl;
-    this.socket = null;
-    this.onChatMessage = null;
-
-    this._initWebSocket();
-  }
-
-  _initWebSocket() {
-    this.socket = new WebSocket(this.serverUrl);
-
-    this.socket.onopen = () => {
-      console.log('WebSocket connected to', this.serverUrl);
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'CHAT_MSG') {
-          if (this.onChatMessage) {
-            this.onChatMessage(data.msg);
+    <details> <summary><strong>networkManager.js</strong></summary>
+    
+    export class NetworkManager {
+      constructor(serverUrl) {
+        this.serverUrl = serverUrl;
+        this.socket = null;
+        this.onChatMessage = null;
+    
+        this._initWebSocket();
+      }
+    
+      _initWebSocket() {
+        this.socket = new WebSocket(this.serverUrl);
+    
+        this.socket.onopen = () => {
+          console.log('WebSocket connected to', this.serverUrl);
+        };
+    
+        this.socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'CHAT_MSG') {
+              if (this.onChatMessage) {
+                this.onChatMessage(data.msg);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to parse incoming WS message', err);
+          }
+        };
+    
+        this.socket.onclose = () => {
+          console.log('WebSocket closed');
+        };
+      }
+    
+      sendChatMessage(msgObj) {
+        const packet = {
+          type: 'CHAT_MSG',
+          msg: msgObj
+        };
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify(packet));
+        }
+      }
+    }
+    
+    </details> <details> <summary><strong>pluginManager.js</strong></summary>
+    
+    export class PluginManager {
+      constructor() {
+        this.plugins = {};
+      }
+    
+      registerPlugin(pluginType, pluginClass) {
+        this.plugins[pluginType] = pluginClass;
+      }
+    
+      createWindow(pluginType, options) {
+        const PluginClass = this.plugins[pluginType];
+        if (!PluginClass) {
+          throw new Error(`Unknown plugin type: ${pluginType}`);
+        }
+        return new PluginClass(options);
+      }
+    }
+    
+    </details> <details> <summary><strong>windowManager.js</strong></summary>
+    
+    import * as THREE from 'three';
+    
+    export class Window3D {
+      constructor({
+        width = 2,
+        height = 1.5,
+        color = 0x00ff00,
+        position = new THREE.Vector3(0,0,0),
+        title = 'Untitled'
+      }) {
+        this.width = width;
+        this.height = height;
+        this.title = title;
+        this.isDragging = false;
+        this.isClosed = false;
+    
+        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.position.copy(position);
+      }
+    
+      addToScene(scene) {
+        scene.add(this.mesh);
+      }
+    
+      removeFromScene(scene) {
+        scene.remove(this.mesh);
+        this.isClosed = true;
+      }
+    }
+    
+    export class WindowManager {
+      constructor(scene, camera, renderer) {
+        this.scene = scene;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.windows = [];
+    
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+    
+        this.draggedWindow = null;
+        this.dragOffset = new THREE.Vector3();
+    
+        this._initEvents();
+      }
+    
+      _initEvents() {
+        const canvas = this.renderer.domElement;
+        canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
+        canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
+      }
+    
+      _onMouseDown(event) {
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const meshes = this.windows.map(w => w.mesh);
+        const intersects = this.raycaster.intersectObjects(meshes);
+        if (intersects.length > 0) {
+          const { object, point } = intersects[0];
+          const foundWin = this.windows.find(w => w.mesh === object);
+          if (foundWin) {
+            this.draggedWindow = foundWin;
+            foundWin.isDragging = true;
+            this.dragOffset.copy(point).sub(foundWin.mesh.position);
           }
         }
-      } catch (err) {
-        console.error('Failed to parse incoming WS message', err);
       }
-    };
-
-    this.socket.onclose = () => {
-      console.log('WebSocket closed');
-    };
-  }
-
-  sendChatMessage(msgObj) {
-    const packet = {
-      type: 'CHAT_MSG',
-      msg: msgObj
-    };
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(packet));
-    }
-  }
-}
-
-</details> <details> <summary><strong>pluginManager.js</strong></summary>
-
-export class PluginManager {
-  constructor() {
-    this.plugins = {};
-  }
-
-  registerPlugin(pluginType, pluginClass) {
-    this.plugins[pluginType] = pluginClass;
-  }
-
-  createWindow(pluginType, options) {
-    const PluginClass = this.plugins[pluginType];
-    if (!PluginClass) {
-      throw new Error(`Unknown plugin type: ${pluginType}`);
-    }
-    return new PluginClass(options);
-  }
-}
-
-</details> <details> <summary><strong>windowManager.js</strong></summary>
-
-import * as THREE from 'three';
-
-export class Window3D {
-  constructor({
-    width = 2,
-    height = 1.5,
-    color = 0x00ff00,
-    position = new THREE.Vector3(0,0,0),
-    title = 'Untitled'
-  }) {
-    this.width = width;
-    this.height = height;
-    this.title = title;
-    this.isDragging = false;
-    this.isClosed = false;
-
-    this.geometry = new THREE.PlaneGeometry(width, height);
-    this.material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position.copy(position);
-  }
-
-  addToScene(scene) {
-    scene.add(this.mesh);
-  }
-
-  removeFromScene(scene) {
-    scene.remove(this.mesh);
-    this.isClosed = true;
-  }
-}
-
-export class WindowManager {
-  constructor(scene, camera, renderer) {
-    this.scene = scene;
-    this.camera = camera;
-    this.renderer = renderer;
-    this.windows = [];
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-
-    this.draggedWindow = null;
-    this.dragOffset = new THREE.Vector3();
-
-    this._initEvents();
-  }
-
-  _initEvents() {
-    const canvas = this.renderer.domElement;
-    canvas.addEventListener('mousedown', (e) => this._onMouseDown(e));
-    canvas.addEventListener('mousemove', (e) => this._onMouseMove(e));
-    canvas.addEventListener('mouseup', (e) => this._onMouseUp(e));
-  }
-
-  _onMouseDown(event) {
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const meshes = this.windows.map(w => w.mesh);
-    const intersects = this.raycaster.intersectObjects(meshes);
-    if (intersects.length > 0) {
-      const { object, point } = intersects[0];
-      const foundWin = this.windows.find(w => w.mesh === object);
-      if (foundWin) {
-        this.draggedWindow = foundWin;
-        foundWin.isDragging = true;
-        this.dragOffset.copy(point).sub(foundWin.mesh.position);
-      }
-    }
-  }
-
-  _onMouseMove(event) {
-    if (!this.draggedWindow) return;
-    this._setMouseCoords(event);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    const planeZ = this.draggedWindow.mesh.position.z;
-    const pointOnPlane = this._getPointOnZPlane(planeZ);
-    if (pointOnPlane) {
-      const newPos = pointOnPlane.sub(this.dragOffset);
-      this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
-    }
-  }
-
-  _onMouseUp(event) {
-    if (this.draggedWindow) {
-      this.draggedWindow.isDragging = false;
-      this.draggedWindow = null;
-    }
-  }
-
-  _setMouseCoords(event) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
-  _getPointOnZPlane(zValue) {
-    const ray = this.raycaster.ray;
-    const t = (zValue - ray.origin.z) / ray.direction.z;
-    if (t < 0) return null;
-    return new THREE.Vector3(
-      ray.origin.x + t * ray.direction.x,
-      ray.origin.y + t * ray.direction.y,
-      zValue
-    );
-  }
-}
-
-</details> <details> <summary><strong>chatWindow.js</strong></summary>
-
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ChatWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.messages = [];
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // Input for chat messages
-    this.inputEl = document.createElement('input');
-    this.inputEl.type = 'text';
-    this.inputEl.placeholder = 'Type a message...';
-    this.inputEl.style.position = 'absolute';
-    this.inputEl.style.bottom = '40px';
-    this.inputEl.style.left = '40px';
-    this.inputEl.style.width = '200px';
-    document.body.appendChild(this.inputEl);
-
-    this.inputEl.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const text = this.inputEl.value.trim();
-        if (text) {
-          this._sendChatMessage(text);
+    
+      _onMouseMove(event) {
+        if (!this.draggedWindow) return;
+        this._setMouseCoords(event);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+        const planeZ = this.draggedWindow.mesh.position.z;
+        const pointOnPlane = this._getPointOnZPlane(planeZ);
+        if (pointOnPlane) {
+          const newPos = pointOnPlane.sub(this.dragOffset);
+          this.draggedWindow.mesh.position.set(newPos.x, newPos.y, planeZ);
         }
-        this.inputEl.value = '';
       }
-    });
-
-    // Listen for chat from server
-    if (window.__networkManager) {
-      window.__networkManager.onChatMessage = (msgObj) => {
-        this._onMessageReceived(msgObj);
-      };
-    }
-
-    this._renderChat();
-  }
-
-  _sendChatMessage(text) {
-    const msgObj = {
-      sender: 'Me',
-      text,
-      timestamp: Date.now()
-    };
-    this.messages.push(msgObj);
-    this._renderChat();
-
-    if (window.__networkManager) {
-      window.__networkManager.sendChatMessage(msgObj);
-    }
-  }
-
-  _onMessageReceived(msgObj) {
-    this.messages.push(msgObj);
-    this._renderChat();
-  }
-
-  _renderChat() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    const lineHeight = 20;
-    const recent = this.messages.slice(-8);
-    for (const m of recent) {
-      const line = `${m.sender}: ${m.text}`;
-      this.ctx.fillText(line, 10, y);
-      y += lineHeight;
-    }
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.inputEl);
-  }
-}
-
-</details> <details> <summary><strong>whiteboardWindow.js</strong></summary>
-
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class WhiteboardWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 512;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.strokes = [];
-    this.currentStroke = null;
-    this.color = '#ff0000';
-    this.brushSize = 3;
-
-    this._clearCanvas();
-
-    this._createToolUI();
-  }
-
-  _createToolUI() {
-    // Color
-    this.colorInput = document.createElement('input');
-    this.colorInput.type = 'color';
-    this.colorInput.value = this.color;
-    this.colorInput.style.position = 'absolute';
-    this.colorInput.style.top = '40px';
-    this.colorInput.style.left = '250px';
-    document.body.appendChild(this.colorInput);
-
-    this.colorInput.addEventListener('input', () => {
-      this.color = this.colorInput.value;
-    });
-
-    // Brush size
-    this.sizeInput = document.createElement('input');
-    this.sizeInput.type = 'range';
-    this.sizeInput.min = '1';
-    this.sizeInput.max = '10';
-    this.sizeInput.value = String(this.brushSize);
-    this.sizeInput.style.position = 'absolute';
-    this.sizeInput.style.top = '70px';
-    this.sizeInput.style.left = '250px';
-    document.body.appendChild(this.sizeInput);
-
-    this.sizeInput.addEventListener('input', () => {
-      this.brushSize = parseInt(this.sizeInput.value, 10);
-    });
-
-    // mouse events for drawing
-    this._mouseDownHandler = (ev) => this._onMouseDown(ev);
-    this._mouseMoveHandler = (ev) => this._onMouseMove(ev);
-    this._mouseUpHandler = (ev) => this._onMouseUp(ev);
-
-    window.addEventListener('mousedown', this._mouseDownHandler);
-    window.addEventListener('mousemove', this._mouseMoveHandler);
-    window.addEventListener('mouseup', this._mouseUpHandler);
-  }
-
-  _onMouseDown(ev) {
-    const pos = this._screenToCanvas(ev.clientX, ev.clientY);
-    if (!pos) return;
-    this.currentStroke = {
-      color: this.color,
-      brush: this.brushSize,
-      points: [pos]
-    };
-  }
-
-  _onMouseMove(ev) {
-    if (!this.currentStroke) return;
-    const pos = this._screenToCanvas(ev.clientX, ev.clientY);
-    if (!pos) return;
-    this.currentStroke.points.push(pos);
-    this._drawAll();
-  }
-
-  _onMouseUp(ev) {
-    if (this.currentStroke) {
-      this.strokes.push(this.currentStroke);
-      this.currentStroke = null;
-      this._drawAll();
-    }
-  }
-
-  _drawAll() {
-    this._clearCanvas();
-    for (const stroke of this.strokes) {
-      this._drawStroke(stroke);
-    }
-    if (this.currentStroke) {
-      this._drawStroke(this.currentStroke);
-    }
-    this.texture.needsUpdate = true;
-  }
-
-  _drawStroke(stroke) {
-    this.ctx.strokeStyle = stroke.color;
-    this.ctx.lineWidth = stroke.brush;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
-
-    const pts = stroke.points;
-    this.ctx.beginPath();
-    if (pts.length > 0) {
-      this.ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        this.ctx.lineTo(pts[i].x, pts[i].y);
+    
+      _onMouseUp(event) {
+        if (this.draggedWindow) {
+          this.draggedWindow.isDragging = false;
+          this.draggedWindow = null;
+        }
+      }
+    
+      _setMouseCoords(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+    
+      _getPointOnZPlane(zValue) {
+        const ray = this.raycaster.ray;
+        const t = (zValue - ray.origin.z) / ray.direction.z;
+        if (t < 0) return null;
+        return new THREE.Vector3(
+          ray.origin.x + t * ray.direction.x,
+          ray.origin.y + t * ray.direction.y,
+          zValue
+        );
       }
     }
-    this.ctx.stroke();
-  }
-
-  _clearCanvas() {
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.texture.needsUpdate = true;
-  }
-
-  _screenToCanvas(sx, sy) {
-    // Very naive approach: just check if within 500x500 region
-    if (sx < 0 || sx > 500 || sy < 0 || sy > 500) return null;
-    const cx = (sx / 500) * 512;
-    const cy = (sy / 500) * 512;
-    return { x: cx, y: cy };
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.colorInput);
-    document.body.removeChild(this.sizeInput);
-
-    window.removeEventListener('mousedown', this._mouseDownHandler);
-    window.removeEventListener('mousemove', this._mouseMoveHandler);
-    window.removeEventListener('mouseup', this._mouseUpHandler);
-  }
-}
-
-</details> <details> <summary><strong>musicPlayerWindow.js</strong></summary>
-
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class MusicPlayerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.audio = new Audio(options.src || 'path/to/music.mp3');
-    this.audio.loop = false;
-    this.isPlaying = false;
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.playBtn = document.createElement('button');
-    this.playBtn.textContent = 'Play';
-    this.playBtn.style.position = 'absolute';
-    this.playBtn.style.top = '40px';
-    this.playBtn.style.right = '40px';
-    document.body.appendChild(this.playBtn);
-
-    this.playBtn.addEventListener('click', () => {
-      if (this.isPlaying) {
-        this.pause();
-      } else {
-        this.play();
+    
+    </details> <details> <summary><strong>chatWindow.js</strong></summary>
+    
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ChatWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.messages = [];
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // Input for chat messages
+        this.inputEl = document.createElement('input');
+        this.inputEl.type = 'text';
+        this.inputEl.placeholder = 'Type a message...';
+        this.inputEl.style.position = 'absolute';
+        this.inputEl.style.bottom = '40px';
+        this.inputEl.style.left = '40px';
+        this.inputEl.style.width = '200px';
+        document.body.appendChild(this.inputEl);
+    
+        this.inputEl.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            const text = this.inputEl.value.trim();
+            if (text) {
+              this._sendChatMessage(text);
+            }
+            this.inputEl.value = '';
+          }
+        });
+    
+        // Listen for chat from server
+        if (window.__networkManager) {
+          window.__networkManager.onChatMessage = (msgObj) => {
+            this._onMessageReceived(msgObj);
+          };
+        }
+    
+        this._renderChat();
       }
-    });
-
-    this.volumeSlider = document.createElement('input');
-    this.volumeSlider.type = 'range';
-    this.volumeSlider.min = '0';
-    this.volumeSlider.max = '1';
-    this.volumeSlider.step = '0.01';
-    this.volumeSlider.value = '1.0';
-    this.volumeSlider.style.position = 'absolute';
-    this.volumeSlider.style.top = '70px';
-    this.volumeSlider.style.right = '40px';
-    document.body.appendChild(this.volumeSlider);
-
-    this.volumeSlider.addEventListener('input', () => {
-      this.audio.volume = parseFloat(this.volumeSlider.value);
-    });
-
-    this._renderUI();
-  }
-
-  play() {
-    this.audio.play();
-    this.isPlaying = true;
-    this.playBtn.textContent = 'Pause';
-    this._renderUI();
-  }
-
-  pause() {
-    this.audio.pause();
-    this.isPlaying = false;
-    this.playBtn.textContent = 'Play';
-    this._renderUI();
-  }
-
-  _renderUI() {
-    this.ctx.fillStyle = '#333';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '16px sans-serif';
-    this.ctx.fillText(`Music: ${this.isPlaying ? 'Playing' : 'Paused'}`, 10, 30);
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.playBtn);
-    document.body.removeChild(this.volumeSlider);
-
-    this.audio.pause();
-    this.audio.src = '';
-  }
-}
-
-</details> <details> <summary><strong>modelViewerWindow.js</strong></summary>
-
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-export class ModelViewerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.subScene = new THREE.Scene();
-    this.subCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    this.subCamera.position.set(0, 1, 3);
-
-    const light = new THREE.AmbientLight(0xffffff, 1);
-    this.subScene.add(light);
-
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
-    this.texture = this.renderTarget.texture;
-    this.material.map = this.texture;
-
-    this.loader = new GLTFLoader();
-    if (options.modelUrl) {
-      this._loadModel(options.modelUrl);
-    }
-
-    this.clock = new THREE.Clock();
-    this.model = null;
-
-    this._animateSubScene = this._animateSubScene.bind(this);
-    this._animateSubScene();
-  }
-
-  _loadModel(url) {
-    this.loader.load(
-      url,
-      (gltf) => {
-        this.model = gltf.scene;
-        this.subScene.add(this.model);
-        this.model.position.set(0, 0, 0);
-      },
-      undefined,
-      (err) => {
-        console.error('Model load error:', err);
+    
+      _sendChatMessage(text) {
+        const msgObj = {
+          sender: 'Me',
+          text,
+          timestamp: Date.now()
+        };
+        this.messages.push(msgObj);
+        this._renderChat();
+    
+        if (window.__networkManager) {
+          window.__networkManager.sendChatMessage(msgObj);
+        }
       }
-    );
-  }
-
-  _animateSubScene() {
-    if (this.isClosed) return;
-    requestAnimationFrame(this._animateSubScene);
-
-    const delta = this.clock.getDelta();
-    if (this.model) {
-      this.model.rotation.y += delta;
+    
+      _onMessageReceived(msgObj) {
+        this.messages.push(msgObj);
+        this._renderChat();
+      }
+    
+      _renderChat() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        const lineHeight = 20;
+        const recent = this.messages.slice(-8);
+        for (const m of recent) {
+          const line = `${m.sender}: ${m.text}`;
+          this.ctx.fillText(line, 10, y);
+          y += lineHeight;
+        }
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.inputEl);
+      }
     }
-
-    if (window.__globalThreeRenderer) {
-      window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
-      window.__globalThreeRenderer.render(this.subScene, this.subCamera);
-      window.__globalThreeRenderer.setRenderTarget(null);
+    
+    </details> <details> <summary><strong>whiteboardWindow.js</strong></summary>
+    
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class WhiteboardWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 512;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.strokes = [];
+        this.currentStroke = null;
+        this.color = '#ff0000';
+        this.brushSize = 3;
+    
+        this._clearCanvas();
+    
+        this._createToolUI();
+      }
+    
+      _createToolUI() {
+        // Color
+        this.colorInput = document.createElement('input');
+        this.colorInput.type = 'color';
+        this.colorInput.value = this.color;
+        this.colorInput.style.position = 'absolute';
+        this.colorInput.style.top = '40px';
+        this.colorInput.style.left = '250px';
+        document.body.appendChild(this.colorInput);
+    
+        this.colorInput.addEventListener('input', () => {
+          this.color = this.colorInput.value;
+        });
+    
+        // Brush size
+        this.sizeInput = document.createElement('input');
+        this.sizeInput.type = 'range';
+        this.sizeInput.min = '1';
+        this.sizeInput.max = '10';
+        this.sizeInput.value = String(this.brushSize);
+        this.sizeInput.style.position = 'absolute';
+        this.sizeInput.style.top = '70px';
+        this.sizeInput.style.left = '250px';
+        document.body.appendChild(this.sizeInput);
+    
+        this.sizeInput.addEventListener('input', () => {
+          this.brushSize = parseInt(this.sizeInput.value, 10);
+        });
+    
+        // mouse events for drawing
+        this._mouseDownHandler = (ev) => this._onMouseDown(ev);
+        this._mouseMoveHandler = (ev) => this._onMouseMove(ev);
+        this._mouseUpHandler = (ev) => this._onMouseUp(ev);
+    
+        window.addEventListener('mousedown', this._mouseDownHandler);
+        window.addEventListener('mousemove', this._mouseMoveHandler);
+        window.addEventListener('mouseup', this._mouseUpHandler);
+      }
+    
+      _onMouseDown(ev) {
+        const pos = this._screenToCanvas(ev.clientX, ev.clientY);
+        if (!pos) return;
+        this.currentStroke = {
+          color: this.color,
+          brush: this.brushSize,
+          points: [pos]
+        };
+      }
+    
+      _onMouseMove(ev) {
+        if (!this.currentStroke) return;
+        const pos = this._screenToCanvas(ev.clientX, ev.clientY);
+        if (!pos) return;
+        this.currentStroke.points.push(pos);
+        this._drawAll();
+      }
+    
+      _onMouseUp(ev) {
+        if (this.currentStroke) {
+          this.strokes.push(this.currentStroke);
+          this.currentStroke = null;
+          this._drawAll();
+        }
+      }
+    
+      _drawAll() {
+        this._clearCanvas();
+        for (const stroke of this.strokes) {
+          this._drawStroke(stroke);
+        }
+        if (this.currentStroke) {
+          this._drawStroke(this.currentStroke);
+        }
+        this.texture.needsUpdate = true;
+      }
+    
+      _drawStroke(stroke) {
+        this.ctx.strokeStyle = stroke.color;
+        this.ctx.lineWidth = stroke.brush;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+    
+        const pts = stroke.points;
+        this.ctx.beginPath();
+        if (pts.length > 0) {
+          this.ctx.moveTo(pts[0].x, pts[0].y);
+          for (let i = 1; i < pts.length; i++) {
+            this.ctx.lineTo(pts[i].x, pts[i].y);
+          }
+        }
+        this.ctx.stroke();
+      }
+    
+      _clearCanvas() {
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.texture.needsUpdate = true;
+      }
+    
+      _screenToCanvas(sx, sy) {
+        // Very naive approach: just check if within 500x500 region
+        if (sx < 0 || sx > 500 || sy < 0 || sy > 500) return null;
+        const cx = (sx / 500) * 512;
+        const cy = (sy / 500) * 512;
+        return { x: cx, y: cy };
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.colorInput);
+        document.body.removeChild(this.sizeInput);
+    
+        window.removeEventListener('mousedown', this._mouseDownHandler);
+        window.removeEventListener('mousemove', this._mouseMoveHandler);
+        window.removeEventListener('mouseup', this._mouseUpHandler);
+      }
     }
-  }
-}
-
-</details> <details> <summary><strong>main.js</strong></summary>
-
-import { NetworkManager } from './networkManager.js';
-import { PluginManager } from './pluginManager.js';
-import { WindowManager } from './windowManager.js';
-import { ChatWindow } from './chatWindow.js';
-import { WhiteboardWindow } from './whiteboardWindow.js';
-import { MusicPlayerWindow } from './musicPlayerWindow.js';
-import { ModelViewerWindow } from './modelViewerWindow.js';
-
-function init() {
-  const canvas = document.getElementById('appCanvas');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  // Expose the renderer for ModelViewer subscenes
-  window.__globalThreeRenderer = renderer;
-
-  // A reference cube
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  // Setup managers
-  window.__networkManager = new NetworkManager('ws://localhost:3000');
-  const windowManager = new WindowManager(scene, camera, renderer);
-  const pluginManager = new PluginManager();
-
-  // Register all plugin windows
-  pluginManager.registerPlugin('chat', ChatWindow);
-  pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
-  pluginManager.registerPlugin('music', MusicPlayerWindow);
-  pluginManager.registerPlugin('model', ModelViewerWindow);
-
-  // Create a ChatWindow
-  const chatWin = pluginManager.createWindow('chat', {
-    width: 3,
-    height: 2,
-    color: 0x2222cc,
-    position: new THREE.Vector3(-4, 1, 0),
-    title: 'Chat Window'
-  });
-  chatWin.addToScene(scene);
-  windowManager.windows.push(chatWin);
-
-  // Create a WhiteboardWindow
-  const whiteboardWin = pluginManager.createWindow('whiteboard', {
-    width: 3,
-    height: 3,
-    color: 0x888888,
-    position: new THREE.Vector3(0, 1, 0),
-    title: 'Whiteboard'
-  });
-  whiteboardWin.addToScene(scene);
-  windowManager.windows.push(whiteboardWin);
-
-  // Create a MusicPlayerWindow
-  const musicWin = pluginManager.createWindow('music', {
-    width: 3,
-    height: 2,
-    color: 0xaa3366,
-    position: new THREE.Vector3(-4, -2, 0),
-    title: 'Music Player',
-    src: 'path/to/music.mp3'
-  });
-  musicWin.addToScene(scene);
-  windowManager.windows.push(musicWin);
-
-  // Create a ModelViewerWindow
-  const modelWin = pluginManager.createWindow('model', {
-    width: 3,
-    height: 2,
-    color: 0x444444,
-    position: new THREE.Vector3(3, 1, 0),
-    title: '3D Model',
-    modelUrl: 'models/scene.gltf'
-  });
-  modelWin.addToScene(scene);
-  windowManager.windows.push(modelWin);
-
-  function animate() {
-    requestAnimationFrame(animate);
-    // Rotate the cube
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-init();
-
-</details>
+    
+    </details> <details> <summary><strong>musicPlayerWindow.js</strong></summary>
+    
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class MusicPlayerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.audio = new Audio(options.src || 'path/to/music.mp3');
+        this.audio.loop = false;
+        this.isPlaying = false;
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.playBtn = document.createElement('button');
+        this.playBtn.textContent = 'Play';
+        this.playBtn.style.position = 'absolute';
+        this.playBtn.style.top = '40px';
+        this.playBtn.style.right = '40px';
+        document.body.appendChild(this.playBtn);
+    
+        this.playBtn.addEventListener('click', () => {
+          if (this.isPlaying) {
+            this.pause();
+          } else {
+            this.play();
+          }
+        });
+    
+        this.volumeSlider = document.createElement('input');
+        this.volumeSlider.type = 'range';
+        this.volumeSlider.min = '0';
+        this.volumeSlider.max = '1';
+        this.volumeSlider.step = '0.01';
+        this.volumeSlider.value = '1.0';
+        this.volumeSlider.style.position = 'absolute';
+        this.volumeSlider.style.top = '70px';
+        this.volumeSlider.style.right = '40px';
+        document.body.appendChild(this.volumeSlider);
+    
+        this.volumeSlider.addEventListener('input', () => {
+          this.audio.volume = parseFloat(this.volumeSlider.value);
+        });
+    
+        this._renderUI();
+      }
+    
+      play() {
+        this.audio.play();
+        this.isPlaying = true;
+        this.playBtn.textContent = 'Pause';
+        this._renderUI();
+      }
+    
+      pause() {
+        this.audio.pause();
+        this.isPlaying = false;
+        this.playBtn.textContent = 'Play';
+        this._renderUI();
+      }
+    
+      _renderUI() {
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px sans-serif';
+        this.ctx.fillText(`Music: ${this.isPlaying ? 'Playing' : 'Paused'}`, 10, 30);
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.playBtn);
+        document.body.removeChild(this.volumeSlider);
+    
+        this.audio.pause();
+        this.audio.src = '';
+      }
+    }
+    
+    </details> <details> <summary><strong>modelViewerWindow.js</strong></summary>
+    
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    
+    export class ModelViewerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.subScene = new THREE.Scene();
+        this.subCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        this.subCamera.position.set(0, 1, 3);
+    
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        this.subScene.add(light);
+    
+        this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
+        this.texture = this.renderTarget.texture;
+        this.material.map = this.texture;
+    
+        this.loader = new GLTFLoader();
+        if (options.modelUrl) {
+          this._loadModel(options.modelUrl);
+        }
+    
+        this.clock = new THREE.Clock();
+        this.model = null;
+    
+        this._animateSubScene = this._animateSubScene.bind(this);
+        this._animateSubScene();
+      }
+    
+      _loadModel(url) {
+        this.loader.load(
+          url,
+          (gltf) => {
+            this.model = gltf.scene;
+            this.subScene.add(this.model);
+            this.model.position.set(0, 0, 0);
+          },
+          undefined,
+          (err) => {
+            console.error('Model load error:', err);
+          }
+        );
+      }
+    
+      _animateSubScene() {
+        if (this.isClosed) return;
+        requestAnimationFrame(this._animateSubScene);
+    
+        const delta = this.clock.getDelta();
+        if (this.model) {
+          this.model.rotation.y += delta;
+        }
+    
+        if (window.__globalThreeRenderer) {
+          window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
+          window.__globalThreeRenderer.render(this.subScene, this.subCamera);
+          window.__globalThreeRenderer.setRenderTarget(null);
+        }
+      }
+    }
+    
+    </details> <details> <summary><strong>main.js</strong></summary>
+    
+    import { NetworkManager } from './networkManager.js';
+    import { PluginManager } from './pluginManager.js';
+    import { WindowManager } from './windowManager.js';
+    import { ChatWindow } from './chatWindow.js';
+    import { WhiteboardWindow } from './whiteboardWindow.js';
+    import { MusicPlayerWindow } from './musicPlayerWindow.js';
+    import { ModelViewerWindow } from './modelViewerWindow.js';
+    
+    function init() {
+      const canvas = document.getElementById('appCanvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 5);
+    
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    
+      // Expose the renderer for ModelViewer subscenes
+      window.__globalThreeRenderer = renderer;
+    
+      // A reference cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+    
+      // Setup managers
+      window.__networkManager = new NetworkManager('ws://localhost:3000');
+      const windowManager = new WindowManager(scene, camera, renderer);
+      const pluginManager = new PluginManager();
+    
+      // Register all plugin windows
+      pluginManager.registerPlugin('chat', ChatWindow);
+      pluginManager.registerPlugin('whiteboard', WhiteboardWindow);
+      pluginManager.registerPlugin('music', MusicPlayerWindow);
+      pluginManager.registerPlugin('model', ModelViewerWindow);
+    
+      // Create a ChatWindow
+      const chatWin = pluginManager.createWindow('chat', {
+        width: 3,
+        height: 2,
+        color: 0x2222cc,
+        position: new THREE.Vector3(-4, 1, 0),
+        title: 'Chat Window'
+      });
+      chatWin.addToScene(scene);
+      windowManager.windows.push(chatWin);
+    
+      // Create a WhiteboardWindow
+      const whiteboardWin = pluginManager.createWindow('whiteboard', {
+        width: 3,
+        height: 3,
+        color: 0x888888,
+        position: new THREE.Vector3(0, 1, 0),
+        title: 'Whiteboard'
+      });
+      whiteboardWin.addToScene(scene);
+      windowManager.windows.push(whiteboardWin);
+    
+      // Create a MusicPlayerWindow
+      const musicWin = pluginManager.createWindow('music', {
+        width: 3,
+        height: 2,
+        color: 0xaa3366,
+        position: new THREE.Vector3(-4, -2, 0),
+        title: 'Music Player',
+        src: 'path/to/music.mp3'
+      });
+      musicWin.addToScene(scene);
+      windowManager.windows.push(musicWin);
+    
+      // Create a ModelViewerWindow
+      const modelWin = pluginManager.createWindow('model', {
+        width: 3,
+        height: 2,
+        color: 0x444444,
+        position: new THREE.Vector3(3, 1, 0),
+        title: '3D Model',
+        modelUrl: 'models/scene.gltf'
+      });
+      modelWin.addToScene(scene);
+      windowManager.windows.push(modelWin);
+    
+      function animate() {
+        requestAnimationFrame(animate);
+        // Rotate the cube
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    init();
+    
+    </details>
 
 ## 6. Running the System
 
-    Backend:
+Backend:
 
-cd backend
-npm install
-npm start
+    cd backend
+    npm install
+    npm start
 
     Runs on http://localhost:3000 by default.
 
@@ -6481,78 +6484,78 @@ You can add or remove these as you see fit, and expand the server-side logic if 
 
 If you’re bundling your code, you can do:
 
-npm install xterm
+    npm install xterm
 
 Or load it via CDN if you prefer. For demonstration, we’ll assume local installation and you import it as an ES module.
 
-// frontend/src/terminalWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-// If installed locally:
-// import { Terminal } from 'xterm';
-// import 'xterm/css/xterm.css';
-
-// If using a CDN, see https://github.com/xtermjs/xterm.js for usage.
-
-export class TerminalWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // Basic usage of Xterm
-    this.termContainer = document.createElement('div');
-    this.termContainer.style.width = '600px';
-    this.termContainer.style.height = '300px';
-    this.termContainer.style.overflow = 'hidden';
-    this.termContainer.style.position = 'absolute';
-    this.termContainer.style.top = '120px';
-    this.termContainer.style.left = '40px';
-    document.body.appendChild(this.termContainer);
-
-    // For a minimal local example, we’ll assume you have xterm loaded
-    this.terminal = new Terminal({
-      cols: 80,
-      rows: 16,
-      fontSize: 14,
-      theme: {
-        background: '#000000',
-        foreground: '#00ff00',
-      },
-    });
-    this.terminal.open(this.termContainer);
-    this.terminal.write('Welcome to TerminalWindow\r\n');
-
-    // Optionally wire up server commands if you want multi-user or remote shell
-    // For now, we just echo local input:
-    this.terminal.onData((data) => {
-      // Echo
-      this.terminal.write('\r\nYou typed: ' + data);
-    });
-
-    // A simple plane texture if you want
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-    this._renderLabel();
-  }
-
-  _renderLabel() {
-    this.ctx.fillStyle = '#222';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '16px sans-serif';
-    this.ctx.fillText('TerminalWindow', 10, 30);
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.termContainer);
-  }
-}
+    // frontend/src/terminalWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    // If installed locally:
+    // import { Terminal } from 'xterm';
+    // import 'xterm/css/xterm.css';
+    
+    // If using a CDN, see https://github.com/xtermjs/xterm.js for usage.
+    
+    export class TerminalWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // Basic usage of Xterm
+        this.termContainer = document.createElement('div');
+        this.termContainer.style.width = '600px';
+        this.termContainer.style.height = '300px';
+        this.termContainer.style.overflow = 'hidden';
+        this.termContainer.style.position = 'absolute';
+        this.termContainer.style.top = '120px';
+        this.termContainer.style.left = '40px';
+        document.body.appendChild(this.termContainer);
+    
+        // For a minimal local example, we’ll assume you have xterm loaded
+        this.terminal = new Terminal({
+          cols: 80,
+          rows: 16,
+          fontSize: 14,
+          theme: {
+            background: '#000000',
+            foreground: '#00ff00',
+          },
+        });
+        this.terminal.open(this.termContainer);
+        this.terminal.write('Welcome to TerminalWindow\r\n');
+    
+        // Optionally wire up server commands if you want multi-user or remote shell
+        // For now, we just echo local input:
+        this.terminal.onData((data) => {
+          // Echo
+          this.terminal.write('\r\nYou typed: ' + data);
+        });
+    
+        // A simple plane texture if you want
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+        this._renderLabel();
+      }
+    
+      _renderLabel() {
+        this.ctx.fillStyle = '#222';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px sans-serif';
+        this.ctx.fillText('TerminalWindow', 10, 30);
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.termContainer);
+      }
+    }
 
 Multi-user or remote:
 
@@ -6562,287 +6565,287 @@ Multi-user or remote:
 
 Shows a 3D network graph with nodes and edges. For demonstration, we’ll create a random graph. You can adapt it to show real network data or relationships.
 
-// frontend/src/networkGraphWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class NetworkGraphWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll create small spheres for nodes, lines for edges
-    this.graphScene = new THREE.Scene();
-    this.graphCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    this.graphCamera.position.set(0, 0, 10);
-
-    const light = new THREE.AmbientLight(0xffffff, 1);
-    this.graphScene.add(light);
-
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
-    this.texture = this.renderTarget.texture;
-    this.material.map = this.texture;
-
-    // Create some random nodes/edges
-    this.nodes = [];
-    this.edges = [];
-    this._createRandomGraph(8, 10);
-
-    // Animate subscene
-    this.clock = new THREE.Clock();
-    this._animateGraph = this._animateGraph.bind(this);
-    this._animateGraph();
-  }
-
-  _createRandomGraph(numNodes, numEdges) {
-    const nodeGeo = new THREE.SphereGeometry(0.2, 16, 16);
-    const nodeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-    for (let i=0; i<numNodes; i++) {
-      const node = new THREE.Mesh(nodeGeo, nodeMat.clone());
-      node.position.set(
-        (Math.random()-0.5)*8,
-        (Math.random()-0.5)*8,
-        (Math.random()-0.5)*8
-      );
-      this.graphScene.add(node);
-      this.nodes.push(node);
-    }
-    for (let e=0; e<numEdges; e++) {
-      const nA = this.nodes[Math.floor(Math.random() * numNodes)];
-      const nB = this.nodes[Math.floor(Math.random() * numNodes)];
-      if (nA !== nB) {
-        this.edges.push({ a: nA, b: nB });
+    // frontend/src/networkGraphWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class NetworkGraphWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll create small spheres for nodes, lines for edges
+        this.graphScene = new THREE.Scene();
+        this.graphCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        this.graphCamera.position.set(0, 0, 10);
+    
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        this.graphScene.add(light);
+    
+        this.renderTarget = new THREE.WebGLRenderTarget(512, 512);
+        this.texture = this.renderTarget.texture;
+        this.material.map = this.texture;
+    
+        // Create some random nodes/edges
+        this.nodes = [];
+        this.edges = [];
+        this._createRandomGraph(8, 10);
+    
+        // Animate subscene
+        this.clock = new THREE.Clock();
+        this._animateGraph = this._animateGraph.bind(this);
+        this._animateGraph();
+      }
+    
+      _createRandomGraph(numNodes, numEdges) {
+        const nodeGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        const nodeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    
+        for (let i=0; i<numNodes; i++) {
+          const node = new THREE.Mesh(nodeGeo, nodeMat.clone());
+          node.position.set(
+            (Math.random()-0.5)*8,
+            (Math.random()-0.5)*8,
+            (Math.random()-0.5)*8
+          );
+          this.graphScene.add(node);
+          this.nodes.push(node);
+        }
+        for (let e=0; e<numEdges; e++) {
+          const nA = this.nodes[Math.floor(Math.random() * numNodes)];
+          const nB = this.nodes[Math.floor(Math.random() * numNodes)];
+          if (nA !== nB) {
+            this.edges.push({ a: nA, b: nB });
+          }
+        }
+      }
+    
+      _animateGraph() {
+        if (this.isClosed) return;
+        requestAnimationFrame(this._animateGraph);
+    
+        // Optionally rotate entire graph
+        this.nodes.forEach(n => {
+          n.rotation.x += 0.01;
+          n.rotation.y += 0.01;
+        });
+    
+        // Draw lines
+        // We'll create a line geometry each frame for simplicity. For real usage, do once + update
+        const lines = new THREE.Group();
+        this.edges.forEach(({a, b}) => {
+          const points = [ a.position.clone(), b.position.clone() ];
+          const geo = new THREE.BufferGeometry().setFromPoints(points);
+          const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
+          const line = new THREE.Line(geo, mat);
+          lines.add(line);
+        });
+        // Clear old lines, add new
+        this.graphScene.traverse((obj) => {
+          if (obj.isGroup && obj.name === 'linesGroup') this.graphScene.remove(obj);
+        });
+        lines.name = 'linesGroup';
+        this.graphScene.add(lines);
+    
+        // Render subscene
+        if (window.__globalThreeRenderer) {
+          window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
+          window.__globalThreeRenderer.render(this.graphScene, this.graphCamera);
+          window.__globalThreeRenderer.setRenderTarget(null);
+        }
       }
     }
-  }
-
-  _animateGraph() {
-    if (this.isClosed) return;
-    requestAnimationFrame(this._animateGraph);
-
-    // Optionally rotate entire graph
-    this.nodes.forEach(n => {
-      n.rotation.x += 0.01;
-      n.rotation.y += 0.01;
-    });
-
-    // Draw lines
-    // We'll create a line geometry each frame for simplicity. For real usage, do once + update
-    const lines = new THREE.Group();
-    this.edges.forEach(({a, b}) => {
-      const points = [ a.position.clone(), b.position.clone() ];
-      const geo = new THREE.BufferGeometry().setFromPoints(points);
-      const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
-      const line = new THREE.Line(geo, mat);
-      lines.add(line);
-    });
-    // Clear old lines, add new
-    this.graphScene.traverse((obj) => {
-      if (obj.isGroup && obj.name === 'linesGroup') this.graphScene.remove(obj);
-    });
-    lines.name = 'linesGroup';
-    this.graphScene.add(lines);
-
-    // Render subscene
-    if (window.__globalThreeRenderer) {
-      window.__globalThreeRenderer.setRenderTarget(this.renderTarget);
-      window.__globalThreeRenderer.render(this.graphScene, this.graphCamera);
-      window.__globalThreeRenderer.setRenderTarget(null);
-    }
-  }
-}
 
 ## 3. PerformanceMonitorWindow
 
 Tracks FPS and JS memory usage. You can display these in a CanvasTexture that updates once per second or so.
 
-// frontend/src/performanceMonitorWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class PerformanceMonitorWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.lastTime = performance.now();
-    this.frameCount = 0;
-    this.fps = 0;
-
-    this._updateLoop = this._updateLoop.bind(this);
-    this._updateLoop();
-  }
-
-  _updateLoop() {
-    if (this.isClosed) return;
-    requestAnimationFrame(this._updateLoop);
-
-    // FPS
-    this.frameCount++;
-    const now = performance.now();
-    if (now - this.lastTime >= 1000) {
-      this.fps = (this.frameCount / ((now - this.lastTime) / 1000)).toFixed(1);
-      this.frameCount = 0;
-      this.lastTime = now;
+    // frontend/src/performanceMonitorWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class PerformanceMonitorWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.lastTime = performance.now();
+        this.frameCount = 0;
+        this.fps = 0;
+    
+        this._updateLoop = this._updateLoop.bind(this);
+        this._updateLoop();
+      }
+    
+      _updateLoop() {
+        if (this.isClosed) return;
+        requestAnimationFrame(this._updateLoop);
+    
+        // FPS
+        this.frameCount++;
+        const now = performance.now();
+        if (now - this.lastTime >= 1000) {
+          this.fps = (this.frameCount / ((now - this.lastTime) / 1000)).toFixed(1);
+          this.frameCount = 0;
+          this.lastTime = now;
+        }
+    
+        // JS Heap usage (Chrome only)
+        let memUsage = 'N/A';
+        if (performance.memory) {
+          const usedMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+          const totalMB = (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
+          memUsage = `${usedMB}/${totalMB} MB`;
+        }
+    
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+        this.ctx.fillText(`FPS: ${this.fps}`, 10, 20);
+        this.ctx.fillText(`Mem: ${memUsage}`, 10, 40);
+    
+        this.texture.needsUpdate = true;
+      }
     }
-
-    // JS Heap usage (Chrome only)
-    let memUsage = 'N/A';
-    if (performance.memory) {
-      const usedMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
-      const totalMB = (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
-      memUsage = `${usedMB}/${totalMB} MB`;
-    }
-
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-    this.ctx.fillText(`FPS: ${this.fps}`, 10, 20);
-    this.ctx.fillText(`Mem: ${memUsage}`, 10, 40);
-
-    this.texture.needsUpdate = true;
-  }
-}
 
 ## 4. NotificationWindow (Ephemeral Pop-Ups)
 
 A quick ephemeral window that auto-removes itself after a few seconds or on click:
 
-// frontend/src/notificationWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class NotificationWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.lifetime = options.lifetime || 3000;
-    this.startTime = performance.now();
-    this.message = options.message || 'Notification!';
-    this.clickedToClose = false;
-
-    // Canvas
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this._drawMessage();
-    this._checkLifetime = this._checkLifetime.bind(this);
-    requestAnimationFrame(this._checkLifetime);
-
-    // Optionally, let user close on click
-    this._handleClick = (e) => this._onClick(e);
-    window.addEventListener('mousedown', this._handleClick);
-  }
-
-  _drawMessage() {
-    this.ctx.fillStyle = '#222';
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '16px sans-serif';
-    this.ctx.fillText(this.message, 10, 30);
-    this.texture.needsUpdate = true;
-  }
-
-  _checkLifetime() {
-    if (this.isClosed) return;
-    const now = performance.now();
-    if (this.clickedToClose || now - this.startTime > this.lifetime) {
-      // Remove from scene
-      if (this.sceneRef) {
-        this.removeFromScene(this.sceneRef);
+    // frontend/src/notificationWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class NotificationWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.lifetime = options.lifetime || 3000;
+        this.startTime = performance.now();
+        this.message = options.message || 'Notification!';
+        this.clickedToClose = false;
+    
+        // Canvas
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this._drawMessage();
+        this._checkLifetime = this._checkLifetime.bind(this);
+        requestAnimationFrame(this._checkLifetime);
+    
+        // Optionally, let user close on click
+        this._handleClick = (e) => this._onClick(e);
+        window.addEventListener('mousedown', this._handleClick);
       }
-      return;
+    
+      _drawMessage() {
+        this.ctx.fillStyle = '#222';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px sans-serif';
+        this.ctx.fillText(this.message, 10, 30);
+        this.texture.needsUpdate = true;
+      }
+    
+      _checkLifetime() {
+        if (this.isClosed) return;
+        const now = performance.now();
+        if (this.clickedToClose || now - this.startTime > this.lifetime) {
+          // Remove from scene
+          if (this.sceneRef) {
+            this.removeFromScene(this.sceneRef);
+          }
+          return;
+        }
+        requestAnimationFrame(this._checkLifetime);
+      }
+    
+      addToScene(scene) {
+        super.addToScene(scene);
+        this.sceneRef = scene;
+      }
+    
+      _onClick(e) {
+        // If the user clicks anywhere, let's close
+        this.clickedToClose = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        window.removeEventListener('mousedown', this._handleClick);
+      }
     }
-    requestAnimationFrame(this._checkLifetime);
-  }
-
-  addToScene(scene) {
-    super.addToScene(scene);
-    this.sceneRef = scene;
-  }
-
-  _onClick(e) {
-    // If the user clicks anywhere, let's close
-    this.clickedToClose = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    window.removeEventListener('mousedown', this._handleClick);
-  }
-}
 
 ## 5. Registering & Using in main.js
 
-// main.js snippet
-
-import { TerminalWindow } from './terminalWindow.js';
-import { NetworkGraphWindow } from './networkGraphWindow.js';
-import { PerformanceMonitorWindow } from './performanceMonitorWindow.js';
-import { NotificationWindow } from './notificationWindow.js';
-
-// Inside init()
-  // ...
-  pluginManager.registerPlugin('terminal', TerminalWindow);
-  pluginManager.registerPlugin('netgraph', NetworkGraphWindow);
-  pluginManager.registerPlugin('perfmon', PerformanceMonitorWindow);
-  pluginManager.registerPlugin('notify', NotificationWindow);
-
-  // Create them as desired
-  const termWin = pluginManager.createWindow('terminal', {
-    width: 3,
-    height: 2,
-    color: 0x5544cc,
-    position: new THREE.Vector3(4, -1, 0),
-    title: 'Terminal'
-  });
-  termWin.addToScene(scene);
-  windowManager.windows.push(termWin);
-
-  const netGraphWin = pluginManager.createWindow('netgraph', {
-    width: 3,
-    height: 3,
-    color: 0x226622,
-    position: new THREE.Vector3(-2, -3, 0),
-    title: 'Network Graph'
-  });
-  netGraphWin.addToScene(scene);
-  windowManager.windows.push(netGraphWin);
-
-  const perfMonWin = pluginManager.createWindow('perfmon', {
-    width: 2.5,
-    height: 2,
-    color: 0x222222,
-    position: new THREE.Vector3(2, -3, 0),
-    title: 'Perf Monitor'
-  });
-  perfMonWin.addToScene(scene);
-  windowManager.windows.push(perfMonWin);
-
-  // Example ephemeral notification
-  const notifyWin = pluginManager.createWindow('notify', {
-    width: 2,
-    height: 1,
-    color: 0x992222,
-    position: new THREE.Vector3(2, 3, 0),
-    title: 'Notification',
-    message: 'Hello, this will vanish in 5s!',
-    lifetime: 5000
-  });
-  notifyWin.addToScene(scene);
-  windowManager.windows.push(notifyWin);
+    // main.js snippet
+    
+    import { TerminalWindow } from './terminalWindow.js';
+    import { NetworkGraphWindow } from './networkGraphWindow.js';
+    import { PerformanceMonitorWindow } from './performanceMonitorWindow.js';
+    import { NotificationWindow } from './notificationWindow.js';
+    
+    // Inside init()
+      // ...
+      pluginManager.registerPlugin('terminal', TerminalWindow);
+      pluginManager.registerPlugin('netgraph', NetworkGraphWindow);
+      pluginManager.registerPlugin('perfmon', PerformanceMonitorWindow);
+      pluginManager.registerPlugin('notify', NotificationWindow);
+    
+      // Create them as desired
+      const termWin = pluginManager.createWindow('terminal', {
+        width: 3,
+        height: 2,
+        color: 0x5544cc,
+        position: new THREE.Vector3(4, -1, 0),
+        title: 'Terminal'
+      });
+      termWin.addToScene(scene);
+      windowManager.windows.push(termWin);
+    
+      const netGraphWin = pluginManager.createWindow('netgraph', {
+        width: 3,
+        height: 3,
+        color: 0x226622,
+        position: new THREE.Vector3(-2, -3, 0),
+        title: 'Network Graph'
+      });
+      netGraphWin.addToScene(scene);
+      windowManager.windows.push(netGraphWin);
+    
+      const perfMonWin = pluginManager.createWindow('perfmon', {
+        width: 2.5,
+        height: 2,
+        color: 0x222222,
+        position: new THREE.Vector3(2, -3, 0),
+        title: 'Perf Monitor'
+      });
+      perfMonWin.addToScene(scene);
+      windowManager.windows.push(perfMonWin);
+    
+      // Example ephemeral notification
+      const notifyWin = pluginManager.createWindow('notify', {
+        width: 2,
+        height: 1,
+        color: 0x992222,
+        position: new THREE.Vector3(2, 3, 0),
+        title: 'Notification',
+        message: 'Hello, this will vanish in 5s!',
+        lifetime: 5000
+      });
+      notifyWin.addToScene(scene);
+      windowManager.windows.push(notifyWin);
 
 ## 6. Conclusion
 
@@ -6888,55 +6891,55 @@ All of these windows follow the same pattern:
 
 Plays a video from a given URL. You could also tie this into a WebRTC stream for real-time collaboration.
 
-// frontend/src/videoPlayerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class VideoPlayerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // A <video> element
-    this.videoEl = document.createElement('video');
-    this.videoEl.src = options.videoUrl || 'path/to/video.mp4';
-    this.videoEl.controls = false;
-    this.videoEl.autoplay = false;
-    this.videoEl.loop = false;
-    this.videoEl.muted = true; // avoid echo, can be toggled
-
-    // A basic UI to toggle play/pause
-    this.playBtn = document.createElement('button');
-    this.playBtn.textContent = 'Play';
-    this.playBtn.style.position = 'absolute';
-    this.playBtn.style.top = '100px';
-    this.playBtn.style.right = '120px';
-    document.body.appendChild(this.playBtn);
-
-    this.playBtn.addEventListener('click', () => {
-      if (this.videoEl.paused) {
-        this.videoEl.play();
-        this.playBtn.textContent = 'Pause';
-      } else {
-        this.videoEl.pause();
+    // frontend/src/videoPlayerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class VideoPlayerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // A <video> element
+        this.videoEl = document.createElement('video');
+        this.videoEl.src = options.videoUrl || 'path/to/video.mp4';
+        this.videoEl.controls = false;
+        this.videoEl.autoplay = false;
+        this.videoEl.loop = false;
+        this.videoEl.muted = true; // avoid echo, can be toggled
+    
+        // A basic UI to toggle play/pause
+        this.playBtn = document.createElement('button');
         this.playBtn.textContent = 'Play';
+        this.playBtn.style.position = 'absolute';
+        this.playBtn.style.top = '100px';
+        this.playBtn.style.right = '120px';
+        document.body.appendChild(this.playBtn);
+    
+        this.playBtn.addEventListener('click', () => {
+          if (this.videoEl.paused) {
+            this.videoEl.play();
+            this.playBtn.textContent = 'Pause';
+          } else {
+            this.videoEl.pause();
+            this.playBtn.textContent = 'Play';
+          }
+        });
+    
+        // Convert video into a texture
+        this.videoTexture = new THREE.VideoTexture(this.videoEl);
+        this.videoTexture.minFilter = THREE.LinearFilter;
+        this.material.map = this.videoTexture;
       }
-    });
-
-    // Convert video into a texture
-    this.videoTexture = new THREE.VideoTexture(this.videoEl);
-    this.videoTexture.minFilter = THREE.LinearFilter;
-    this.material.map = this.videoTexture;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.playBtn);
-    // Cleanup video
-    this.videoEl.pause();
-    this.videoEl.src = '';
-    this.videoEl.remove();
-  }
-}
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.playBtn);
+        // Cleanup video
+        this.videoEl.pause();
+        this.videoEl.src = '';
+        this.videoEl.remove();
+      }
+    }
 
 Usage:
 
@@ -6947,104 +6950,104 @@ Usage:
 
 A basic calendar or scheduling window. For demonstration, we’ll draw a simple monthly grid on a <canvas> and allow the user to click days (local only).
 
-// frontend/src/calendarWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class CalendarWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll store a year/month
-    const now = new Date();
-    this.year = options.year || now.getFullYear();
-    this.month = (options.month != null ? options.month : now.getMonth()); // 0-based
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this._drawCalendar();
-    // Optional: add next/prev month buttons
-    this._createUI();
-  }
-
-  _drawCalendar() {
-    this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#000';
-    this.ctx.font = '16px sans-serif';
-
-    // Title
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const title = `${monthNames[this.month]} ${this.year}`;
-    this.ctx.fillText(title, 10, 20);
-
-    // Days of week header
-    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    days.forEach((d, i) => {
-      this.ctx.fillText(d, 10 + i*70, 50);
-    });
-
-    // First day offset
-    const first = new Date(this.year, this.month, 1);
-    const startDay = first.getDay(); // 0=Sunday
-
-    // Number of days in the month
-    const last = new Date(this.year, this.month+1, 0);
-    const numDays = last.getDate();
-
-    let x = startDay, y = 0;
-    for (let day=1; day <= numDays; day++) {
-      const px = 10 + x*70;
-      const py = 70 + y*40;
-      this.ctx.fillText(String(day), px, py);
-      x++;
-      if (x>6) {
-        x=0; y++;
+    // frontend/src/calendarWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class CalendarWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll store a year/month
+        const now = new Date();
+        this.year = options.year || now.getFullYear();
+        this.month = (options.month != null ? options.month : now.getMonth()); // 0-based
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this._drawCalendar();
+        // Optional: add next/prev month buttons
+        this._createUI();
+      }
+    
+      _drawCalendar() {
+        this.ctx.fillStyle = '#fff';
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#000';
+        this.ctx.font = '16px sans-serif';
+    
+        // Title
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const title = `${monthNames[this.month]} ${this.year}`;
+        this.ctx.fillText(title, 10, 20);
+    
+        // Days of week header
+        const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        days.forEach((d, i) => {
+          this.ctx.fillText(d, 10 + i*70, 50);
+        });
+    
+        // First day offset
+        const first = new Date(this.year, this.month, 1);
+        const startDay = first.getDay(); // 0=Sunday
+    
+        // Number of days in the month
+        const last = new Date(this.year, this.month+1, 0);
+        const numDays = last.getDate();
+    
+        let x = startDay, y = 0;
+        for (let day=1; day <= numDays; day++) {
+          const px = 10 + x*70;
+          const py = 70 + y*40;
+          this.ctx.fillText(String(day), px, py);
+          x++;
+          if (x>6) {
+            x=0; y++;
+          }
+        }
+        this.texture.needsUpdate = true;
+      }
+    
+      _createUI() {
+        this.prevBtn = document.createElement('button');
+        this.prevBtn.textContent = 'Prev Month';
+        this.prevBtn.style.position = 'absolute';
+        this.prevBtn.style.top = '140px';
+        this.prevBtn.style.left = '100px';
+        document.body.appendChild(this.prevBtn);
+    
+        this.nextBtn = document.createElement('button');
+        this.nextBtn.textContent = 'Next Month';
+        this.nextBtn.style.position = 'absolute';
+        this.nextBtn.style.top = '140px';
+        this.nextBtn.style.left = '180px';
+        document.body.appendChild(this.nextBtn);
+    
+        this.prevBtn.addEventListener('click', () => {
+          this.month--;
+          if (this.month<0) { this.month=11; this.year--; }
+          this._drawCalendar();
+        });
+    
+        this.nextBtn.addEventListener('click', () => {
+          this.month++;
+          if (this.month>11) { this.month=0; this.year++; }
+          this._drawCalendar();
+        });
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.prevBtn);
+        document.body.removeChild(this.nextBtn);
       }
     }
-    this.texture.needsUpdate = true;
-  }
-
-  _createUI() {
-    this.prevBtn = document.createElement('button');
-    this.prevBtn.textContent = 'Prev Month';
-    this.prevBtn.style.position = 'absolute';
-    this.prevBtn.style.top = '140px';
-    this.prevBtn.style.left = '100px';
-    document.body.appendChild(this.prevBtn);
-
-    this.nextBtn = document.createElement('button');
-    this.nextBtn.textContent = 'Next Month';
-    this.nextBtn.style.position = 'absolute';
-    this.nextBtn.style.top = '140px';
-    this.nextBtn.style.left = '180px';
-    document.body.appendChild(this.nextBtn);
-
-    this.prevBtn.addEventListener('click', () => {
-      this.month--;
-      if (this.month<0) { this.month=11; this.year--; }
-      this._drawCalendar();
-    });
-
-    this.nextBtn.addEventListener('click', () => {
-      this.month++;
-      if (this.month>11) { this.month=0; this.year++; }
-      this._drawCalendar();
-    });
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.prevBtn);
-    document.body.removeChild(this.nextBtn);
-  }
-}
 
 For multi-user scheduling, you’d store events in a DB and broadcast changes.
 
@@ -7052,64 +7055,64 @@ For multi-user scheduling, you’d store events in a DB and broadcast changes.
 
 A Kanban-style board for tasks. This example is local only, but you can see how to drag tasks around columns.
 
-// frontend/src/taskBoardWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class TaskBoardWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.tasks = [
-      { text: 'Do laundry', column: 0 },
-      { text: 'Write code', column: 1 },
-      { text: 'Test app', column: 1 },
-      { text: 'Deploy to server', column: 2 }
-    ];
-    this.columns = ["Todo","In Progress","Done"];
+    // frontend/src/taskBoardWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
     
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this._drawBoard();
-  }
-
-  _drawBoard() {
-    this.ctx.fillStyle = '#eee';
-    this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#000';
-    this.ctx.font = '16px sans-serif';
-
-    // 3 columns
-    const colWidth = this.canvas.width / this.columns.length;
-    for (let i=0; i<this.columns.length; i++) {
-      const x = i*colWidth;
-      this.ctx.strokeRect(x, 0, colWidth, this.canvas.height);
-      this.ctx.fillText(this.columns[i], x+10, 20);
+    export class TaskBoardWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.tasks = [
+          { text: 'Do laundry', column: 0 },
+          { text: 'Write code', column: 1 },
+          { text: 'Test app', column: 1 },
+          { text: 'Deploy to server', column: 2 }
+        ];
+        this.columns = ["Todo","In Progress","Done"];
+        
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this._drawBoard();
+      }
+    
+      _drawBoard() {
+        this.ctx.fillStyle = '#eee';
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#000';
+        this.ctx.font = '16px sans-serif';
+    
+        // 3 columns
+        const colWidth = this.canvas.width / this.columns.length;
+        for (let i=0; i<this.columns.length; i++) {
+          const x = i*colWidth;
+          this.ctx.strokeRect(x, 0, colWidth, this.canvas.height);
+          this.ctx.fillText(this.columns[i], x+10, 20);
+        }
+    
+        // Tasks
+        let positions = [[],[],[]];
+        this.tasks.forEach(task => {
+          positions[task.column].push(task.text);
+        });
+    
+        for (let c=0; c<3; c++) {
+          let py=40;
+          positions[c].forEach(txt => {
+            this.ctx.fillText(txt, c*colWidth+10, py);
+            py += 20;
+          });
+        }
+        this.texture.needsUpdate = true;
+      }
     }
-
-    // Tasks
-    let positions = [[],[],[]];
-    this.tasks.forEach(task => {
-      positions[task.column].push(task.text);
-    });
-
-    for (let c=0; c<3; c++) {
-      let py=40;
-      positions[c].forEach(txt => {
-        this.ctx.fillText(txt, c*colWidth+10, py);
-        py += 20;
-      });
-    }
-    this.texture.needsUpdate = true;
-  }
-}
 
 If you want to drag tasks between columns, you’d add mouse events and recalculate task.column.
 
@@ -7117,169 +7120,169 @@ If you want to drag tasks between columns, you’d add mouse events and recalcul
 
 A minimal text editor using an HTML <textarea>. For fully collaborative editing, you’d broadcast changes in real time (like Google Docs), but here we keep it local:
 
-// frontend/src/collaborativeTextEditorWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class CollaborativeTextEditorWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.textarea = document.createElement('textarea');
-    this.textarea.style.position = 'absolute';
-    this.textarea.style.top = '200px';
-    this.textarea.style.left = '40px';
-    this.textarea.style.width = '300px';
-    this.textarea.style.height = '150px';
-    document.body.appendChild(this.textarea);
-
-    // Basic label on the plane
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-    this._drawLabel();
-
-    // If you want multi-user sync, you'd broadcast changes on 'input'
-    // and apply them on receiving a message from the server, etc.
-  }
-
-  _drawLabel() {
-    this.ctx.fillStyle = '#555';
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = '16px sans-serif';
-    this.ctx.fillText('Text Editor', 10, 30);
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.textarea);
-  }
-}
+    // frontend/src/collaborativeTextEditorWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class CollaborativeTextEditorWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.textarea = document.createElement('textarea');
+        this.textarea.style.position = 'absolute';
+        this.textarea.style.top = '200px';
+        this.textarea.style.left = '40px';
+        this.textarea.style.width = '300px';
+        this.textarea.style.height = '150px';
+        document.body.appendChild(this.textarea);
+    
+        // Basic label on the plane
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+        this._drawLabel();
+    
+        // If you want multi-user sync, you'd broadcast changes on 'input'
+        // and apply them on receiving a message from the server, etc.
+      }
+    
+      _drawLabel() {
+        this.ctx.fillStyle = '#555';
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px sans-serif';
+        this.ctx.fillText('Text Editor', 10, 30);
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.textarea);
+      }
+    }
 
 ## 5. ClockWindow
 
 Displays the current time, optionally for multiple time zones. We’ll update once per second.
 
-// frontend/src/clockWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ClockWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this.timezones = options.timezones || ["local"]; // e.g. ["UTC","America/New_York"]
-    this._tick = this._tick.bind(this);
-    this._tick();
-  }
-
-  _tick() {
-    if (this.isClosed) return;
-    requestAnimationFrame(this._tick);
-
-    this.ctx.fillStyle = '#111';
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 20;
-    for (const tz of this.timezones) {
-      let timeStr;
-      if (tz === 'local') {
-        timeStr = new Date().toLocaleTimeString();
-      } else {
-        // We'll do naive approach for demonstration
-        timeStr = new Date().toLocaleString('en-US', { timeZone: tz });
+    // frontend/src/clockWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ClockWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this.timezones = options.timezones || ["local"]; // e.g. ["UTC","America/New_York"]
+        this._tick = this._tick.bind(this);
+        this._tick();
       }
-      this.ctx.fillText(`${tz}: ${timeStr}`, 10, y);
-      y += 20;
+    
+      _tick() {
+        if (this.isClosed) return;
+        requestAnimationFrame(this._tick);
+    
+        this.ctx.fillStyle = '#111';
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 20;
+        for (const tz of this.timezones) {
+          let timeStr;
+          if (tz === 'local') {
+            timeStr = new Date().toLocaleTimeString();
+          } else {
+            // We'll do naive approach for demonstration
+            timeStr = new Date().toLocaleString('en-US', { timeZone: tz });
+          }
+          this.ctx.fillText(`${tz}: ${timeStr}`, 10, y);
+          y += 20;
+        }
+        this.texture.needsUpdate = true;
+      }
     }
-    this.texture.needsUpdate = true;
-  }
-}
 
 ## 6. Registering & Using in main.js
 
 In your main.js, register these new plugins in pluginManager and create them as needed. For example:
 
-// main.js snippet
-import { VideoPlayerWindow } from './videoPlayerWindow.js';
-import { CalendarWindow } from './calendarWindow.js';
-import { TaskBoardWindow } from './taskBoardWindow.js';
-import { CollaborativeTextEditorWindow } from './collaborativeTextEditorWindow.js';
-import { ClockWindow } from './clockWindow.js';
-
-function init() {
-  // ... existing code (scene, camera, managers) ...
-  
-  // Register new plugin windows
-  pluginManager.registerPlugin('videoPlayer', VideoPlayerWindow);
-  pluginManager.registerPlugin('calendar', CalendarWindow);
-  pluginManager.registerPlugin('tasks', TaskBoardWindow);
-  pluginManager.registerPlugin('textEditor', CollaborativeTextEditorWindow);
-  pluginManager.registerPlugin('clock', ClockWindow);
-
-  // Create a VideoPlayerWindow
-  const videoWin = pluginManager.createWindow('videoPlayer', {
-    position: new THREE.Vector3(5, 2, 0),
-    color: 0x553333,
-    videoUrl: 'path/to/video.mp4'
-  });
-  videoWin.addToScene(scene);
-  windowManager.windows.push(videoWin);
-
-  // Create a CalendarWindow
-  const calendarWin = pluginManager.createWindow('calendar', {
-    position: new THREE.Vector3(5, -1, 0),
-    color: 0x557755,
-    year: 2024,
-    month: 0 // January
-  });
-  calendarWin.addToScene(scene);
-  windowManager.windows.push(calendarWin);
-
-  // Create a TaskBoardWindow
-  const tasksWin = pluginManager.createWindow('tasks', {
-    position: new THREE.Vector3(-6, 0, 0),
-    color: 0x777777
-  });
-  tasksWin.addToScene(scene);
-  windowManager.windows.push(tasksWin);
-
-  // Create a CollaborativeTextEditorWindow
-  const editorWin = pluginManager.createWindow('textEditor', {
-    position: new THREE.Vector3(-2, -3, 0),
-    color: 0x333355
-  });
-  editorWin.addToScene(scene);
-  windowManager.windows.push(editorWin);
-
-  // Create a ClockWindow
-  const clockWin = pluginManager.createWindow('clock', {
-    position: new THREE.Vector3(7, 3, 0),
-    color: 0x333333,
-    timezones: ["local","UTC","America/New_York"]
-  });
-  clockWin.addToScene(scene);
-  windowManager.windows.push(clockWin);
-
-  // ... rest of init code ...
-}
+    // main.js snippet
+    import { VideoPlayerWindow } from './videoPlayerWindow.js';
+    import { CalendarWindow } from './calendarWindow.js';
+    import { TaskBoardWindow } from './taskBoardWindow.js';
+    import { CollaborativeTextEditorWindow } from './collaborativeTextEditorWindow.js';
+    import { ClockWindow } from './clockWindow.js';
+    
+    function init() {
+      // ... existing code (scene, camera, managers) ...
+      
+      // Register new plugin windows
+      pluginManager.registerPlugin('videoPlayer', VideoPlayerWindow);
+      pluginManager.registerPlugin('calendar', CalendarWindow);
+      pluginManager.registerPlugin('tasks', TaskBoardWindow);
+      pluginManager.registerPlugin('textEditor', CollaborativeTextEditorWindow);
+      pluginManager.registerPlugin('clock', ClockWindow);
+    
+      // Create a VideoPlayerWindow
+      const videoWin = pluginManager.createWindow('videoPlayer', {
+        position: new THREE.Vector3(5, 2, 0),
+        color: 0x553333,
+        videoUrl: 'path/to/video.mp4'
+      });
+      videoWin.addToScene(scene);
+      windowManager.windows.push(videoWin);
+    
+      // Create a CalendarWindow
+      const calendarWin = pluginManager.createWindow('calendar', {
+        position: new THREE.Vector3(5, -1, 0),
+        color: 0x557755,
+        year: 2024,
+        month: 0 // January
+      });
+      calendarWin.addToScene(scene);
+      windowManager.windows.push(calendarWin);
+    
+      // Create a TaskBoardWindow
+      const tasksWin = pluginManager.createWindow('tasks', {
+        position: new THREE.Vector3(-6, 0, 0),
+        color: 0x777777
+      });
+      tasksWin.addToScene(scene);
+      windowManager.windows.push(tasksWin);
+    
+      // Create a CollaborativeTextEditorWindow
+      const editorWin = pluginManager.createWindow('textEditor', {
+        position: new THREE.Vector3(-2, -3, 0),
+        color: 0x333355
+      });
+      editorWin.addToScene(scene);
+      windowManager.windows.push(editorWin);
+    
+      // Create a ClockWindow
+      const clockWin = pluginManager.createWindow('clock', {
+        position: new THREE.Vector3(7, 3, 0),
+        color: 0x333333,
+        timezones: ["local","UTC","America/New_York"]
+      });
+      clockWin.addToScene(scene);
+      windowManager.windows.push(clockWin);
+    
+      // ... rest of init code ...
+    }
 
 ## 7. Summary & Next Steps
 
@@ -7330,75 +7333,75 @@ Each new window is a separate plugin class extending Window3D. You can register 
 
 A window that displays real-time stock/crypto prices or simulated quotes. In production, you’d fetch data from an API or a WebSocket feed. Below, we simulate random data.
 
-// frontend/src/stockTickerWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class StockTickerWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // We'll store some “symbols”
-    this.symbols = options.symbols || ['AAPL', 'TSLA', 'BTC-USD', 'ETH-USD'];
-    this.prices = {};
-
-    // Create a canvas to draw each symbol price
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // If you had a real feed, you'd connect here.
-    // We'll simulate random price updates
-    this._simulatePrices();
-    this._drawTicker();
-
-    // setInterval to update every 2s
-    this.interval = setInterval(() => {
-      this._simulatePrices();
-      this._drawTicker();
-    }, 2000);
-  }
-
-  _simulatePrices() {
-    this.symbols.forEach(sym => {
-      // If we don't have a price, initialize randomly
-      if (!this.prices[sym]) {
-        this.prices[sym] = 100 + Math.random()*500;
-      } else {
-        // random small change
-        const change = (Math.random()-0.5)*5;
-        this.prices[sym] += change;
+    // frontend/src/stockTickerWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class StockTickerWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // We'll store some “symbols”
+        this.symbols = options.symbols || ['AAPL', 'TSLA', 'BTC-USD', 'ETH-USD'];
+        this.prices = {};
+    
+        // Create a canvas to draw each symbol price
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // If you had a real feed, you'd connect here.
+        // We'll simulate random price updates
+        this._simulatePrices();
+        this._drawTicker();
+    
+        // setInterval to update every 2s
+        this.interval = setInterval(() => {
+          this._simulatePrices();
+          this._drawTicker();
+        }, 2000);
       }
-    });
-  }
-
-  _drawTicker() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '16px monospace';
-
-    let y = 30;
-    for (const sym of this.symbols) {
-      const price = this.prices[sym].toFixed(2);
-      const line = `${sym}: $${price}`;
-      this.ctx.fillText(line, 10, y);
-      y += 24;
+    
+      _simulatePrices() {
+        this.symbols.forEach(sym => {
+          // If we don't have a price, initialize randomly
+          if (!this.prices[sym]) {
+            this.prices[sym] = 100 + Math.random()*500;
+          } else {
+            // random small change
+            const change = (Math.random()-0.5)*5;
+            this.prices[sym] += change;
+          }
+        });
+      }
+    
+      _drawTicker() {
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '16px monospace';
+    
+        let y = 30;
+        for (const sym of this.symbols) {
+          const price = this.prices[sym].toFixed(2);
+          const line = `${sym}: $${price}`;
+          this.ctx.fillText(line, 10, y);
+          y += 24;
+        }
+    
+        this.texture.needsUpdate = true;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        clearInterval(this.interval);
+      }
     }
-
-    this.texture.needsUpdate = true;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    clearInterval(this.interval);
-  }
-}
 
 Real-time data: You’d replace _simulatePrices() with an actual data feed (e.g. Yahoo Finance API, or a crypto WebSocket).
 
@@ -7406,143 +7409,143 @@ Real-time data: You’d replace _simulatePrices() with an actual data feed (e.g.
 
 Cycles through a set of images. Could be local or remote URLs. We’ll create a “Next” and “Prev” button to navigate.
 
-// frontend/src/imageGalleryWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class ImageGalleryWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    // List of image URLs
-    this.images = options.images || [
-      'images/pic1.jpg',
-      'images/pic2.jpg',
-      'images/pic3.jpg'
-    ];
-    this.currentIndex = 0;
-
-    // We'll load them onto a <img> and then draw that to a canvas
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // HTML controls
-    this.prevBtn = document.createElement('button');
-    this.prevBtn.textContent = 'Prev';
-    this.prevBtn.style.position = 'absolute';
-    this.prevBtn.style.top = '80px';
-    this.prevBtn.style.left = '100px';
-    document.body.appendChild(this.prevBtn);
-
-    this.nextBtn = document.createElement('button');
-    this.nextBtn.textContent = 'Next';
-    this.nextBtn.style.position = 'absolute';
-    this.nextBtn.style.top = '80px';
-    this.nextBtn.style.left = '160px';
-    document.body.appendChild(this.nextBtn);
-
-    this.prevBtn.addEventListener('click', () => {
-      this.currentIndex--;
-      if (this.currentIndex < 0) this.currentIndex = this.images.length-1;
-      this._drawImage();
-    });
-    this.nextBtn.addEventListener('click', () => {
-      this.currentIndex++;
-      if (this.currentIndex >= this.images.length) this.currentIndex = 0;
-      this._drawImage();
-    });
-
-    this._drawImage();
-  }
-
-  _drawImage() {
-    const url = this.images[this.currentIndex];
-    const imgEl = new Image();
-    imgEl.onload = () => {
-      this.ctx.fillStyle = '#000';
-      this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-      // scale to fit
-      const aspectCanvas = this.canvas.width / this.canvas.height;
-      const aspectImg = imgEl.width / imgEl.height;
-      let drawW = this.canvas.width;
-      let drawH = this.canvas.height;
-      if (aspectImg > aspectCanvas) {
-        // wider than canvas
-        drawH = Math.floor(drawW / aspectImg);
-      } else {
-        // taller than canvas
-        drawW = Math.floor(drawH * aspectImg);
+    // frontend/src/imageGalleryWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class ImageGalleryWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        // List of image URLs
+        this.images = options.images || [
+          'images/pic1.jpg',
+          'images/pic2.jpg',
+          'images/pic3.jpg'
+        ];
+        this.currentIndex = 0;
+    
+        // We'll load them onto a <img> and then draw that to a canvas
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // HTML controls
+        this.prevBtn = document.createElement('button');
+        this.prevBtn.textContent = 'Prev';
+        this.prevBtn.style.position = 'absolute';
+        this.prevBtn.style.top = '80px';
+        this.prevBtn.style.left = '100px';
+        document.body.appendChild(this.prevBtn);
+    
+        this.nextBtn = document.createElement('button');
+        this.nextBtn.textContent = 'Next';
+        this.nextBtn.style.position = 'absolute';
+        this.nextBtn.style.top = '80px';
+        this.nextBtn.style.left = '160px';
+        document.body.appendChild(this.nextBtn);
+    
+        this.prevBtn.addEventListener('click', () => {
+          this.currentIndex--;
+          if (this.currentIndex < 0) this.currentIndex = this.images.length-1;
+          this._drawImage();
+        });
+        this.nextBtn.addEventListener('click', () => {
+          this.currentIndex++;
+          if (this.currentIndex >= this.images.length) this.currentIndex = 0;
+          this._drawImage();
+        });
+    
+        this._drawImage();
       }
-      const offsetX = (this.canvas.width - drawW)/2;
-      const offsetY = (this.canvas.height - drawH)/2;
-      this.ctx.drawImage(imgEl, offsetX, offsetY, drawW, drawH);
-      this.texture.needsUpdate = true;
-    };
-    imgEl.src = url;
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.prevBtn);
-    document.body.removeChild(this.nextBtn);
-  }
-}
+    
+      _drawImage() {
+        const url = this.images[this.currentIndex];
+        const imgEl = new Image();
+        imgEl.onload = () => {
+          this.ctx.fillStyle = '#000';
+          this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+          // scale to fit
+          const aspectCanvas = this.canvas.width / this.canvas.height;
+          const aspectImg = imgEl.width / imgEl.height;
+          let drawW = this.canvas.width;
+          let drawH = this.canvas.height;
+          if (aspectImg > aspectCanvas) {
+            // wider than canvas
+            drawH = Math.floor(drawW / aspectImg);
+          } else {
+            // taller than canvas
+            drawW = Math.floor(drawH * aspectImg);
+          }
+          const offsetX = (this.canvas.width - drawW)/2;
+          const offsetY = (this.canvas.height - drawH)/2;
+          this.ctx.drawImage(imgEl, offsetX, offsetY, drawW, drawH);
+          this.texture.needsUpdate = true;
+        };
+        imgEl.src = url;
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.prevBtn);
+        document.body.removeChild(this.nextBtn);
+      }
+    }
 
 ## 3. CodeSnippetWindow
 
 A window that shows syntax-highlighted code. We’ll rely on a syntax highlighter like highlight.js. If you want a more advanced approach, you could embed an actual code editor (like Monaco Editor) in an overlay.
 
-// frontend/src/codeSnippetWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-// If you're bundling highlight.js, e.g. `npm install highlight.js`
-// import hljs from 'highlight.js/lib/core';
-// import javascript from 'highlight.js/lib/languages/javascript';
-// hljs.registerLanguage('javascript', javascript);
-
-export class CodeSnippetWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.language = options.language || 'javascript';
-    this.code = options.code || `console.log('Hello World');`;
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 512;
-    this.canvas.height = 256;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    this._renderCode();
-  }
-
-  _renderCode() {
-    // For demonstration, let's pretend we have highlight.js
-    // let highlighted = hljs.highlight(this.language, this.code).value;
-    // We'll do a simpler approach: just draw the raw code in green
-    this.ctx.fillStyle = '#111';
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-
-    this.ctx.fillStyle = '#0f0';
-    this.ctx.font = '14px monospace';
-
-    const lines = this.code.split('\n');
-    let y = 20;
-    for (const line of lines) {
-      this.ctx.fillText(line, 10, y);
-      y += 18;
-      if (y>this.canvas.height-10) break;
+    // frontend/src/codeSnippetWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    // If you're bundling highlight.js, e.g. `npm install highlight.js`
+    // import hljs from 'highlight.js/lib/core';
+    // import javascript from 'highlight.js/lib/languages/javascript';
+    // hljs.registerLanguage('javascript', javascript);
+    
+    export class CodeSnippetWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.language = options.language || 'javascript';
+        this.code = options.code || `console.log('Hello World');`;
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 512;
+        this.canvas.height = 256;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        this._renderCode();
+      }
+    
+      _renderCode() {
+        // For demonstration, let's pretend we have highlight.js
+        // let highlighted = hljs.highlight(this.language, this.code).value;
+        // We'll do a simpler approach: just draw the raw code in green
+        this.ctx.fillStyle = '#111';
+        this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+    
+        this.ctx.fillStyle = '#0f0';
+        this.ctx.font = '14px monospace';
+    
+        const lines = this.code.split('\n');
+        let y = 20;
+        for (const line of lines) {
+          this.ctx.fillText(line, 10, y);
+          y += 18;
+          if (y>this.canvas.height-10) break;
+        }
+        this.texture.needsUpdate = true;
+      }
     }
-    this.texture.needsUpdate = true;
-  }
-}
 
 Usage:
 
@@ -7562,88 +7565,88 @@ Below is a conceptual plugin that either:
     If options.mode === 'share', tries to capture your screen.
     If options.mode === 'view', it waits for a remote stream from the server or peer.
 
-// frontend/src/remoteDesktopWindow.js
-import { Window3D } from './windowManager.js';
-import * as THREE from 'three';
-
-export class RemoteDesktopWindow extends Window3D {
-  constructor(options) {
-    super(options);
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = 256;
-    this.canvas.height = 128;
-    this.ctx = this.canvas.getContext('2d');
-
-    this.texture = new THREE.CanvasTexture(this.canvas);
-    this.material.map = this.texture;
-
-    // We'll create a <video> to show the remote or local screen feed
-    this.videoEl = document.createElement('video');
-    this.videoEl.autoplay = true;
-    this.videoEl.controls = false;
-    this.videoEl.style.display = 'none';
-    document.body.appendChild(this.videoEl);
-
-    this.peerConnection = null; // WebRTC RTCPeerConnection
-    this.mode = options.mode || 'view'; // 'share' or 'view'
-
-    this._setupUI();
-    this._renderLoop = this._renderLoop.bind(this);
-    this._renderLoop();
-  }
-
-  async _setupUI() {
-    if (this.mode === 'share') {
-      // Attempt to capture display
-      try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        this.videoEl.srcObject = stream;
-
-        // Then you'd create an RTCPeerConnection, add the stream, etc.
-        // For local demonstration, we just show it ourselves
-      } catch(err) {
-        console.error('Failed to get display media:', err);
+    // frontend/src/remoteDesktopWindow.js
+    import { Window3D } from './windowManager.js';
+    import * as THREE from 'three';
+    
+    export class RemoteDesktopWindow extends Window3D {
+      constructor(options) {
+        super(options);
+    
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 256;
+        this.canvas.height = 128;
+        this.ctx = this.canvas.getContext('2d');
+    
+        this.texture = new THREE.CanvasTexture(this.canvas);
+        this.material.map = this.texture;
+    
+        // We'll create a <video> to show the remote or local screen feed
+        this.videoEl = document.createElement('video');
+        this.videoEl.autoplay = true;
+        this.videoEl.controls = false;
+        this.videoEl.style.display = 'none';
+        document.body.appendChild(this.videoEl);
+    
+        this.peerConnection = null; // WebRTC RTCPeerConnection
+        this.mode = options.mode || 'view'; // 'share' or 'view'
+    
+        this._setupUI();
+        this._renderLoop = this._renderLoop.bind(this);
+        this._renderLoop();
       }
-    } else {
-      // 'view' mode: we wait for a remote stream from a peer
-      // In a real system, you'd do signaling, etc.
-    }
-  }
-
-  _renderLoop() {
-    if (this.isClosed) return;
-    requestAnimationFrame(this._renderLoop);
-
-    // draw the video onto the canvas
-    const vid = this.videoEl;
-    if (vid.readyState >= vid.HAVE_CURRENT_DATA) {
-      this.ctx.fillStyle = '#000';
-      this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
-
-      // Fit the video
-      const aspectCanvas = this.canvas.width / this.canvas.height;
-      const aspectVideo = vid.videoWidth / vid.videoHeight;
-      let drawW = this.canvas.width;
-      let drawH = this.canvas.height;
-      if (aspectVideo > aspectCanvas) {
-        drawH = Math.floor(drawW / aspectVideo);
-      } else {
-        drawW = Math.floor(drawH * aspectVideo);
+    
+      async _setupUI() {
+        if (this.mode === 'share') {
+          // Attempt to capture display
+          try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            this.videoEl.srcObject = stream;
+    
+            // Then you'd create an RTCPeerConnection, add the stream, etc.
+            // For local demonstration, we just show it ourselves
+          } catch(err) {
+            console.error('Failed to get display media:', err);
+          }
+        } else {
+          // 'view' mode: we wait for a remote stream from a peer
+          // In a real system, you'd do signaling, etc.
+        }
       }
-      const offsetX = (this.canvas.width - drawW)/2;
-      const offsetY = (this.canvas.height - drawH)/2;
-      this.ctx.drawImage(vid, offsetX, offsetY, drawW, drawH);
-      this.texture.needsUpdate = true;
+    
+      _renderLoop() {
+        if (this.isClosed) return;
+        requestAnimationFrame(this._renderLoop);
+    
+        // draw the video onto the canvas
+        const vid = this.videoEl;
+        if (vid.readyState >= vid.HAVE_CURRENT_DATA) {
+          this.ctx.fillStyle = '#000';
+          this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+    
+          // Fit the video
+          const aspectCanvas = this.canvas.width / this.canvas.height;
+          const aspectVideo = vid.videoWidth / vid.videoHeight;
+          let drawW = this.canvas.width;
+          let drawH = this.canvas.height;
+          if (aspectVideo > aspectCanvas) {
+            drawH = Math.floor(drawW / aspectVideo);
+          } else {
+            drawW = Math.floor(drawH * aspectVideo);
+          }
+          const offsetX = (this.canvas.width - drawW)/2;
+          const offsetY = (this.canvas.height - drawH)/2;
+          this.ctx.drawImage(vid, offsetX, offsetY, drawW, drawH);
+          this.texture.needsUpdate = true;
+        }
+      }
+    
+      removeFromScene(scene) {
+        super.removeFromScene(scene);
+        document.body.removeChild(this.videoEl);
+        // if we had a real peer connection, we'd close it
+      }
     }
-  }
-
-  removeFromScene(scene) {
-    super.removeFromScene(scene);
-    document.body.removeChild(this.videoEl);
-    // if we had a real peer connection, we'd close it
-  }
-}
 
 Implementation notes:
 
@@ -7655,52 +7658,52 @@ Implementation notes:
 
 Finally, register and create them:
 
-// main.js snippet
-import { StockTickerWindow } from './stockTickerWindow.js';
-import { ImageGalleryWindow } from './imageGalleryWindow.js';
-import { CodeSnippetWindow } from './codeSnippetWindow.js';
-import { RemoteDesktopWindow } from './remoteDesktopWindow.js';
-
-function init() {
-  // ... your scene, camera, managers, etc.
-
-  // pluginManager.registerPlugin('stockTicker', StockTickerWindow);
-  // pluginManager.registerPlugin('imageGallery', ImageGalleryWindow);
-  // pluginManager.registerPlugin('codeSnippet', CodeSnippetWindow);
-  // pluginManager.registerPlugin('remoteDesktop', RemoteDesktopWindow);
-
-  // Example usage:
-  const tickerWin = pluginManager.createWindow('stockTicker', {
-    position: new THREE.Vector3(2, 4, 0),
-    symbols: ['AAPL','GOOG','BTC-USD','ETH-USD']
-  });
-  tickerWin.addToScene(scene);
-  windowManager.windows.push(tickerWin);
-
-  const galleryWin = pluginManager.createWindow('imageGallery', {
-    position: new THREE.Vector3(-5, 4, 0),
-    images: ['images/1.jpg','images/2.jpg','images/3.jpg']
-  });
-  galleryWin.addToScene(scene);
-  windowManager.windows.push(galleryWin);
-
-  const codeWin = pluginManager.createWindow('codeSnippet', {
-    position: new THREE.Vector3(0, -4, 0),
-    language: 'javascript',
-    code: `function greet(name) {\n  console.log("Hello, " + name);\n}\ngreet("World");`
-  });
-  codeWin.addToScene(scene);
-  windowManager.windows.push(codeWin);
-
-  const remoteWin = pluginManager.createWindow('remoteDesktop', {
-    position: new THREE.Vector3(5, -4, 0),
-    mode: 'share'  // or 'view'
-  });
-  remoteWin.addToScene(scene);
-  windowManager.windows.push(remoteWin);
-
-  // ... rest of your code ...
-}
+    // main.js snippet
+    import { StockTickerWindow } from './stockTickerWindow.js';
+    import { ImageGalleryWindow } from './imageGalleryWindow.js';
+    import { CodeSnippetWindow } from './codeSnippetWindow.js';
+    import { RemoteDesktopWindow } from './remoteDesktopWindow.js';
+    
+    function init() {
+      // ... your scene, camera, managers, etc.
+    
+      // pluginManager.registerPlugin('stockTicker', StockTickerWindow);
+      // pluginManager.registerPlugin('imageGallery', ImageGalleryWindow);
+      // pluginManager.registerPlugin('codeSnippet', CodeSnippetWindow);
+      // pluginManager.registerPlugin('remoteDesktop', RemoteDesktopWindow);
+    
+      // Example usage:
+      const tickerWin = pluginManager.createWindow('stockTicker', {
+        position: new THREE.Vector3(2, 4, 0),
+        symbols: ['AAPL','GOOG','BTC-USD','ETH-USD']
+      });
+      tickerWin.addToScene(scene);
+      windowManager.windows.push(tickerWin);
+    
+      const galleryWin = pluginManager.createWindow('imageGallery', {
+        position: new THREE.Vector3(-5, 4, 0),
+        images: ['images/1.jpg','images/2.jpg','images/3.jpg']
+      });
+      galleryWin.addToScene(scene);
+      windowManager.windows.push(galleryWin);
+    
+      const codeWin = pluginManager.createWindow('codeSnippet', {
+        position: new THREE.Vector3(0, -4, 0),
+        language: 'javascript',
+        code: `function greet(name) {\n  console.log("Hello, " + name);\n}\ngreet("World");`
+      });
+      codeWin.addToScene(scene);
+      windowManager.windows.push(codeWin);
+    
+      const remoteWin = pluginManager.createWindow('remoteDesktop', {
+        position: new THREE.Vector3(5, -4, 0),
+        mode: 'share'  // or 'view'
+      });
+      remoteWin.addToScene(scene);
+      windowManager.windows.push(remoteWin);
+    
+      // ... rest of your code ...
+    }
 
 Summary
 
@@ -7740,64 +7743,64 @@ We'll discuss:
 In production, you might have a JWT or session-based system. For a simple demo, we can store roles in memory for each WebSocket connection.
 ### 1.1.1 Server-Side Example
 
-// backend/server.js (partial, adding roles)
-
-const { WebSocketServer } = require('ws');
-// ...
-
-// We'll assume we have a simple map of userId -> role, or pass it via query param
-// In real usage, you'd do proper auth, e.g., JWT verifying user role.
-
-server.on('upgrade', (req, socket, head) => {
-  // Suppose we read a "role" from query string for demonstration
-  // e.g.: ws://localhost:3000/?role=admin
-  const params = new URLSearchParams(req.url.replace('/?', ''));
-  const userRole = params.get('role') || 'user';
-
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    ws.userRole = userRole; // store on ws object
-    wss.emit('connection', ws, req);
-  });
-});
-
-wss.on('connection', (ws) => {
-  clients.add(ws);
-
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-
-      // If we require an admin role for certain messages:
-      if (parsed.type === 'MUSIC_SYNC') {
-        if (ws.userRole !== 'admin') {
-          // ignore or send error
-          return;
+    // backend/server.js (partial, adding roles)
+    
+    const { WebSocketServer } = require('ws');
+    // ...
+    
+    // We'll assume we have a simple map of userId -> role, or pass it via query param
+    // In real usage, you'd do proper auth, e.g., JWT verifying user role.
+    
+    server.on('upgrade', (req, socket, head) => {
+      // Suppose we read a "role" from query string for demonstration
+      // e.g.: ws://localhost:3000/?role=admin
+      const params = new URLSearchParams(req.url.replace('/?', ''));
+      const userRole = params.get('role') || 'user';
+    
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        ws.userRole = userRole; // store on ws object
+        wss.emit('connection', ws, req);
+      });
+    });
+    
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+    
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+    
+          // If we require an admin role for certain messages:
+          if (parsed.type === 'MUSIC_SYNC') {
+            if (ws.userRole !== 'admin') {
+              // ignore or send error
+              return;
+            }
+            // otherwise broadcast
+            broadcastToAll(parsed, ws);
+          } 
+          // Chat messages can be for all
+          else if (parsed.type === 'CHAT_MSG') {
+            broadcastToAll(parsed, ws);
+          }
+          // ... handle other plugin events ...
+        } catch (err) {
+          console.error('Message parse error:', err);
         }
-        // otherwise broadcast
-        broadcastToAll(parsed, ws);
-      } 
-      // Chat messages can be for all
-      else if (parsed.type === 'CHAT_MSG') {
-        broadcastToAll(parsed, ws);
-      }
-      // ... handle other plugin events ...
-    } catch (err) {
-      console.error('Message parse error:', err);
-    }
-  });
-});
+      });
+    });
 
 ### 1.1.2 Client-Side Role Declaration
 
 When connecting to the server, you might do:
 
-// networkManager.js
-constructor(serverUrl, role='user') {
-  // e.g. ws://localhost:3000/?role=admin
-  const fullUrl = `${serverUrl}?role=${role}`;
-  this.socket = new WebSocket(fullUrl);
-  // ...
-}
+    // networkManager.js
+    constructor(serverUrl, role='user') {
+      // e.g. ws://localhost:3000/?role=admin
+      const fullUrl = `${serverUrl}?role=${role}`;
+      this.socket = new WebSocket(fullUrl);
+      // ...
+    }
 
 This is obviously just a demo; a malicious user can still connect with ?role=admin. In a real system, you'd verify tokens or have your server do a real authentication check (JWT, OAuth, etc.).
 
@@ -7805,21 +7808,21 @@ This is obviously just a demo; a malicious user can still connect with ?role=adm
 
 On the client side, you can also hide or disable certain plugin windows if the user is not an admin or lacks certain privileges. For instance:
 
-// main.js snippet
-function init() {
-  // Suppose the user’s role is known from a login flow
-  const userRole = 'admin'; // or 'viewer'
-  window.__networkManager = new NetworkManager('ws://localhost:3000', userRole);
-
-  if (userRole === 'admin') {
-    // Create a MusicPlayerWindow or Whiteboard with special powers
-    const musicWin = pluginManager.createWindow('music', {...});
-    musicWin.addToScene(scene);
-    windowManager.windows.push(musicWin);
-  } else {
-    // Possibly hide the music plugin for normal users
-  }
-}
+    // main.js snippet
+    function init() {
+      // Suppose the user’s role is known from a login flow
+      const userRole = 'admin'; // or 'viewer'
+      window.__networkManager = new NetworkManager('ws://localhost:3000', userRole);
+    
+      if (userRole === 'admin') {
+        // Create a MusicPlayerWindow or Whiteboard with special powers
+        const musicWin = pluginManager.createWindow('music', {...});
+        musicWin.addToScene(scene);
+        windowManager.windows.push(musicWin);
+      } else {
+        // Possibly hide the music plugin for normal users
+      }
+    }
 
 Important: Client checks alone are not enough; you must also enforce on the server side. Otherwise, a user can modify client code and still attempt to control the music.
 
@@ -7841,31 +7844,31 @@ We have partially demonstrated this with CHAT_MSG. Let's formalize a generic app
 
 ## 2.1 Server Handling Multiple Message Types
 
-// backend/server.js (expanded example)
-wss.on('connection', (ws) => {
-  clients.add(ws);
-
-  ws.on('message', (data) => {
-    try {
-      const parsed = JSON.parse(data);
-      switch (parsed.type) {
-        case 'CHAT_MSG':
-        case 'WHITEBOARD_STROKE':
-        case 'MUSIC_SYNC':
-        case 'MODEL_TRANSFORM':
-        case 'CODE_UPDATE':
-          // Possibly do role checks here
-          // Then broadcast or store in DB
-          broadcastToAll(parsed, ws);
-          break;
-        default:
-          console.log('Unknown message type', parsed.type);
-      }
-    } catch (err) {
-      console.error('Message parse error:', err);
-    }
-  });
-});
+    // backend/server.js (expanded example)
+    wss.on('connection', (ws) => {
+      clients.add(ws);
+    
+      ws.on('message', (data) => {
+        try {
+          const parsed = JSON.parse(data);
+          switch (parsed.type) {
+            case 'CHAT_MSG':
+            case 'WHITEBOARD_STROKE':
+            case 'MUSIC_SYNC':
+            case 'MODEL_TRANSFORM':
+            case 'CODE_UPDATE':
+              // Possibly do role checks here
+              // Then broadcast or store in DB
+              broadcastToAll(parsed, ws);
+              break;
+            default:
+              console.log('Unknown message type', parsed.type);
+          }
+        } catch (err) {
+          console.error('Message parse error:', err);
+        }
+      });
+    });
 
 ## 2.2 Whiteboard Example
 
@@ -7903,25 +7906,25 @@ If you want a shared Whiteboard:
 
 If you want separate rooms for different groups of users:
 
-// server.js with rooms
-const rooms = {}; // roomId -> { clients: new Set() }
-
-ws.on('message', (data) => {
-  const msg = JSON.parse(data);
-  if (msg.type === 'JOIN_ROOM') {
-    const roomId = msg.roomId;
-    if (!rooms[roomId]) {
-      rooms[roomId] = { clients: new Set() };
-    }
-    rooms[roomId].clients.add(ws);
-    ws.currentRoomId = roomId;
-    // ...
-  } else if (msg.type === 'WHITEBOARD_STROKE') {
-    // broadcast to that room only
-    broadcastToRoom(ws.currentRoomId, msg, ws);
-  }
-  // ...
-});
+    // server.js with rooms
+    const rooms = {}; // roomId -> { clients: new Set() }
+    
+    ws.on('message', (data) => {
+      const msg = JSON.parse(data);
+      if (msg.type === 'JOIN_ROOM') {
+        const roomId = msg.roomId;
+        if (!rooms[roomId]) {
+          rooms[roomId] = { clients: new Set() };
+        }
+        rooms[roomId].clients.add(ws);
+        ws.currentRoomId = roomId;
+        // ...
+      } else if (msg.type === 'WHITEBOARD_STROKE') {
+        // broadcast to that room only
+        broadcastToRoom(ws.currentRoomId, msg, ws);
+      }
+      // ...
+    });
 
 Clients would do:
 
@@ -7939,14 +7942,14 @@ window.__networkManager.send({ type: 'JOIN_ROOM', roomId: 'myWhiteboardRoom' });
 
     Server:
 
-// If role is at least 'editor', we allow whiteboard strokes
-if (parsed.type === 'WHITEBOARD_STROKE') {
-  if (['editor','admin'].includes(ws.userRole)) {
-    broadcastToAll(parsed, ws);
-  } else {
-    // ignore or send error
-  }
-}
+    // If role is at least 'editor', we allow whiteboard strokes
+    if (parsed.type === 'WHITEBOARD_STROKE') {
+      if (['editor','admin'].includes(ws.userRole)) {
+        broadcastToAll(parsed, ws);
+      } else {
+        // ignore or send error
+      }
+    }
 
 Client (whiteboardWindow.js):
 
@@ -8067,19 +8070,19 @@ Below is a more robust approach to multi-user synchronization for the Whiteboard
     Client sends { type: 'JOIN_ROOM', roomId: 'whiteboardRoom42' }.
     Server puts the client’s ws in that room’s set of clients. Then it sends a snapshot:
 
-ws.send(JSON.stringify({
-  type: 'WHITEBOARD_SNAPSHOT',
-  strokes: room.whiteboardStrokes
-}));
+    ws.send(JSON.stringify({
+      type: 'WHITEBOARD_SNAPSHOT',
+      strokes: room.whiteboardStrokes
+    }));
 
 Client receives WHITEBOARD_SNAPSHOT, replaces local strokes with the server’s snapshot, and calls _drawAll().
 When a user draws a stroke, the client sends:
 
-{
-  type: 'WHITEBOARD_STROKE',
-  roomId: 'whiteboardRoom42',
-  stroke: { ... }
-}
+    {
+      type: 'WHITEBOARD_STROKE',
+      roomId: 'whiteboardRoom42',
+      stroke: { ... }
+    }
 
 Server receives it, appends the stroke to room.whiteboardStrokes, then broadcasts it to all other clients in that room:
 
