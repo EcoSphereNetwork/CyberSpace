@@ -45,3 +45,16 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+async function fetchHelloFromBackend() {
+  try {
+    const response = await fetch('http://localhost:3000/api/hello');
+    const data = await response.json();
+    console.log('Data from backend:', data);
+  } catch (error) {
+    console.error('Could not fetch from backend:', error);
+  }
+}
+
+// Rufe die Funktion auf
+fetchHelloFromBackend();
