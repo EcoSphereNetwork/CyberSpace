@@ -1,7 +1,7 @@
 # CyberSpace
 CyberSpace is a project under the EcoSphere Network, focusing on developing innovative solutions in the digital realm.
 
-**Project Structure**
+### **Project Structure**
 The repository is organized as follows:
 
   Project_Structure/: Contains the overall architecture and design documents.
@@ -15,16 +15,16 @@ Technologies Used
   HTML: 18.4%
   Python: 0.7%
 
-**Getting Started**
+### **Getting Started**
 To get a local copy up and running, follow these steps:
 
-**Clone the repository:**
+### **Clone the repository:**
 
   bash
   Copy code
   git clone https://github.com/EcoSphereNetwork/CyberSpace.git
   
-Navigate to the project directory:
+**Navigate to the project directory:**
 
   bash
   Copy code
@@ -32,11 +32,11 @@ Navigate to the project directory:
   
 Open index.html in your preferred web browser to view the project.
 
-**Contributing**
+### **Contributing**
 Contributions are welcome! Please fork the repository and create a pull request with your proposed changes.
 
-**License**
+### **License**
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-**Contact**
+### **Contact**
 For more information, visit the EcoSphere Network GitHub page.
