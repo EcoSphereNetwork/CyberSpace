@@ -18,7 +18,7 @@
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noFallthroughCases": true,
+    "allowUnusedLabels": false,
     "noUncheckedIndexedAccess": false,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
