@@ -16,20 +16,20 @@ export const LayerPresets = {
             size: new Vector2(1000, 1000),
             segments: new Vector2(100, 100),
             heightScale: 100,
-            roughness: 1.5
+            roughness: 1.5,
           },
           lighting: {
             ambient: {
               color: 0x404040,
-              intensity: 0.5
+              intensity: 0.5,
             },
             sun: {
               color: 0xffffff,
               intensity: 1,
-              position: new Vector3(100, 100, 0)
-            }
-          }
-        }
+              position: new Vector3(100, 100, 0),
+            },
+          },
+        },
       },
       {
         id: 'weather',
@@ -38,11 +38,11 @@ export const LayerPresets = {
             {
               type: 'clouds',
               intensity: 0.3,
-              color: 0xffffff
-            }
+              color: 0xffffff,
+            },
           ],
-          wind: new Vector3(1, 0, 1)
-        }
+          wind: new Vector3(1, 0, 1),
+        },
       },
       {
         id: 'ui',
@@ -52,11 +52,11 @@ export const LayerPresets = {
               id: 'hud',
               type: 'hud',
               position: new Vector3(0, 0, 0),
-              content: 'Default HUD'
-            }
-          ]
-        }
-      }
+              content: 'Default HUD',
+            },
+          ],
+        },
+      },
     ],
     groups: [
       {
@@ -65,20 +65,20 @@ export const LayerPresets = {
         active: true,
         blend: {
           mode: 'screen',
-          opacity: 0.8
-        }
+          opacity: 0.8,
+        },
       },
       {
         id: 'interface',
         layers: ['ui'],
-        active: true
-      }
+        active: true,
+      },
     ],
     transition: {
       duration: 2,
       easing: 'power2.inOut',
-      type: 'fade'
-    }
+      type: 'fade',
+    },
   },
 
   // Data visualization preset
@@ -93,8 +93,8 @@ export const LayerPresets = {
               id: 'node1',
               position: new Vector3(0, 0, 0),
               value: 1,
-              color: 0x00ff00
-            }
+              color: 0x00ff00,
+            },
           ],
           connections: [
             {
@@ -102,10 +102,10 @@ export const LayerPresets = {
               from: 'node1',
               to: 'node2',
               value: 0.5,
-              animated: true
-            }
-          ]
-        }
+              animated: true,
+            },
+          ],
+        },
       },
       {
         id: 'ui',
@@ -115,11 +115,11 @@ export const LayerPresets = {
               id: 'dataPanel',
               type: 'panel',
               position: new Vector3(1, 1, 0),
-              content: 'Data Visualization'
-            }
-          ]
-        }
-      }
+              content: 'Data Visualization',
+            },
+          ],
+        },
+      },
     ],
     groups: [
       {
@@ -128,10 +128,10 @@ export const LayerPresets = {
         active: true,
         transition: {
           type: 'zoom',
-          duration: 1
-        }
-      }
-    ]
+          duration: 1,
+        },
+      },
+    ],
   },
 
   // VR environment preset
@@ -145,21 +145,21 @@ export const LayerPresets = {
             size: new Vector2(2000, 2000),
             segments: new Vector2(200, 200),
             heightScale: 200,
-            roughness: 2
+            roughness: 2,
           },
           vegetation: [
             {
               type: 'tree',
               density: 0.01,
-              scale: new Vector3(1, 2, 1)
+              scale: new Vector3(1, 2, 1),
             },
             {
               type: 'grass',
               density: 0.1,
-              scale: new Vector3(0.5, 1, 0.5)
-            }
-          ]
-        }
+              scale: new Vector3(0.5, 1, 0.5),
+            },
+          ],
+        },
       },
       {
         id: 'weather',
@@ -167,14 +167,14 @@ export const LayerPresets = {
           effects: [
             {
               type: 'clouds',
-              intensity: 0.5
+              intensity: 0.5,
             },
             {
               type: 'fog',
-              intensity: 0.2
-            }
-          ]
-        }
+              intensity: 0.2,
+            },
+          ],
+        },
       },
       {
         id: 'ui',
@@ -184,11 +184,11 @@ export const LayerPresets = {
               id: 'vrControls',
               type: 'custom',
               position: new Vector3(0, 1, -2),
-              content: 'VR Controls'
-            }
-          ]
-        }
-      }
+              content: 'VR Controls',
+            },
+          ],
+        },
+      },
     ],
     groups: [
       {
@@ -197,8 +197,8 @@ export const LayerPresets = {
         active: true,
         blend: {
           mode: 'screen',
-          opacity: 0.9
-        }
+          opacity: 0.9,
+        },
       },
       {
         id: 'interface',
@@ -206,10 +206,10 @@ export const LayerPresets = {
         active: true,
         transition: {
           type: 'fade',
-          duration: 0.5
-        }
-      }
-    ]
+          duration: 0.5,
+        },
+      },
+    ],
   },
 
   // Night environment preset
@@ -221,20 +221,20 @@ export const LayerPresets = {
         config: {
           terrain: {
             size: new Vector2(1000, 1000),
-            segments: new Vector2(100, 100)
+            segments: new Vector2(100, 100),
           },
           lighting: {
             ambient: {
               color: 0x001133,
-              intensity: 0.2
+              intensity: 0.2,
             },
             sun: {
               color: 0x0044ff,
               intensity: 0.1,
-              position: new Vector3(-100, -50, 0)
-            }
-          }
-        }
+              position: new Vector3(-100, -50, 0),
+            },
+          },
+        },
       },
       {
         id: 'weather',
@@ -242,15 +242,15 @@ export const LayerPresets = {
           effects: [
             {
               type: 'stars',
-              intensity: 1
+              intensity: 1,
             },
             {
               type: 'clouds',
               intensity: 0.2,
-              color: 0x222244
-            }
-          ]
-        }
+              color: 0x222244,
+            },
+          ],
+        },
       },
       {
         id: 'data',
@@ -259,16 +259,13 @@ export const LayerPresets = {
           flows: [
             {
               id: 'flow1',
-              path: [
-                new Vector3(0, 10, 0),
-                new Vector3(10, 15, 10)
-              ],
+              path: [new Vector3(0, 10, 0), new Vector3(10, 15, 10)],
               color: 0x00ffff,
-              speed: 0.5
-            }
-          ]
-        }
-      }
+              speed: 0.5,
+            },
+          ],
+        },
+      },
     ],
     groups: [
       {
@@ -277,8 +274,8 @@ export const LayerPresets = {
         active: true,
         blend: {
           mode: 'screen',
-          opacity: 1
-        }
+          opacity: 1,
+        },
       },
       {
         id: 'data',
@@ -286,15 +283,15 @@ export const LayerPresets = {
         active: true,
         blend: {
           mode: 'add',
-          opacity: 0.8
-        }
-      }
+          opacity: 0.8,
+        },
+      },
     ],
     transition: {
       duration: 3,
       easing: 'power2.inOut',
-      type: 'fade'
-    }
+      type: 'fade',
+    },
   },
 
   // Storm environment preset
@@ -306,20 +303,20 @@ export const LayerPresets = {
         config: {
           terrain: {
             size: new Vector2(1000, 1000),
-            segments: new Vector2(100, 100)
+            segments: new Vector2(100, 100),
           },
           lighting: {
             ambient: {
               color: 0x222222,
-              intensity: 0.3
+              intensity: 0.3,
             },
             sun: {
               color: 0x666666,
               intensity: 0.4,
-              position: new Vector3(0, 100, 0)
-            }
-          }
-        }
+              position: new Vector3(0, 100, 0),
+            },
+          },
+        },
       },
       {
         id: 'weather',
@@ -327,20 +324,20 @@ export const LayerPresets = {
           effects: [
             {
               type: 'rain',
-              intensity: 1
+              intensity: 1,
             },
             {
               type: 'clouds',
               intensity: 0.9,
-              color: 0x333333
+              color: 0x333333,
             },
             {
               type: 'lightning',
-              intensity: 0.7
-            }
+              intensity: 0.7,
+            },
           ],
-          wind: new Vector3(5, 0, 5)
-        }
+          wind: new Vector3(5, 0, 5),
+        },
       },
       {
         id: 'ui',
@@ -350,11 +347,11 @@ export const LayerPresets = {
               id: 'warning',
               type: 'panel',
               position: new Vector3(0, 2, 0),
-              content: 'Storm Warning'
-            }
-          ]
-        }
-      }
+              content: 'Storm Warning',
+            },
+          ],
+        },
+      },
     ],
     groups: [
       {
@@ -363,8 +360,8 @@ export const LayerPresets = {
         active: true,
         blend: {
           mode: 'multiply',
-          opacity: 1
-        }
+          opacity: 1,
+        },
       },
       {
         id: 'interface',
@@ -372,14 +369,14 @@ export const LayerPresets = {
         active: true,
         transition: {
           type: 'fade',
-          duration: 0.3
-        }
-      }
+          duration: 0.3,
+        },
+      },
     ],
     transition: {
       duration: 2,
       easing: 'power3.inOut',
-      type: 'fade'
-    }
-  }
+      type: 'fade',
+    },
+  },
 };

@@ -54,14 +54,14 @@ export abstract class Layer extends EventEmitter {
       interactive: config.interactive ?? true,
       loaded: false,
       active: false,
-      error: null
+      error: null,
     };
 
     // Initialize resources
     this.resources = {
       objects: new Map(),
       materials: new Map(),
-      textures: new Map()
+      textures: new Map(),
     };
 
     // Apply initial state
@@ -81,11 +81,14 @@ export abstract class Layer extends EventEmitter {
     try {
       await this.loadResources();
       await this.setup();
-      
+
       this.state.loaded = true;
       this.emit('loaded');
     } catch (error) {
-      this.state.error = error instanceof Error ? error : new Error('Failed to initialize layer');
+      this.state.error =
+        error instanceof Error
+          ? error
+          : new Error('Failed to initialize layer');
       this.emit('error', this.state.error);
       throw this.state.error;
     }
@@ -146,19 +149,19 @@ export abstract class Layer extends EventEmitter {
    */
   public dispose(): void {
     // Dispose resources
-    this.resources.objects.forEach(object => {
-      object.traverse(child => {
+    this.resources.objects.forEach((object) => {
+      object.traverse((child) => {
         if (child instanceof Object3D) {
           child.removeFromParent();
         }
       });
     });
 
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       material.dispose();
     });
 
-    this.resources.textures.forEach(texture => {
+    this.resources.textures.forEach((texture) => {
       texture.dispose();
     });
 
@@ -191,7 +194,7 @@ export abstract class Layer extends EventEmitter {
    */
   public setOpacity(opacity: number): void {
     this.state.opacity = opacity;
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       if ('opacity' in material) {
         material.opacity = opacity;
         material.transparent = opacity < 1;
@@ -216,7 +219,7 @@ export abstract class Layer extends EventEmitter {
   public setRenderOrder(order: number): void {
     this.state.renderOrder = order;
     this.root.renderOrder = order;
-    this.root.traverse(child => {
+    this.root.traverse((child) => {
       child.renderOrder = order;
     });
     this.emit('renderOrderChanged', order);

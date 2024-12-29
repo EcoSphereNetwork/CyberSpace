@@ -38,7 +38,7 @@ export class EventEmitter {
     if (!this.events[event]) {
       return;
     }
-    this.events[event] = this.events[event].filter(h => h !== handler);
+    this.events[event] = this.events[event].filter((h) => h !== handler);
     if (this.events[event].length === 0) {
       delete this.events[event];
     }
@@ -62,7 +62,7 @@ export class EventEmitter {
     if (!this.events[event]) {
       return;
     }
-    this.events[event].forEach(handler => {
+    this.events[event].forEach((handler) => {
       try {
         handler.apply(this, args);
       } catch (error) {

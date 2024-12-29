@@ -1,7 +1,10 @@
 import { Layer, LayerConfig } from '@/core/layers/Layer';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { CSS3DObject, CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer';
+import {
+  CSS3DObject,
+  CSS3DRenderer,
+} from 'three/examples/jsm/renderers/CSS3DRenderer';
 import { Vector3, Quaternion, Matrix4, Object3D } from 'three';
 import styled from '@emotion/styled';
 
@@ -36,15 +39,15 @@ interface UILayerConfig extends LayerConfig {
 }
 
 // Styled components for UI elements
-const UIContainer = styled.div<{ interactive: boolean }>\`
+const UIContainer = styled.div<{ interactive: boolean }>`
   position: absolute;
   transform-origin: 0 0;
-  pointer-events: \${props => props.interactive ? 'auto' : 'none'};
+  pointer-events: ${(props) => (props.interactive ? 'auto' : 'none')};
   user-select: none;
   backface-visibility: hidden;
-\`;
+`;
 
-const Window = styled.div\`
+const Window = styled.div`
   background: rgba(20, 20, 20, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -52,20 +55,20 @@ const Window = styled.div\`
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
-\`;
+`;
 
-const Panel = styled.div\`
+const Panel = styled.div`
   background: rgba(30, 30, 30, 0.6);
   border-radius: 4px;
   padding: 12px;
   color: white;
-\`;
+`;
 
-const HUD = styled.div\`
+const HUD = styled.div`
   position: fixed;
   pointer-events: none;
   z-index: 1000;
-\`;
+`;
 
 /**
  * Layer for UI elements in 3D space
@@ -165,7 +168,7 @@ export class UILayer extends Layer {
 
     // Store element
     this.elements.set(config.id, object);
-    this.resources.objects.set(\`ui_\${config.id}\`, object);
+    this.resources.objects.set(`ui_${config.id}`, object);
 
     // Add to root
     this.root.add(object);
@@ -192,7 +195,7 @@ export class UILayer extends Layer {
 
     // Store group
     this.groups.set(config.id, group);
-    this.resources.objects.set(\`group_\${config.id}\`, group);
+    this.resources.objects.set(`group_${config.id}`, group);
 
     // Add to root
     this.root.add(group);
@@ -259,7 +262,7 @@ export class UILayer extends Layer {
     if (element) {
       element.removeFromParent();
       this.elements.delete(id);
-      this.resources.objects.delete(\`ui_\${id}\`);
+      this.resources.objects.delete(`ui_${id}`);
 
       // Cleanup React root
       const root = this.roots.get(id);
@@ -286,7 +289,7 @@ export class UILayer extends Layer {
     const group = this.groups.get(id);
     if (group) {
       // Remove all elements in group
-      group.traverse(child => {
+      group.traverse((child) => {
         if (child instanceof CSS3DObject) {
           const elementId = child.name;
           this.removeElement(elementId);
@@ -295,7 +298,7 @@ export class UILayer extends Layer {
 
       group.removeFromParent();
       this.groups.delete(id);
-      this.resources.objects.delete(\`group_\${id}\`);
+      this.resources.objects.delete(`group_${id}`);
 
       this.emit('groupRemoved', id);
     }
@@ -345,7 +348,9 @@ export class UILayer extends Layer {
         const config = element.userData as UIElement;
         root.render(
           <UIContainer
-            interactive={config.interactive ?? this.uiConfig.interactive ?? true}
+            interactive={
+              config.interactive ?? this.uiConfig.interactive ?? true
+            }
             style={config.style}
             className={config.className}
           >
@@ -365,7 +370,7 @@ export class UILayer extends Layer {
     window.removeEventListener('resize', this.handleResize);
 
     // Cleanup React roots
-    this.roots.forEach(root => root.unmount());
+    this.roots.forEach((root) => root.unmount());
     this.roots.clear();
 
     // Remove renderer

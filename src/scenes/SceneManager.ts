@@ -66,7 +66,7 @@ export class SceneManager extends EventEmitter {
       container: config.container,
       defaultScene: config.defaultScene ?? 'default',
       scenes: config.scenes ?? [],
-      autoStart: config.autoStart ?? true
+      autoStart: config.autoStart ?? true,
     };
 
     this.container = config.container;
@@ -77,7 +77,10 @@ export class SceneManager extends EventEmitter {
 
     // Initialize Three.js
     this.renderer = new WebGLRenderer({ antialias: true });
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setSize(
+      this.container.clientWidth,
+      this.container.clientHeight
+    );
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
 
@@ -105,7 +108,7 @@ export class SceneManager extends EventEmitter {
     );
 
     // Initialize scenes
-    this.config.scenes.forEach(scene => {
+    this.config.scenes.forEach((scene) => {
       this.addScene(scene);
     });
 
@@ -183,7 +186,7 @@ export class SceneManager extends EventEmitter {
   public async loadScene(id: string): Promise<void> {
     const scene = this.scenes.get(id);
     if (!scene) {
-      throw new Error(\`Invalid scene: \${id}\`);
+      throw new Error(`Invalid scene: ${id}`);
     }
 
     // Call onLeave for current scene
@@ -235,7 +238,7 @@ export class SceneManager extends EventEmitter {
     const toScene = this.scenes.get(config.to);
 
     if (!fromScene || !toScene) {
-      throw new Error(\`Invalid scenes: \${config.from} -> \${config.to}\`);
+      throw new Error(`Invalid scenes: ${config.from} -> ${config.to}`);
     }
 
     // Start transition
@@ -247,7 +250,7 @@ export class SceneManager extends EventEmitter {
       from: config.from,
       to: config.to,
       duration: config.duration,
-      type: config.type
+      type: config.type,
     });
 
     // Update scene

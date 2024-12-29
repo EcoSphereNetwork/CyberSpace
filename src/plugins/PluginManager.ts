@@ -1,6 +1,11 @@
 import { EventEmitter } from '@/utils/EventEmitter';
 import { App } from '@/core/App';
-import { BasePlugin, PluginAPI, PluginMetadata, PluginStorage } from './PluginAPI';
+import {
+  BasePlugin,
+  PluginAPI,
+  PluginMetadata,
+  PluginStorage,
+} from './PluginAPI';
 
 interface PluginInstance {
   metadata: PluginMetadata;
@@ -34,7 +39,7 @@ export class PluginManager extends EventEmitter {
       autoEnable: config.autoEnable ?? true,
       storagePrefix: config.storagePrefix ?? 'plugin:',
       maxPlugins: config.maxPlugins ?? 100,
-      updateInterval: config.updateInterval ?? 1000 / 60 // 60 FPS
+      updateInterval: config.updateInterval ?? 1000 / 60, // 60 FPS
     };
 
     this.plugins = new Map();
@@ -50,7 +55,10 @@ export class PluginManager extends EventEmitter {
    */
   public async initialize(): Promise<void> {
     // Start update loop
-    this.updateInterval = window.setInterval(this.update, this.config.updateInterval);
+    this.updateInterval = window.setInterval(
+      this.update,
+      this.config.updateInterval
+    );
 
     this.emit('initialized');
   }
@@ -76,7 +84,10 @@ export class PluginManager extends EventEmitter {
   /**
    * Install a plugin
    */
-  public async installPlugin(pluginId: string, metadata: PluginMetadata): Promise<void> {
+  public async installPlugin(
+    pluginId: string,
+    metadata: PluginMetadata
+  ): Promise<void> {
     if (this.plugins.size >= this.config.maxPlugins) {
       throw new Error('Maximum number of plugins reached');
     }
@@ -99,7 +110,7 @@ export class PluginManager extends EventEmitter {
       metadata,
       instance: plugin,
       enabled: false,
-      loaded: false
+      loaded: false,
     });
 
     // Auto-enable if configured
@@ -293,20 +304,22 @@ export class PluginManager extends EventEmitter {
             localStorage.removeItem(key);
           }
         }
-      }
+      },
     };
   }
 
   /**
    * Create plugin instance
    */
-  private async createPluginInstance(metadata: PluginMetadata): Promise<BasePlugin> {
+  private async createPluginInstance(
+    metadata: PluginMetadata
+  ): Promise<BasePlugin> {
     // Create plugin context
     const context = {
       app: this.app,
       metadata,
       storage: this.createPluginStorage(metadata.id),
-      api: this.api
+      api: this.api,
     };
 
     // Load plugin module
@@ -328,7 +341,7 @@ export class PluginManager extends EventEmitter {
    * Get all installed plugins
    */
   public getInstalledPlugins(): PluginMetadata[] {
-    return Array.from(this.plugins.values()).map(p => p.metadata);
+    return Array.from(this.plugins.values()).map((p) => p.metadata);
   }
 
   /**

@@ -13,7 +13,7 @@ import {
   AdditiveBlending,
   BufferGeometry,
   Float32BufferAttribute,
-  Points
+  Points,
 } from 'three';
 
 interface HybridObject {
@@ -71,7 +71,7 @@ export class HybridLayer extends Layer {
 
   // Shaders
   private static readonly glowShader = {
-    vertexShader: \`
+    vertexShader: `
       varying vec3 vPosition;
       varying vec2 vUv;
       void main() {
@@ -79,8 +79,8 @@ export class HybridLayer extends Layer {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform vec3 color;
       uniform float intensity;
       uniform float time;
@@ -92,7 +92,7 @@ export class HybridLayer extends Layer {
         float pulse = sin(time * 2.0) * 0.5 + 0.5;
         gl_FragColor = vec4(color, alpha * intensity * pulse);
       }
-    \`
+    `,
   };
 
   constructor(config: HybridLayerConfig) {
@@ -108,33 +108,42 @@ export class HybridLayer extends Layer {
 
   protected async loadResources(): Promise<void> {
     // Create materials
-    this.resources.materials.set('highlight', new MeshBasicMaterial({
-      color: this.hybridConfig.interaction?.highlightColor ?? 0x00ff00,
-      transparent: true,
-      opacity: 0.3,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'highlight',
+      new MeshBasicMaterial({
+        color: this.hybridConfig.interaction?.highlightColor ?? 0x00ff00,
+        transparent: true,
+        opacity: 0.3,
+        depthWrite: false,
+      })
+    );
 
-    this.resources.materials.set('selection', new MeshBasicMaterial({
-      color: this.hybridConfig.interaction?.selectionColor ?? 0x0000ff,
-      transparent: true,
-      opacity: 0.5,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'selection',
+      new MeshBasicMaterial({
+        color: this.hybridConfig.interaction?.selectionColor ?? 0x0000ff,
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: false,
+      })
+    );
 
     // Create glow material
-    this.resources.materials.set('glow', new ShaderMaterial({
-      uniforms: {
-        color: { value: new Color(0x00ff00) },
-        intensity: { value: 1.0 },
-        time: { value: 0.0 }
-      },
-      vertexShader: HybridLayer.glowShader.vertexShader,
-      fragmentShader: HybridLayer.glowShader.fragmentShader,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'glow',
+      new ShaderMaterial({
+        uniforms: {
+          color: { value: new Color(0x00ff00) },
+          intensity: { value: 1.0 },
+          time: { value: 0.0 },
+        },
+        vertexShader: HybridLayer.glowShader.vertexShader,
+        fragmentShader: HybridLayer.glowShader.fragmentShader,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      })
+    );
 
     // Load objects
     if (this.hybridConfig.objects) {
@@ -204,7 +213,7 @@ export class HybridLayer extends Layer {
 
     // Store object
     this.objects.set(config.id, object);
-    this.resources.objects.set(\`hybrid_\${config.id}\`, object);
+    this.resources.objects.set(`hybrid_${config.id}`, object);
 
     // Add to root
     this.root.add(object);
@@ -216,26 +225,22 @@ export class HybridLayer extends Layer {
    * Create a portal object
    */
   private createPortal(config: HybridObject): Object3D {
-    const geometry = new BoxGeometry(
-      config.size ?? 2,
-      config.size ?? 2,
-      0.1
-    );
+    const geometry = new BoxGeometry(config.size ?? 2, config.size ?? 2, 0.1);
 
     const material = new ShaderMaterial({
       uniforms: {
         color: { value: new Color(config.color ?? 0x00ff00) },
         opacity: { value: config.opacity ?? 0.5 },
-        time: { value: 0 }
+        time: { value: 0 },
       },
-      vertexShader: \`
+      vertexShader: `
         varying vec2 vUv;
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
-      \`,
-      fragmentShader: \`
+      `,
+      fragmentShader: `
         uniform vec3 color;
         uniform float opacity;
         uniform float time;
@@ -247,9 +252,9 @@ export class HybridLayer extends Layer {
           float alpha = smoothstep(0.5, 0.4, dist) * opacity * ripple;
           gl_FragColor = vec4(color, alpha);
         }
-      \`,
+      `,
       transparent: true,
-      depthWrite: false
+      depthWrite: false,
     });
 
     return new Mesh(geometry, material);
@@ -269,16 +274,16 @@ export class HybridLayer extends Layer {
       uniforms: {
         color: { value: new Color(config.color ?? 0x00ffff) },
         opacity: { value: config.opacity ?? 0.8 },
-        time: { value: 0 }
+        time: { value: 0 },
       },
-      vertexShader: \`
+      vertexShader: `
         varying vec2 vUv;
         void main() {
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
-      \`,
-      fragmentShader: \`
+      `,
+      fragmentShader: `
         uniform vec3 color;
         uniform float opacity;
         uniform float time;
@@ -289,9 +294,9 @@ export class HybridLayer extends Layer {
           float alpha = (0.8 + scanline * 0.2) * opacity * (1.0 + edge);
           gl_FragColor = vec4(color, alpha);
         }
-      \`,
+      `,
       transparent: true,
-      depthWrite: false
+      depthWrite: false,
     });
 
     return new Mesh(geometry, material);
@@ -328,9 +333,9 @@ export class HybridLayer extends Layer {
     const material = new ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        opacity: { value: config.opacity ?? 0.5 }
+        opacity: { value: config.opacity ?? 0.5 },
       },
-      vertexShader: \`
+      vertexShader: `
         attribute vec3 color;
         varying vec3 vColor;
         uniform float time;
@@ -341,16 +346,16 @@ export class HybridLayer extends Layer {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
           gl_PointSize = 2.0;
         }
-      \`,
-      fragmentShader: \`
+      `,
+      fragmentShader: `
         varying vec3 vColor;
         uniform float opacity;
         void main() {
           gl_FragColor = vec4(vColor, opacity);
         }
-      \`,
+      `,
       transparent: true,
-      depthWrite: false
+      depthWrite: false,
     });
 
     return new Points(geometry, material);
@@ -370,7 +375,7 @@ export class HybridLayer extends Layer {
     const material = new MeshBasicMaterial({
       color: config.color ?? 0xffffff,
       transparent: true,
-      opacity: config.opacity ?? 1
+      opacity: config.opacity ?? 1,
     });
 
     return new Mesh(geometry, material);
@@ -379,12 +384,16 @@ export class HybridLayer extends Layer {
   /**
    * Create a hybrid connection
    */
-  private async createHybridConnection(config: HybridConnection): Promise<Object3D> {
+  private async createHybridConnection(
+    config: HybridConnection
+  ): Promise<Object3D> {
     const fromObj = this.objects.get(config.from);
     const toObj = this.objects.get(config.to);
 
     if (!fromObj || !toObj) {
-      throw new Error(\`Invalid connection objects: \${config.from} -> \${config.to}\`);
+      throw new Error(
+        `Invalid connection objects: ${config.from} -> ${config.to}`
+      );
     }
 
     const geometry = new BufferGeometry();
@@ -393,7 +402,7 @@ export class HybridLayer extends Layer {
 
     // Will be updated in updateConnections
     this.connections.set(config.id, line);
-    this.resources.objects.set(\`connection_\${config.id}\`, line);
+    this.resources.objects.set(`connection_${config.id}`, line);
     this.root.add(line);
 
     return line;
@@ -419,7 +428,7 @@ export class HybridLayer extends Layer {
         effect = this.createCustomEffect(config);
     }
 
-    const id = \`effect_\${this.effects.size}\`;
+    const id = `effect_${this.effects.size}`;
     this.effects.set(id, effect);
     this.resources.objects.set(id, effect);
     this.root.add(effect);
@@ -497,7 +506,7 @@ export class HybridLayer extends Layer {
    * Update materials
    */
   private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       if (material instanceof ShaderMaterial && material.uniforms.time) {
         material.uniforms.time.value += deltaTime;
       }
@@ -519,7 +528,7 @@ export class HybridLayer extends Layer {
     if (object) {
       object.removeFromParent();
       this.objects.delete(id);
-      this.resources.objects.delete(\`hybrid_\${id}\`);
+      this.resources.objects.delete(`hybrid_${id}`);
       this.emit('objectRemoved', id);
     }
   }
@@ -539,7 +548,7 @@ export class HybridLayer extends Layer {
     if (connection) {
       connection.removeFromParent();
       this.connections.delete(id);
-      this.resources.objects.delete(\`connection_\${id}\`);
+      this.resources.objects.delete(`connection_${id}`);
       this.emit('connectionRemoved', id);
     }
   }

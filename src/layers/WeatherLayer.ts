@@ -15,7 +15,7 @@ import {
   RepeatWrapping,
   InstancedMesh,
   Matrix4,
-  DynamicDrawUsage
+  DynamicDrawUsage,
 } from 'three';
 
 interface WeatherParticle {
@@ -63,7 +63,7 @@ export class WeatherLayer extends Layer {
 
   // Shaders
   private static readonly rainShader = {
-    vertexShader: \`
+    vertexShader: `
       attribute float size;
       attribute float opacity;
       varying float vOpacity;
@@ -73,8 +73,8 @@ export class WeatherLayer extends Layer {
         gl_PointSize = size * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform sampler2D texture;
       varying float vOpacity;
       void main() {
@@ -82,11 +82,11 @@ export class WeatherLayer extends Layer {
         vec4 tex = texture2D(texture, uv);
         gl_FragColor = vec4(vec3(0.7, 0.7, 0.9), tex.a * vOpacity);
       }
-    \`
+    `,
   };
 
   private static readonly snowShader = {
-    vertexShader: \`
+    vertexShader: `
       attribute float size;
       attribute float rotation;
       attribute float opacity;
@@ -99,8 +99,8 @@ export class WeatherLayer extends Layer {
         gl_PointSize = size * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform sampler2D texture;
       varying float vRotation;
       varying float vOpacity;
@@ -113,18 +113,18 @@ export class WeatherLayer extends Layer {
         vec4 tex = texture2D(texture, ruv);
         gl_FragColor = vec4(vec3(1.0), tex.a * vOpacity);
       }
-    \`
+    `,
   };
 
   private static readonly cloudShader = {
-    vertexShader: \`
+    vertexShader: `
       varying vec2 vUv;
       void main() {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform sampler2D noiseTexture;
       uniform float time;
       uniform vec3 color;
@@ -137,7 +137,7 @@ export class WeatherLayer extends Layer {
         noise = smoothstep(0.4, 0.6, noise);
         gl_FragColor = vec4(color, noise * density);
       }
-    \`
+    `,
   };
 
   constructor(config: WeatherLayerConfig) {
@@ -154,7 +154,7 @@ export class WeatherLayer extends Layer {
     const [rainTexture, snowTexture, noiseTexture] = await Promise.all([
       this.loadTexture(textureLoader, '/assets/textures/rain.png'),
       this.loadTexture(textureLoader, '/assets/textures/snow.png'),
-      this.loadTexture(textureLoader, '/assets/textures/noise.png')
+      this.loadTexture(textureLoader, '/assets/textures/noise.png'),
     ]);
 
     noiseTexture.wrapS = RepeatWrapping;
@@ -165,38 +165,47 @@ export class WeatherLayer extends Layer {
     this.resources.textures.set('noise', noiseTexture);
 
     // Create materials
-    this.resources.materials.set('rain', new ShaderMaterial({
-      uniforms: {
-        texture: { value: rainTexture }
-      },
-      vertexShader: WeatherLayer.rainShader.vertexShader,
-      fragmentShader: WeatherLayer.rainShader.fragmentShader,
-      transparent: true,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'rain',
+      new ShaderMaterial({
+        uniforms: {
+          texture: { value: rainTexture },
+        },
+        vertexShader: WeatherLayer.rainShader.vertexShader,
+        fragmentShader: WeatherLayer.rainShader.fragmentShader,
+        transparent: true,
+        depthWrite: false,
+      })
+    );
 
-    this.resources.materials.set('snow', new ShaderMaterial({
-      uniforms: {
-        texture: { value: snowTexture }
-      },
-      vertexShader: WeatherLayer.snowShader.vertexShader,
-      fragmentShader: WeatherLayer.snowShader.fragmentShader,
-      transparent: true,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'snow',
+      new ShaderMaterial({
+        uniforms: {
+          texture: { value: snowTexture },
+        },
+        vertexShader: WeatherLayer.snowShader.vertexShader,
+        fragmentShader: WeatherLayer.snowShader.fragmentShader,
+        transparent: true,
+        depthWrite: false,
+      })
+    );
 
-    this.resources.materials.set('cloud', new ShaderMaterial({
-      uniforms: {
-        noiseTexture: { value: noiseTexture },
-        time: { value: 0 },
-        color: { value: new Color(0xffffff) },
-        density: { value: 0.5 }
-      },
-      vertexShader: WeatherLayer.cloudShader.vertexShader,
-      fragmentShader: WeatherLayer.cloudShader.fragmentShader,
-      transparent: true,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'cloud',
+      new ShaderMaterial({
+        uniforms: {
+          noiseTexture: { value: noiseTexture },
+          time: { value: 0 },
+          color: { value: new Color(0xffffff) },
+          density: { value: 0.5 },
+        },
+        vertexShader: WeatherLayer.cloudShader.vertexShader,
+        fragmentShader: WeatherLayer.cloudShader.fragmentShader,
+        transparent: true,
+        depthWrite: false,
+      })
+    );
 
     // Setup fog
     if (this.weatherConfig.fog) {
@@ -236,7 +245,10 @@ export class WeatherLayer extends Layer {
   /**
    * Load a texture
    */
-  private loadTexture(loader: TextureLoader, url: string): Promise<THREE.Texture> {
+  private loadTexture(
+    loader: TextureLoader,
+    url: string
+  ): Promise<THREE.Texture> {
     return new Promise((resolve, reject) => {
       loader.load(url, resolve, undefined, reject);
     });
@@ -282,7 +294,7 @@ export class WeatherLayer extends Layer {
     }
 
     // Store effect
-    const id = \`\${config.type}_\${this.effects.size}\`;
+    const id = `${config.type}_${this.effects.size}`;
     this.effects.set(id, effect);
     this.resources.objects.set(id, effect);
 
@@ -299,7 +311,7 @@ export class WeatherLayer extends Layer {
     const count = Math.floor((config.intensity ?? 1) * 1000);
     const area = config.area ?? {
       center: new Vector3(0, 20, 0),
-      size: new Vector3(40, 0, 40)
+      size: new Vector3(40, 0, 40),
     };
 
     const geometry = new BufferGeometry();
@@ -342,7 +354,7 @@ export class WeatherLayer extends Layer {
     const count = Math.floor((config.intensity ?? 1) * 500);
     const area = config.area ?? {
       center: new Vector3(0, 20, 0),
-      size: new Vector3(40, 0, 40)
+      size: new Vector3(40, 0, 40),
     };
 
     const geometry = new BufferGeometry();
@@ -408,7 +420,9 @@ export class WeatherLayer extends Layer {
   /**
    * Create lightning effect
    */
-  private async createLightningEffect(config: WeatherEffect): Promise<Object3D> {
+  private async createLightningEffect(
+    config: WeatherEffect
+  ): Promise<Object3D> {
     // Implementation
     return new Object3D(); // Placeholder
   }
@@ -424,7 +438,10 @@ export class WeatherLayer extends Layer {
   /**
    * Create a rain particle
    */
-  private createRainParticle(area: { center: Vector3; size: Vector3 }): WeatherParticle {
+  private createRainParticle(area: {
+    center: Vector3;
+    size: Vector3;
+  }): WeatherParticle {
     return {
       position: new Vector3(
         area.center.x + (Math.random() - 0.5) * area.size.x,
@@ -434,28 +451,27 @@ export class WeatherLayer extends Layer {
       velocity: new Vector3(0, -10, 0),
       size: Math.random() * 0.1 + 0.1,
       lifetime: Infinity,
-      age: 0
+      age: 0,
     };
   }
 
   /**
    * Create a snow particle
    */
-  private createSnowParticle(area: { center: Vector3; size: Vector3 }): WeatherParticle {
+  private createSnowParticle(area: {
+    center: Vector3;
+    size: Vector3;
+  }): WeatherParticle {
     return {
       position: new Vector3(
         area.center.x + (Math.random() - 0.5) * area.size.x,
         area.center.y,
         area.center.z + (Math.random() - 0.5) * area.size.z
       ),
-      velocity: new Vector3(
-        Math.random() - 0.5,
-        -2,
-        Math.random() - 0.5
-      ),
+      velocity: new Vector3(Math.random() - 0.5, -2, Math.random() - 0.5),
       size: Math.random() * 0.2 + 0.2,
       lifetime: Infinity,
-      age: 0
+      age: 0,
     };
   }
 
@@ -483,13 +499,18 @@ export class WeatherLayer extends Layer {
   /**
    * Update particles
    */
-  private updateParticles(particles: WeatherParticle[], deltaTime: number): void {
-    particles.forEach(particle => {
+  private updateParticles(
+    particles: WeatherParticle[],
+    deltaTime: number
+  ): void {
+    particles.forEach((particle) => {
       // Apply wind
       particle.velocity.add(this.wind.clone().multiplyScalar(deltaTime));
 
       // Update position
-      particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
+      particle.position.add(
+        particle.velocity.clone().multiplyScalar(deltaTime)
+      );
 
       // Reset if out of bounds
       if (particle.position.y < -10) {
@@ -501,9 +522,13 @@ export class WeatherLayer extends Layer {
     });
 
     // Update geometry
-    const points = this.root.getObjectByProperty('uuid', particles[0].uuid) as Points;
+    const points = this.root.getObjectByProperty(
+      'uuid',
+      particles[0].uuid
+    ) as Points;
     if (points) {
-      const positions = points.geometry.attributes.position.array as Float32Array;
+      const positions = points.geometry.attributes.position
+        .array as Float32Array;
       particles.forEach((particle, i) => {
         const i3 = i * 3;
         positions[i3] = particle.position.x;
@@ -518,7 +543,7 @@ export class WeatherLayer extends Layer {
    * Update materials
    */
   private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       if (material instanceof ShaderMaterial && material.uniforms.time) {
         material.uniforms.time.value += deltaTime;
       }

@@ -89,15 +89,15 @@ export class LayerIntegration extends EventEmitter {
         duration: 1,
         easing: 'power2.inOut',
         type: 'fade',
-        ...config.defaultTransition
+        ...config.defaultTransition,
       },
       defaultBlend: {
         mode: 'add',
         opacity: 1,
-        ...config.defaultBlend
+        ...config.defaultBlend,
       },
       presets: config.presets ?? [],
-      maxActiveGroups: config.maxActiveGroups ?? 10
+      maxActiveGroups: config.maxActiveGroups ?? 10,
     };
 
     this.activeTransitions = new Map();
@@ -106,7 +106,7 @@ export class LayerIntegration extends EventEmitter {
     this.presets = new Map();
 
     // Initialize presets
-    this.config.presets.forEach(preset => {
+    this.config.presets.forEach((preset) => {
       this.presets.set(preset.id, preset);
     });
   }
@@ -119,7 +119,7 @@ export class LayerIntegration extends EventEmitter {
     const toLayer = this.layerManager.getLayer(config.to);
 
     if (!fromLayer || !toLayer) {
-      throw new Error(\`Invalid layers: \${config.from} -> \${config.to}\`);
+      throw new Error(`Invalid layers: ${config.from} -> ${config.to}`);
     }
 
     // Cancel existing transition for these layers
@@ -129,7 +129,7 @@ export class LayerIntegration extends EventEmitter {
     // Merge with default config
     const transitionConfig: Required<LayerTransition> = {
       ...this.config.defaultTransition,
-      ...config
+      ...config,
     };
 
     // Setup transition
@@ -140,7 +140,7 @@ export class LayerIntegration extends EventEmitter {
       fromScale: 1,
       toScale: 1,
       fromPosition: new Vector3(),
-      toPosition: new Vector3()
+      toPosition: new Vector3(),
     };
 
     // Create GSAP timeline
@@ -154,7 +154,7 @@ export class LayerIntegration extends EventEmitter {
         this.emit('transitionComplete', transitionConfig);
         this.activeTransitions.delete(config.from);
         this.activeTransitions.delete(config.to);
-      }
+      },
     });
 
     // Setup transition based on type
@@ -169,14 +169,15 @@ export class LayerIntegration extends EventEmitter {
           onUpdate: () => {
             fromLayer.setOpacity(transition.fromOpacity);
             toLayer.setOpacity(transition.toOpacity);
-          }
+          },
         });
         break;
 
       case 'slide':
         const direction = transitionConfig.direction ?? 'right';
         const offset = 100;
-        let x = 0, y = 0;
+        let x = 0,
+          y = 0;
 
         switch (direction) {
           case 'left':
@@ -193,8 +194,9 @@ export class LayerIntegration extends EventEmitter {
             break;
         }
 
-        tl.set(transition.toPosition, { x: x, y: y })
-          .to([transition, transition.toPosition], {
+        tl.set(transition.toPosition, { x: x, y: y }).to(
+          [transition, transition.toPosition],
+          {
             duration: transitionConfig.duration,
             ease: transitionConfig.easing,
             progress: 1,
@@ -206,27 +208,27 @@ export class LayerIntegration extends EventEmitter {
               fromLayer.setOpacity(transition.fromOpacity);
               toLayer.setOpacity(transition.toOpacity);
               toLayer.getRoot().position.copy(transition.toPosition);
-            }
-          });
+            },
+          }
+        );
         break;
 
       case 'zoom':
-        tl.set(transition, { toScale: 0.5 })
-          .to(transition, {
-            duration: transitionConfig.duration,
-            ease: transitionConfig.easing,
-            progress: 1,
-            fromScale: 1.5,
-            toScale: 1,
-            fromOpacity: 0,
-            toOpacity: 1,
-            onUpdate: () => {
-              fromLayer.getRoot().scale.setScalar(transition.fromScale);
-              toLayer.getRoot().scale.setScalar(transition.toScale);
-              fromLayer.setOpacity(transition.fromOpacity);
-              toLayer.setOpacity(transition.toOpacity);
-            }
-          });
+        tl.set(transition, { toScale: 0.5 }).to(transition, {
+          duration: transitionConfig.duration,
+          ease: transitionConfig.easing,
+          progress: 1,
+          fromScale: 1.5,
+          toScale: 1,
+          fromOpacity: 0,
+          toOpacity: 1,
+          onUpdate: () => {
+            fromLayer.getRoot().scale.setScalar(transition.fromScale);
+            toLayer.getRoot().scale.setScalar(transition.toScale);
+            fromLayer.setOpacity(transition.fromOpacity);
+            toLayer.setOpacity(transition.toOpacity);
+          },
+        });
         break;
 
       case 'custom':
@@ -258,16 +260,16 @@ export class LayerIntegration extends EventEmitter {
    */
   public blend(config: LayerBlend): void {
     // Validate layers
-    config.layers.forEach(layerId => {
+    config.layers.forEach((layerId) => {
       if (!this.layerManager.hasLayer(layerId)) {
-        throw new Error(\`Invalid layer: \${layerId}\`);
+        throw new Error(`Invalid layer: ${layerId}`);
       }
     });
 
     // Merge with default config
     const blendConfig: Required<LayerBlend> = {
       ...this.config.defaultBlend,
-      ...config
+      ...config,
     };
 
     // Setup blend based on mode
@@ -303,7 +305,7 @@ export class LayerIntegration extends EventEmitter {
     const blend = this.activeBlends.get(id);
     if (blend) {
       // Reset layer properties
-      blend.layers.forEach(layerId => {
+      blend.layers.forEach((layerId) => {
         const layer = this.layerManager.getLayer(layerId);
         if (layer) {
           layer.setOpacity(1);
@@ -324,9 +326,9 @@ export class LayerIntegration extends EventEmitter {
     }
 
     // Validate layers
-    config.layers.forEach(layerId => {
+    config.layers.forEach((layerId) => {
       if (!this.layerManager.hasLayer(layerId)) {
-        throw new Error(\`Invalid layer: \${layerId}\`);
+        throw new Error(`Invalid layer: ${layerId}`);
       }
     });
 
@@ -363,7 +365,7 @@ export class LayerIntegration extends EventEmitter {
   public async activateGroup(id: string): Promise<void> {
     const group = this.groups.get(id);
     if (!group) {
-      throw new Error(\`Invalid group: \${id}\`);
+      throw new Error(`Invalid group: ${id}`);
     }
 
     // Skip if already active
@@ -373,15 +375,17 @@ export class LayerIntegration extends EventEmitter {
 
     // Activate layers with transition
     if (group.transition) {
-      await Promise.all(group.layers.map(layerId => 
-        this.transition({
-          from: 'none',
-          to: layerId,
-          ...group.transition
-        })
-      ));
+      await Promise.all(
+        group.layers.map((layerId) =>
+          this.transition({
+            from: 'none',
+            to: layerId,
+            ...group.transition,
+          })
+        )
+      );
     } else {
-      group.layers.forEach(layerId => {
+      group.layers.forEach((layerId) => {
         const layer = this.layerManager.getLayer(layerId);
         if (layer) {
           layer.activate();
@@ -393,7 +397,7 @@ export class LayerIntegration extends EventEmitter {
     if (group.blend) {
       this.blend({
         layers: group.layers,
-        ...group.blend
+        ...group.blend,
       });
     }
 
@@ -407,7 +411,7 @@ export class LayerIntegration extends EventEmitter {
   public async deactivateGroup(id: string): Promise<void> {
     const group = this.groups.get(id);
     if (!group) {
-      throw new Error(\`Invalid group: \${id}\`);
+      throw new Error(`Invalid group: ${id}`);
     }
 
     // Skip if not active
@@ -422,15 +426,17 @@ export class LayerIntegration extends EventEmitter {
 
     // Deactivate layers with transition
     if (group.transition) {
-      await Promise.all(group.layers.map(layerId =>
-        this.transition({
-          from: layerId,
-          to: 'none',
-          ...group.transition
-        })
-      ));
+      await Promise.all(
+        group.layers.map((layerId) =>
+          this.transition({
+            from: layerId,
+            to: 'none',
+            ...group.transition,
+          })
+        )
+      );
     } else {
-      group.layers.forEach(layerId => {
+      group.layers.forEach((layerId) => {
         const layer = this.layerManager.getLayer(layerId);
         if (layer) {
           layer.deactivate();
@@ -448,19 +454,19 @@ export class LayerIntegration extends EventEmitter {
   public async applyPreset(id: string): Promise<void> {
     const preset = this.presets.get(id);
     if (!preset) {
-      throw new Error(\`Invalid preset: \${id}\`);
+      throw new Error(`Invalid preset: ${id}`);
     }
 
     // Deactivate all groups
     await Promise.all(
-      Array.from(this.groups.keys()).map(groupId => 
+      Array.from(this.groups.keys()).map((groupId) =>
         this.deactivateGroup(groupId)
       )
     );
 
     // Configure layers
     await Promise.all(
-      preset.layers.map(async layer => {
+      preset.layers.map(async (layer) => {
         const existingLayer = this.layerManager.getLayer(layer.id);
         if (existingLayer) {
           Object.assign(existingLayer.getConfig(), layer.config);
@@ -473,7 +479,7 @@ export class LayerIntegration extends EventEmitter {
 
     // Create and activate groups
     if (preset.groups) {
-      preset.groups.forEach(group => {
+      preset.groups.forEach((group) => {
         this.createGroup(group);
         if (group.active) {
           this.activateGroup(group.id);

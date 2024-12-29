@@ -17,7 +17,7 @@ import {
   TubeGeometry,
   Matrix4,
   InstancedMesh,
-  DynamicDrawUsage
+  DynamicDrawUsage,
 } from 'three';
 
 interface DataPoint {
@@ -85,7 +85,7 @@ export class DataLayer extends Layer {
 
   // Shaders
   private static readonly pointShader = {
-    vertexShader: \`
+    vertexShader: `
       attribute float size;
       attribute vec3 color;
       attribute float value;
@@ -98,8 +98,8 @@ export class DataLayer extends Layer {
         gl_PointSize = size * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       varying vec3 vColor;
       varying float vValue;
       void main() {
@@ -109,11 +109,11 @@ export class DataLayer extends Layer {
         float glow = exp(-dist * 3.0) * vValue;
         gl_FragColor = vec4(vColor, alpha) + vec4(vColor * glow, glow * 0.5);
       }
-    \`
+    `,
   };
 
   private static readonly flowShader = {
-    vertexShader: \`
+    vertexShader: `
       uniform float time;
       attribute float progress;
       varying float vProgress;
@@ -123,8 +123,8 @@ export class DataLayer extends Layer {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform vec3 color;
       uniform float value;
       varying float vProgress;
@@ -134,7 +134,7 @@ export class DataLayer extends Layer {
         alpha *= smoothstep(0.0, 0.1, vProgress) * smoothstep(1.0, 0.9, vProgress);
         gl_FragColor = vec4(color, alpha * value);
       }
-    \`
+    `,
   };
 
   constructor(config: DataLayerConfig) {
@@ -148,29 +148,35 @@ export class DataLayer extends Layer {
 
   protected async loadResources(): Promise<void> {
     // Create materials
-    this.resources.materials.set('point', new ShaderMaterial({
-      uniforms: {
-        time: { value: 0 }
-      },
-      vertexShader: DataLayer.pointShader.vertexShader,
-      fragmentShader: DataLayer.pointShader.fragmentShader,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'point',
+      new ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+        },
+        vertexShader: DataLayer.pointShader.vertexShader,
+        fragmentShader: DataLayer.pointShader.fragmentShader,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      })
+    );
 
-    this.resources.materials.set('flow', new ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        color: { value: new Color(0x00ff00) },
-        value: { value: 1.0 }
-      },
-      vertexShader: DataLayer.flowShader.vertexShader,
-      fragmentShader: DataLayer.flowShader.fragmentShader,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'flow',
+      new ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          color: { value: new Color(0x00ff00) },
+          value: { value: 1.0 },
+        },
+        vertexShader: DataLayer.flowShader.vertexShader,
+        fragmentShader: DataLayer.flowShader.fragmentShader,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      })
+    );
 
     // Load initial data
     if (this.dataConfig.points) {
@@ -225,14 +231,18 @@ export class DataLayer extends Layer {
     const positions = new Float32Array([
       config.position.x,
       config.position.y,
-      config.position.z
+      config.position.z,
     ]);
     const colors = new Float32Array([
-      (config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 16 & 255 / 255,
-      (config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 8 & 255 / 255,
-      (config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) & 255 / 255
+      ((config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 16) &
+        (255 / 255),
+      ((config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 8) &
+        (255 / 255),
+      (config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) & (255 / 255),
     ]);
-    const sizes = new Float32Array([config.size ?? this.dataConfig.defaultSize ?? 1]);
+    const sizes = new Float32Array([
+      config.size ?? this.dataConfig.defaultSize ?? 1,
+    ]);
     const values = new Float32Array([config.value]);
 
     geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -246,7 +256,7 @@ export class DataLayer extends Layer {
 
     // Store point
     this.points.set(config.id, point);
-    this.resources.objects.set(\`point_\${config.id}\`, point);
+    this.resources.objects.set(`point_${config.id}`, point);
 
     // Add to root
     this.root.add(point);
@@ -257,12 +267,16 @@ export class DataLayer extends Layer {
   /**
    * Create a data connection
    */
-  private async createDataConnection(config: DataConnection): Promise<Object3D> {
+  private async createDataConnection(
+    config: DataConnection
+  ): Promise<Object3D> {
     const fromPoint = this.points.get(config.from);
     const toPoint = this.points.get(config.to);
 
     if (!fromPoint || !toPoint) {
-      throw new Error(\`Invalid connection points: \${config.from} -> \${config.to}\`);
+      throw new Error(
+        `Invalid connection points: ${config.from} -> ${config.to}`
+      );
     }
 
     const geometry = new BufferGeometry();
@@ -270,17 +284,17 @@ export class DataLayer extends Layer {
       uniforms: {
         color: { value: new Color(config.color ?? 0x00ff00) },
         value: { value: config.value ?? 1 },
-        time: { value: 0 }
+        time: { value: 0 },
       },
-      vertexShader: \`
+      vertexShader: `
         uniform float time;
         varying float vProgress;
         void main() {
           vProgress = position.y;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
-      \`,
-      fragmentShader: \`
+      `,
+      fragmentShader: `
         uniform vec3 color;
         uniform float value;
         varying float vProgress;
@@ -288,10 +302,10 @@ export class DataLayer extends Layer {
           float alpha = sin(vProgress * 3.14159);
           gl_FragColor = vec4(color, alpha * value);
         }
-      \`,
+      `,
       transparent: true,
       blending: AdditiveBlending,
-      depthWrite: false
+      depthWrite: false,
     });
 
     const line = new Line(geometry, material);
@@ -299,7 +313,7 @@ export class DataLayer extends Layer {
 
     // Store connection
     this.connections.set(config.id, line);
-    this.resources.objects.set(\`connection_\${config.id}\`, line);
+    this.resources.objects.set(`connection_${config.id}`, line);
 
     // Add to root
     this.root.add(line);
@@ -312,11 +326,11 @@ export class DataLayer extends Layer {
    */
   private async createDataCluster(config: DataCluster): Promise<Object3D> {
     const points = config.points
-      .map(id => this.points.get(id))
-      .filter(point => point !== undefined) as Object3D[];
+      .map((id) => this.points.get(id))
+      .filter((point) => point !== undefined) as Object3D[];
 
     if (points.length === 0) {
-      throw new Error(\`No valid points for cluster: \${config.id}\`);
+      throw new Error(`No valid points for cluster: ${config.id}`);
     }
 
     // Calculate cluster center if not provided
@@ -328,7 +342,7 @@ export class DataLayer extends Layer {
       color: config.color ?? 0x00ff00,
       transparent: true,
       opacity: 0.2,
-      wireframe: true
+      wireframe: true,
     });
 
     const cluster = new Mesh(geometry, material);
@@ -337,7 +351,7 @@ export class DataLayer extends Layer {
 
     // Store cluster
     this.clusters.set(config.id, cluster);
-    this.resources.objects.set(\`cluster_\${config.id}\`, cluster);
+    this.resources.objects.set(`cluster_${config.id}`, cluster);
 
     // Add to root
     this.root.add(cluster);
@@ -361,7 +375,7 @@ export class DataLayer extends Layer {
 
     // Store flow
     this.flows.set(config.id, flow);
-    this.resources.objects.set(\`flow_\${config.id}\`, flow);
+    this.resources.objects.set(`flow_${config.id}`, flow);
 
     // Add to root
     this.root.add(flow);
@@ -374,7 +388,7 @@ export class DataLayer extends Layer {
    */
   private calculateClusterCenter(points: Object3D[]): Vector3 {
     const center = new Vector3();
-    points.forEach(point => {
+    points.forEach((point) => {
       center.add(point.position);
     });
     return center.divideScalar(points.length);
@@ -385,7 +399,7 @@ export class DataLayer extends Layer {
    */
   private calculateClusterRadius(points: Object3D[], center: Vector3): number {
     let maxDistance = 0;
-    points.forEach(point => {
+    points.forEach((point) => {
       const distance = point.position.distanceTo(center);
       if (distance > maxDistance) {
         maxDistance = distance;
@@ -398,7 +412,7 @@ export class DataLayer extends Layer {
    * Update materials
    */
   private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       if (material instanceof ShaderMaterial && material.uniforms.time) {
         material.uniforms.time.value += deltaTime;
       }
@@ -410,7 +424,8 @@ export class DataLayer extends Layer {
    */
   private updateFlow(flow: Object3D, deltaTime: number): void {
     if (flow.material instanceof ShaderMaterial) {
-      flow.material.uniforms.time.value += deltaTime * (flow.userData.speed ?? 1);
+      flow.material.uniforms.time.value +=
+        deltaTime * (flow.userData.speed ?? 1);
     }
   }
 

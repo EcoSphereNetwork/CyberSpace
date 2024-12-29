@@ -10,7 +10,7 @@ import {
   Object3D,
   PlaneGeometry,
   SphereGeometry,
-  CylinderGeometry
+  CylinderGeometry,
 } from 'three';
 
 interface PhysicalObject {
@@ -63,7 +63,7 @@ export class PhysicalLayer extends Layer {
     const defaultMaterial = new MeshStandardMaterial({
       color: 0x808080,
       metalness: 0.1,
-      roughness: 0.7
+      roughness: 0.7,
     });
     this.resources.materials.set('default', defaultMaterial);
 
@@ -90,7 +90,9 @@ export class PhysicalLayer extends Layer {
   /**
    * Create a physical object
    */
-  private async createPhysicalObject(config: PhysicalObject): Promise<Object3D> {
+  private async createPhysicalObject(
+    config: PhysicalObject
+  ): Promise<Object3D> {
     let geometry;
     switch (config.type) {
       case 'box':
@@ -115,7 +117,8 @@ export class PhysicalLayer extends Layer {
       metalness: config.material?.metalness ?? 0.1,
       roughness: config.material?.roughness ?? 0.7,
       opacity: config.material?.opacity ?? 1,
-      transparent: config.material?.opacity !== undefined && config.material.opacity < 1
+      transparent:
+        config.material?.opacity !== undefined && config.material.opacity < 1,
     });
 
     // Create mesh
@@ -197,7 +200,7 @@ export class PhysicalLayer extends Layer {
     if (object) {
       object.removeFromParent();
       this.resources.objects.delete(id);
-      
+
       // Remove associated material
       const material = this.resources.materials.get(`${id}_material`);
       if (material) {
@@ -242,7 +245,9 @@ export class PhysicalLayer extends Layer {
    * Set directional light intensity
    */
   public setDirectionalIntensity(intensity: number): void {
-    const directional = this.resources.objects.get('directional_light') as DirectionalLight;
+    const directional = this.resources.objects.get(
+      'directional_light'
+    ) as DirectionalLight;
     if (directional) {
       directional.intensity = intensity;
       this.emit('directionalIntensityChanged', intensity);

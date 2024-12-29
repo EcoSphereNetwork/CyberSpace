@@ -37,7 +37,7 @@ export interface AppState {
 export class App extends EventEmitter {
   private static instance: App;
   private state: AppState;
-  
+
   // Core systems
   public readonly resources: ResourceManager;
   public readonly security: SecurityManager;
@@ -57,7 +57,7 @@ export class App extends EventEmitter {
       activeScene: null,
       vrEnabled: config.vr?.enabled ?? false,
       performanceMode: 'balanced',
-      debug: config.debug ?? false
+      debug: config.debug ?? false,
     };
 
     // Initialize core systems
@@ -106,7 +106,7 @@ export class App extends EventEmitter {
         this.notifications.initialize(),
         this.layers.initialize(),
         this.scenes.initialize(),
-        this.xr.initialize()
+        this.xr.initialize(),
       ]);
 
       // Set initial scene
@@ -116,7 +116,6 @@ export class App extends EventEmitter {
 
       this.state.initialized = true;
       this.emit('initialized');
-
     } catch (error) {
       console.error('Failed to initialize app:', error);
       this.emit('error', error);
@@ -146,7 +145,6 @@ export class App extends EventEmitter {
 
       this.state.initialized = false;
       this.emit('shutdown');
-
     } catch (error) {
       console.error('Error during shutdown:', error);
       this.emit('error', error);

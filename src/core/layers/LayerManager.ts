@@ -28,7 +28,7 @@ export class LayerManager extends EventEmitter {
     this.config = {
       maxLayers: config.maxLayers ?? 100,
       autoActivate: config.autoActivate ?? true,
-      updateInterval: config.updateInterval ?? 1000 / 60 // 60 FPS
+      updateInterval: config.updateInterval ?? 1000 / 60, // 60 FPS
     };
 
     this.scene = scene;
@@ -44,7 +44,10 @@ export class LayerManager extends EventEmitter {
    */
   public async initialize(): Promise<void> {
     // Start update loop
-    this.updateInterval = window.setInterval(this.update, this.config.updateInterval);
+    this.updateInterval = window.setInterval(
+      this.update,
+      this.config.updateInterval
+    );
 
     this.emit('initialized');
   }
@@ -70,7 +73,10 @@ export class LayerManager extends EventEmitter {
   /**
    * Add a layer
    */
-  public async addLayer(layerClass: typeof Layer, config: LayerConfig): Promise<void> {
+  public async addLayer(
+    layerClass: typeof Layer,
+    config: LayerConfig
+  ): Promise<void> {
     if (this.layers.size >= this.config.maxLayers) {
       throw new Error('Maximum number of layers reached');
     }
@@ -88,7 +94,7 @@ export class LayerManager extends EventEmitter {
     // Store layer
     this.layers.set(config.id, {
       config,
-      instance: layer
+      instance: layer,
     });
 
     // Initialize layer

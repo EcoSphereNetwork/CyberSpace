@@ -15,7 +15,7 @@ import {
   SpriteMaterial,
   InstancedMesh,
   Matrix4,
-  DynamicDrawUsage
+  DynamicDrawUsage,
 } from 'three';
 
 interface EffectInstance {
@@ -62,7 +62,7 @@ export class EffectLayer extends Layer {
 
   // Shaders
   private static readonly particleShader = {
-    vertexShader: \`
+    vertexShader: `
       attribute float size;
       attribute vec3 color;
       attribute float opacity;
@@ -75,8 +75,8 @@ export class EffectLayer extends Layer {
         gl_PointSize = size * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform sampler2D texture;
       varying vec3 vColor;
       varying float vOpacity;
@@ -84,11 +84,11 @@ export class EffectLayer extends Layer {
         vec4 texColor = texture2D(texture, gl_PointCoord);
         gl_FragColor = vec4(vColor, texColor.a * vOpacity);
       }
-    \`
+    `,
   };
 
   private static readonly trailShader = {
-    vertexShader: \`
+    vertexShader: `
       attribute float progress;
       varying float vProgress;
       varying vec2 vUv;
@@ -97,8 +97,8 @@ export class EffectLayer extends Layer {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform vec3 color;
       uniform float time;
       varying float vProgress;
@@ -108,7 +108,7 @@ export class EffectLayer extends Layer {
         alpha *= sin(vProgress * 3.14159);
         gl_FragColor = vec4(color, alpha);
       }
-    \`
+    `,
   };
 
   constructor(config: EffectLayerConfig) {
@@ -119,7 +119,7 @@ export class EffectLayer extends Layer {
       defaultDuration: config.defaultDuration ?? 2,
       defaultIntensity: config.defaultIntensity ?? 1,
       blending: config.blending ?? true,
-      postProcessing: config.postProcessing ?? false
+      postProcessing: config.postProcessing ?? false,
     };
     this.effects = new Map();
     this.instances = new Map();
@@ -129,40 +129,48 @@ export class EffectLayer extends Layer {
   protected async loadResources(): Promise<void> {
     // Load textures
     const textureLoader = new TextureLoader();
-    const particleTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-      textureLoader.load(
-        '/assets/textures/particle.png',
-        resolve,
-        undefined,
-        reject
-      );
-    });
+    const particleTexture = await new Promise<THREE.Texture>(
+      (resolve, reject) => {
+        textureLoader.load(
+          '/assets/textures/particle.png',
+          resolve,
+          undefined,
+          reject
+        );
+      }
+    );
     this.resources.textures.set('particle', particleTexture);
 
     // Create materials
-    this.resources.materials.set('particle', new ShaderMaterial({
-      uniforms: {
-        texture: { value: particleTexture },
-        time: { value: 0 }
-      },
-      vertexShader: EffectLayer.particleShader.vertexShader,
-      fragmentShader: EffectLayer.particleShader.fragmentShader,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'particle',
+      new ShaderMaterial({
+        uniforms: {
+          texture: { value: particleTexture },
+          time: { value: 0 },
+        },
+        vertexShader: EffectLayer.particleShader.vertexShader,
+        fragmentShader: EffectLayer.particleShader.fragmentShader,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      })
+    );
 
-    this.resources.materials.set('trail', new ShaderMaterial({
-      uniforms: {
-        color: { value: new Color(0xffffff) },
-        time: { value: 0 }
-      },
-      vertexShader: EffectLayer.trailShader.vertexShader,
-      fragmentShader: EffectLayer.trailShader.fragmentShader,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    }));
+    this.resources.materials.set(
+      'trail',
+      new ShaderMaterial({
+        uniforms: {
+          color: { value: new Color(0xffffff) },
+          time: { value: 0 },
+        },
+        vertexShader: EffectLayer.trailShader.vertexShader,
+        fragmentShader: EffectLayer.trailShader.fragmentShader,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      })
+    );
   }
 
   protected async setup(): Promise<void> {
@@ -294,7 +302,9 @@ export class EffectLayer extends Layer {
     const config = effect.userData.config as Effect;
     effect.userData.age += deltaTime;
 
-    const progress = effect.userData.age / (config.duration ?? this.effectConfig.defaultDuration);
+    const progress =
+      effect.userData.age /
+      (config.duration ?? this.effectConfig.defaultDuration);
 
     if (progress >= 1) {
       this.removeEffect(config.id);
@@ -343,7 +353,10 @@ export class EffectLayer extends Layer {
   /**
    * Update effect instances
    */
-  private updateInstances(instances: EffectInstance[], deltaTime: number): void {
+  private updateInstances(
+    instances: EffectInstance[],
+    deltaTime: number
+  ): void {
     instances.forEach((instance, index) => {
       instance.age += deltaTime;
       if (instance.age >= instance.lifetime) {
@@ -362,7 +375,7 @@ export class EffectLayer extends Layer {
    * Update materials
    */
   private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach(material => {
+    this.resources.materials.forEach((material) => {
       if (material instanceof ShaderMaterial && material.uniforms.time) {
         material.uniforms.time.value += deltaTime;
       }
@@ -396,7 +409,7 @@ export class EffectLayer extends Layer {
         effect = this.createPortalEffect(config);
         break;
       default:
-        throw new Error(\`Unknown effect type: \${config.type}\`);
+        throw new Error(`Unknown effect type: ${config.type}`);
     }
 
     this.effects.set(config.id, effect);

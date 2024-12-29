@@ -6,7 +6,7 @@ import { useApp } from '@/hooks/useApp';
 const Container = styled.div`
   width: 800px;
   height: 600px;
-  background: ${props => props.theme.colors.background.paper};
+  background: ${(props) => props.theme.colors.background.paper};
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@ const Container = styled.div`
 
 const Header = styled.div`
   padding: 16px;
-  border-bottom: 1px solid ${props => props.theme.colors.surface.hover};
+  border-bottom: 1px solid ${(props) => props.theme.colors.surface.hover};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,8 +23,8 @@ const Header = styled.div`
 
 const Title = styled.h2`
   margin: 0;
-  font-size: ${props => props.theme.typography.fontSizes.xl};
-  color: ${props => props.theme.colors.text.primary};
+  font-size: ${(props) => props.theme.typography.fontSizes.xl};
+  color: ${(props) => props.theme.colors.text.primary};
 `;
 
 const Content = styled.div`
@@ -53,20 +53,21 @@ const PluginList = styled.div`
 `;
 
 const PluginCard = styled.div<{ enabled: boolean }>`
-  background: ${props => props.theme.colors.surface.default};
+  background: ${(props) => props.theme.colors.surface.default};
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border: 1px solid ${props => 
-    props.enabled 
-      ? props.theme.colors.primary.main 
-      : props.theme.colors.surface.hover};
+  border: 1px solid
+    ${(props) =>
+      props.enabled
+        ? props.theme.colors.primary.main
+        : props.theme.colors.surface.hover};
   transition: all 0.2s;
 
   &:hover {
-    border-color: ${props => props.theme.colors.primary.main};
+    border-color: ${(props) => props.theme.colors.primary.main};
   }
 `;
 
@@ -83,27 +84,27 @@ const PluginInfo = styled.div`
 
 const PluginName = styled.h3`
   margin: 0;
-  font-size: ${props => props.theme.typography.fontSizes.lg};
-  color: ${props => props.theme.colors.text.primary};
+  font-size: ${(props) => props.theme.typography.fontSizes.lg};
+  color: ${(props) => props.theme.colors.text.primary};
 `;
 
 const PluginVersion = styled.span`
-  font-size: ${props => props.theme.typography.fontSizes.sm};
-  color: ${props => props.theme.colors.text.secondary};
+  font-size: ${(props) => props.theme.typography.fontSizes.sm};
+  color: ${(props) => props.theme.colors.text.secondary};
 `;
 
 const PluginDescription = styled.p`
   margin: 8px 0;
-  font-size: ${props => props.theme.typography.fontSizes.md};
-  color: ${props => props.theme.colors.text.secondary};
+  font-size: ${(props) => props.theme.typography.fontSizes.md};
+  color: ${(props) => props.theme.colors.text.secondary};
 `;
 
 const PluginMeta = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: ${props => props.theme.typography.fontSizes.sm};
-  color: ${props => props.theme.colors.text.secondary};
+  font-size: ${(props) => props.theme.typography.fontSizes.sm};
+  color: ${(props) => props.theme.colors.text.secondary};
 `;
 
 const MetaItem = styled.div`
@@ -122,11 +123,11 @@ const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
   padding: 8px 16px;
   border-radius: 4px;
   border: none;
-  font-size: ${props => props.theme.typography.fontSizes.sm};
+  font-size: ${(props) => props.theme.typography.fontSizes.sm};
   cursor: pointer;
   transition: all 0.2s;
 
-  ${props => {
+  ${(props) => {
     switch (props.variant) {
       case 'primary':
         return `
@@ -160,7 +161,10 @@ const Switch = styled.button<{ enabled: boolean }>`
   width: 48px;
   height: 24px;
   border-radius: 12px;
-  background: ${props => props.enabled ? props.theme.colors.primary.main : props.theme.colors.surface.hover};
+  background: ${(props) =>
+    props.enabled
+      ? props.theme.colors.primary.main
+      : props.theme.colors.surface.hover};
   border: none;
   cursor: pointer;
   position: relative;
@@ -170,11 +174,11 @@ const Switch = styled.button<{ enabled: boolean }>`
     content: '';
     position: absolute;
     top: 2px;
-    left: ${props => props.enabled ? '26px' : '2px'};
+    left: ${(props) => (props.enabled ? '26px' : '2px')};
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: ${props => props.theme.colors.text.primary};
+    background: ${(props) => props.theme.colors.text.primary};
     transition: left 0.2s;
   }
 `;
@@ -247,8 +251,8 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
           <div>{error}</div>
         ) : (
           <PluginList>
-            {plugins.map(plugin => (
-              <PluginCard 
+            {plugins.map((plugin) => (
+              <PluginCard
                 key={plugin.id}
                 enabled={app.plugins.isPluginEnabled(plugin.id)}
               >
@@ -258,9 +262,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
                       {plugin.name}
                       <PluginVersion> v{plugin.version}</PluginVersion>
                     </PluginName>
-                    <PluginDescription>
-                      {plugin.description}
-                    </PluginDescription>
+                    <PluginDescription>{plugin.description}</PluginDescription>
                   </PluginInfo>
 
                   <Switch
@@ -287,7 +289,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
 
                 <PluginControls>
                   {plugin.homepage && (
-                    <Button 
+                    <Button
                       onClick={() => window.open(plugin.homepage, '_blank')}
                     >
                       Homepage

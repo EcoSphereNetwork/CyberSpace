@@ -17,7 +17,7 @@ import {
   DynamicDrawUsage,
   MeshPhongMaterial,
   DirectionalLight,
-  AmbientLight
+  AmbientLight,
 } from 'three';
 import SimplexNoise from 'simplex-noise';
 
@@ -85,7 +85,7 @@ export class TerrainLayer extends Layer {
 
   // Shaders
   private static readonly terrainShader = {
-    vertexShader: \`
+    vertexShader: `
       uniform sampler2D heightMap;
       uniform float heightScale;
       uniform float minHeight;
@@ -115,8 +115,8 @@ export class TerrainLayer extends Layer {
         
         gl_Position = projectionMatrix * mvPosition;
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform sampler2D diffuseMap;
       uniform sampler2D normalMap;
       uniform sampler2D roughnessMap;
@@ -144,11 +144,11 @@ export class TerrainLayer extends Layer {
         
         gl_FragColor = vec4(color * diffuse.rgb * diff, 1.0);
       }
-    \`
+    `,
   };
 
   private static readonly waterShader = {
-    vertexShader: \`
+    vertexShader: `
       uniform float time;
       uniform float waveHeight;
       uniform float waveFrequency;
@@ -173,8 +173,8 @@ export class TerrainLayer extends Layer {
         
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
-    \`,
-    fragmentShader: \`
+    `,
+    fragmentShader: `
       uniform vec3 color;
       uniform float opacity;
       uniform float time;
@@ -193,13 +193,15 @@ export class TerrainLayer extends Layer {
         vec3 finalColor = mix(color, vec3(1.0), fresnel + wave);
         gl_FragColor = vec4(finalColor, opacity);
       }
-    \`
+    `,
   };
 
   constructor(config: TerrainLayerConfig) {
     super(config);
     this.terrainConfig = config;
-    this.noise = new SimplexNoise(config.terrain?.seed?.toString() ?? Math.random().toString());
+    this.noise = new SimplexNoise(
+      config.terrain?.seed?.toString() ?? Math.random().toString()
+    );
     this.heightData = new Float32Array(0);
     this.vegetation = new Map();
     this.waterMesh = null;
@@ -209,14 +211,26 @@ export class TerrainLayer extends Layer {
     // Load textures
     const textureLoader = new TextureLoader();
     const [diffuseMap, normalMap, roughnessMap] = await Promise.all([
-      this.loadTexture(textureLoader, this.terrainConfig.terrain?.textures?.diffuse ?? '/assets/textures/terrain_diffuse.png'),
-      this.loadTexture(textureLoader, this.terrainConfig.terrain?.textures?.normal ?? '/assets/textures/terrain_normal.png'),
-      this.loadTexture(textureLoader, this.terrainConfig.terrain?.textures?.roughness ?? '/assets/textures/terrain_roughness.png')
+      this.loadTexture(
+        textureLoader,
+        this.terrainConfig.terrain?.textures?.diffuse ??
+          '/assets/textures/terrain_diffuse.png'
+      ),
+      this.loadTexture(
+        textureLoader,
+        this.terrainConfig.terrain?.textures?.normal ??
+          '/assets/textures/terrain_normal.png'
+      ),
+      this.loadTexture(
+        textureLoader,
+        this.terrainConfig.terrain?.textures?.roughness ??
+          '/assets/textures/terrain_roughness.png'
+      ),
     ]);
 
     // Configure texture tiling
     const tiling = this.terrainConfig.terrain?.tiling ?? new Vector2(1, 1);
-    [diffuseMap, normalMap, roughnessMap].forEach(texture => {
+    [diffuseMap, normalMap, roughnessMap].forEach((texture) => {
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
       texture.repeat.copy(tiling);
@@ -228,35 +242,45 @@ export class TerrainLayer extends Layer {
     this.resources.textures.set('roughness', roughnessMap);
 
     // Create materials
-    this.resources.materials.set('terrain', new ShaderMaterial({
-      uniforms: {
-        heightMap: { value: null },
-        diffuseMap: { value: diffuseMap },
-        normalMap: { value: normalMap },
-        roughnessMap: { value: roughnessMap },
-        tiling: { value: tiling },
-        heightScale: { value: this.terrainConfig.terrain?.heightScale ?? 10 },
-        minHeight: { value: this.terrainConfig.terrain?.minHeight ?? 0 },
-        maxHeight: { value: this.terrainConfig.terrain?.maxHeight ?? 100 },
-        lowColor: { value: new Color(0x2d4c1e) },
-        highColor: { value: new Color(0x6b8e23) }
-      },
-      vertexShader: TerrainLayer.terrainShader.vertexShader,
-      fragmentShader: TerrainLayer.terrainShader.fragmentShader
-    }));
+    this.resources.materials.set(
+      'terrain',
+      new ShaderMaterial({
+        uniforms: {
+          heightMap: { value: null },
+          diffuseMap: { value: diffuseMap },
+          normalMap: { value: normalMap },
+          roughnessMap: { value: roughnessMap },
+          tiling: { value: tiling },
+          heightScale: { value: this.terrainConfig.terrain?.heightScale ?? 10 },
+          minHeight: { value: this.terrainConfig.terrain?.minHeight ?? 0 },
+          maxHeight: { value: this.terrainConfig.terrain?.maxHeight ?? 100 },
+          lowColor: { value: new Color(0x2d4c1e) },
+          highColor: { value: new Color(0x6b8e23) },
+        },
+        vertexShader: TerrainLayer.terrainShader.vertexShader,
+        fragmentShader: TerrainLayer.terrainShader.fragmentShader,
+      })
+    );
 
-    this.resources.materials.set('water', new ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        color: { value: new Color(this.terrainConfig.water?.color ?? 0x0077be) },
-        opacity: { value: this.terrainConfig.water?.opacity ?? 0.8 },
-        waveHeight: { value: this.terrainConfig.water?.waveHeight ?? 0.5 },
-        waveFrequency: { value: this.terrainConfig.water?.waveFrequency ?? 1 }
-      },
-      vertexShader: TerrainLayer.waterShader.vertexShader,
-      fragmentShader: TerrainLayer.waterShader.fragmentShader,
-      transparent: true
-    }));
+    this.resources.materials.set(
+      'water',
+      new ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          color: {
+            value: new Color(this.terrainConfig.water?.color ?? 0x0077be),
+          },
+          opacity: { value: this.terrainConfig.water?.opacity ?? 0.8 },
+          waveHeight: { value: this.terrainConfig.water?.waveHeight ?? 0.5 },
+          waveFrequency: {
+            value: this.terrainConfig.water?.waveFrequency ?? 1,
+          },
+        },
+        vertexShader: TerrainLayer.waterShader.vertexShader,
+        fragmentShader: TerrainLayer.waterShader.fragmentShader,
+        transparent: true,
+      })
+    );
 
     // Create terrain
     await this.createTerrain();
@@ -297,7 +321,10 @@ export class TerrainLayer extends Layer {
   /**
    * Load a texture
    */
-  private loadTexture(loader: TextureLoader, url: string): Promise<THREE.Texture> {
+  private loadTexture(
+    loader: TextureLoader,
+    url: string
+  ): Promise<THREE.Texture> {
     return new Promise((resolve, reject) => {
       loader.load(url, resolve, undefined, reject);
     });
@@ -308,16 +335,12 @@ export class TerrainLayer extends Layer {
    */
   private async createTerrain(): Promise<void> {
     const size = this.terrainConfig.terrain?.size ?? new Vector2(100, 100);
-    const segments = this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
+    const segments =
+      this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
     const heightScale = this.terrainConfig.terrain?.heightScale ?? 10;
 
     // Create geometry
-    const geometry = new PlaneGeometry(
-      size.x,
-      size.y,
-      segments.x,
-      segments.y
-    );
+    const geometry = new PlaneGeometry(size.x, size.y, segments.x, segments.y);
 
     // Generate height data
     this.heightData = new Float32Array((segments.x + 1) * (segments.y + 1));
@@ -345,23 +368,24 @@ export class TerrainLayer extends Layer {
    * Generate terrain height data
    */
   private generateTerrain(): void {
-    const segments = this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
+    const segments =
+      this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
     const roughness = this.terrainConfig.terrain?.roughness ?? 1;
 
     for (let y = 0; y <= segments.y; y++) {
       for (let x = 0; x <= segments.x; x++) {
         const i = y * (segments.x + 1) + x;
-        
+
         // Multiple octaves of noise
         let height = 0;
         let frequency = 1;
         let amplitude = 1;
-        
+
         for (let o = 0; o < 4; o++) {
-          const nx = x / segments.x * frequency * roughness;
-          const ny = y / segments.y * frequency * roughness;
+          const nx = (x / segments.x) * frequency * roughness;
+          const ny = (y / segments.y) * frequency * roughness;
           height += this.noise.noise2D(nx, ny) * amplitude;
-          
+
           frequency *= 2;
           amplitude *= 0.5;
         }
@@ -414,7 +438,7 @@ export class TerrainLayer extends Layer {
 
     // Create instanced mesh
     const material = new MeshPhongMaterial({
-      color: config.color ?? 0x00ff00
+      color: config.color ?? 0x00ff00,
     });
     const instances = new InstancedMesh(geometry, material, count);
     instances.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -439,18 +463,10 @@ export class TerrainLayer extends Layer {
       // Random scale and rotation
       const s = (Math.random() * 0.5 + 0.5) * (config.randomness ?? 0.2);
       scale.set(s, s, s).multiply(config.scale ?? new Vector3(1, 1, 1));
-      rotation.set(
-        0,
-        Math.random() * Math.PI * 2,
-        0
-      );
+      rotation.set(0, Math.random() * Math.PI * 2, 0);
 
       // Set matrix
-      matrix.compose(
-        position,
-        rotation.setFromVector3(rotation),
-        scale
-      );
+      matrix.compose(position, rotation.setFromVector3(rotation), scale);
       instances.setMatrixAt(i, matrix);
     }
 
@@ -509,7 +525,9 @@ export class TerrainLayer extends Layer {
       this.terrainConfig.lighting?.sun?.color ?? 0xffffff,
       this.terrainConfig.lighting?.sun?.intensity ?? 1
     );
-    sun.position.copy(this.terrainConfig.lighting?.sun?.position ?? new Vector3(100, 100, 0));
+    sun.position.copy(
+      this.terrainConfig.lighting?.sun?.position ?? new Vector3(100, 100, 0)
+    );
     sun.target.position.set(0, 0, 0);
     this.root.add(sun);
     this.root.add(sun.target);
@@ -520,7 +538,8 @@ export class TerrainLayer extends Layer {
    */
   private getHeightAt(x: number, z: number): number {
     const size = this.terrainConfig.terrain?.size ?? new Vector2(100, 100);
-    const segments = this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
+    const segments =
+      this.terrainConfig.terrain?.segments ?? new Vector2(100, 100);
     const heightScale = this.terrainConfig.terrain?.heightScale ?? 10;
 
     // Convert world position to grid coordinates

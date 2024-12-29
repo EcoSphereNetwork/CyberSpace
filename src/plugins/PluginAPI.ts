@@ -39,7 +39,10 @@ export interface PluginLifecycle {
 /**
  * Base class for plugins to extend
  */
-export abstract class BasePlugin extends EventEmitter implements PluginLifecycle {
+export abstract class BasePlugin
+  extends EventEmitter
+  implements PluginLifecycle
+{
   protected readonly context: PluginContext;
 
   constructor(context: PluginContext) {
@@ -130,7 +133,9 @@ export class PluginAPI {
   }
 
   // Performance API
-  public setPerformanceMode(mode: 'quality' | 'balanced' | 'performance'): void {
+  public setPerformanceMode(
+    mode: 'quality' | 'balanced' | 'performance'
+  ): void {
     this.app.setPerformanceMode(mode);
   }
 

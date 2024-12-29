@@ -12,16 +12,16 @@ export const ExampleScenes: SceneConfig[] = [
     camera: {
       position: new Vector3(0, 10, 20),
       target: new Vector3(0, 0, 0),
-      fov: 75
+      fov: 75,
     },
     controls: {
       enabled: true,
       autoRotate: false,
-      enableDamping: true
+      enableDamping: true,
     },
     onEnter: () => {
       console.log('Entered default scene');
-    }
+    },
   },
 
   // Data visualization scene
@@ -31,12 +31,12 @@ export const ExampleScenes: SceneConfig[] = [
     camera: {
       position: new Vector3(0, 5, 10),
       target: new Vector3(0, 0, 0),
-      fov: 60
+      fov: 60,
     },
     controls: {
       enabled: true,
       autoRotate: true,
-      enableDamping: true
+      enableDamping: true,
     },
     onEnter: () => {
       // Start data updates
@@ -45,7 +45,7 @@ export const ExampleScenes: SceneConfig[] = [
     onLeave: () => {
       // Cleanup data updates
       console.log('Stopping data visualization');
-    }
+    },
   },
 
   // VR environment scene
@@ -55,10 +55,10 @@ export const ExampleScenes: SceneConfig[] = [
     camera: {
       position: new Vector3(0, 2, 0),
       target: new Vector3(0, 2, -1),
-      fov: 90
+      fov: 90,
     },
     controls: {
-      enabled: false // VR controls will be used instead
+      enabled: false, // VR controls will be used instead
     },
     onEnter: () => {
       // Initialize VR
@@ -67,7 +67,7 @@ export const ExampleScenes: SceneConfig[] = [
     onLeave: () => {
       // Cleanup VR
       console.log('Exiting VR mode');
-    }
+    },
   },
 
   // Night scene
@@ -77,17 +77,17 @@ export const ExampleScenes: SceneConfig[] = [
     camera: {
       position: new Vector3(0, 15, 30),
       target: new Vector3(0, 0, 0),
-      fov: 70
+      fov: 70,
     },
     controls: {
       enabled: true,
       autoRotate: true,
-      enableDamping: true
+      enableDamping: true,
     },
     onEnter: () => {
       // Start night cycle
       console.log('Starting night cycle');
-    }
+    },
   },
 
   // Storm scene
@@ -97,12 +97,12 @@ export const ExampleScenes: SceneConfig[] = [
     camera: {
       position: new Vector3(0, 20, 40),
       target: new Vector3(0, 0, 0),
-      fov: 65
+      fov: 65,
     },
     controls: {
       enabled: true,
       autoRotate: false,
-      enableDamping: true
+      enableDamping: true,
     },
     onEnter: () => {
       // Start storm effects
@@ -111,6 +111,6 @@ export const ExampleScenes: SceneConfig[] = [
     onLeave: () => {
       // Cleanup storm effects
       console.log('Storm passing');
-    }
-  }
+    },
+  },
 ];

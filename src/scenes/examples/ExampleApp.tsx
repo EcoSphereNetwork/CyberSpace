@@ -3,20 +3,20 @@ import styled from '@emotion/styled';
 import { SceneManager } from '../SceneManager';
 import { ExampleScenes } from './ExampleScenes';
 
-const Container = styled.div\`
+const Container = styled.div`
   width: 100vw;
   height: 100vh;
   position: relative;
   overflow: hidden;
   background: #000;
-\`;
+`;
 
-const Canvas = styled.div\`
+const Canvas = styled.div`
   width: 100%;
   height: 100%;
-\`;
+`;
 
-const Controls = styled.div\`
+const Controls = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
@@ -27,28 +27,28 @@ const Controls = styled.div\`
   background: rgba(0, 0, 0, 0.8);
   border-radius: 8px;
   z-index: 1000;
-\`;
+`;
 
-const Button = styled.button<{ active?: boolean }>\`
+const Button = styled.button<{ active?: boolean }>`
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
-  background: \${props => props.active ? '#00ff00' : '#333'};
+  background: ${(props) => (props.active ? '#00ff00' : '#333')};
   color: white;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: \${props => props.active ? '#00cc00' : '#444'};
+    background: ${(props) => (props.active ? '#00cc00' : '#444')};
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-\`;
+`;
 
-const Status = styled.div\`
+const Status = styled.div`
   position: absolute;
   bottom: 20px;
   left: 20px;
@@ -58,7 +58,7 @@ const Status = styled.div\`
   color: white;
   font-family: monospace;
   z-index: 1000;
-\`;
+`;
 
 export const ExampleApp: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,18 +75,18 @@ export const ExampleApp: React.FC = () => {
       container: containerRef.current,
       defaultScene: 'default',
       scenes: ExampleScenes,
-      autoStart: true
+      autoStart: true,
     });
 
     // Listen for events
-    managerRef.current.on('sceneLoaded', scene => {
+    managerRef.current.on('sceneLoaded', (scene) => {
       setActiveScene(scene.id);
-      setStatus(\`Loaded scene: \${scene.id}\`);
+      setStatus(`Loaded scene: ${scene.id}`);
     });
 
-    managerRef.current.on('transitionStart', transition => {
+    managerRef.current.on('transitionStart', (transition) => {
       setTransitioning(true);
-      setStatus(\`Transitioning: \${transition.from} -> \${transition.to}\`);
+      setStatus(`Transitioning: ${transition.from} -> ${transition.to}`);
     });
 
     managerRef.current.on('transitionComplete', () => {
@@ -107,7 +107,7 @@ export const ExampleApp: React.FC = () => {
         from: activeScene,
         to: sceneId,
         duration: 2,
-        type: 'fade'
+        type: 'fade',
       });
     } catch (error) {
       console.error('Failed to transition:', error);
@@ -120,15 +120,15 @@ export const ExampleApp: React.FC = () => {
     { id: 'dataViz', label: 'Data Visualization' },
     { id: 'vrWorld', label: 'VR World' },
     { id: 'night', label: 'Night' },
-    { id: 'storm', label: 'Storm' }
+    { id: 'storm', label: 'Storm' },
   ];
 
   return (
     <Container>
       <Canvas ref={containerRef} />
-      
+
       <Controls>
-        {scenes.map(scene => (
+        {scenes.map((scene) => (
           <Button
             key={scene.id}
             active={activeScene === scene.id}

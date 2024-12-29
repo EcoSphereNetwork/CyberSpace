@@ -14,7 +14,7 @@ import {
   TextureLoader,
   SpriteMaterial,
   Sprite,
-  Color
+  Color,
 } from 'three';
 
 interface DigitalNode {
@@ -91,26 +91,35 @@ export class DigitalLayer extends Layer {
     this.resources.textures.set('node', nodeTexture);
 
     // Create materials
-    this.resources.materials.set('node', new SpriteMaterial({
-      map: nodeTexture,
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.8
-    }));
+    this.resources.materials.set(
+      'node',
+      new SpriteMaterial({
+        map: nodeTexture,
+        color: 0x00ff00,
+        transparent: true,
+        opacity: 0.8,
+      })
+    );
 
-    this.resources.materials.set('connection', new LineBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5
-    }));
+    this.resources.materials.set(
+      'connection',
+      new LineBasicMaterial({
+        color: 0x00ff00,
+        transparent: true,
+        opacity: 0.5,
+      })
+    );
 
-    this.resources.materials.set('particle', new PointsMaterial({
-      color: this.digitalConfig.particles?.color ?? 0x00ff00,
-      size: this.digitalConfig.particles?.size ?? 0.1,
-      transparent: true,
-      opacity: 0.5,
-      sizeAttenuation: true
-    }));
+    this.resources.materials.set(
+      'particle',
+      new PointsMaterial({
+        color: this.digitalConfig.particles?.color ?? 0x00ff00,
+        size: this.digitalConfig.particles?.size ?? 0.1,
+        transparent: true,
+        opacity: 0.5,
+        sizeAttenuation: true,
+      })
+    );
 
     // Create nodes
     if (this.digitalConfig.nodes) {
@@ -176,17 +185,25 @@ export class DigitalLayer extends Layer {
     const toNode = this.nodes.get(config.to);
 
     if (!fromNode || !toNode) {
-      throw new Error(`Invalid connection nodes: ${config.from} -> ${config.to}`);
+      throw new Error(
+        `Invalid connection nodes: ${config.from} -> ${config.to}`
+      );
     }
 
     const geometry = new BufferGeometry();
     const positions = new Float32Array([
-      fromNode.position.x, fromNode.position.y, fromNode.position.z,
-      toNode.position.x, toNode.position.y, toNode.position.z
+      fromNode.position.x,
+      fromNode.position.y,
+      fromNode.position.z,
+      toNode.position.x,
+      toNode.position.y,
+      toNode.position.z,
     ]);
     geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
 
-    const material = (this.resources.materials.get('connection') as LineBasicMaterial).clone();
+    const material = (
+      this.resources.materials.get('connection') as LineBasicMaterial
+    ).clone();
     if (config.color) {
       material.color = new Color(config.color);
     }
@@ -254,10 +271,12 @@ export class DigitalLayer extends Layer {
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
         Math.random() * 2 - 1
-      ).normalize().multiplyScalar(this.digitalConfig.particles?.speed ?? 1),
+      )
+        .normalize()
+        .multiplyScalar(this.digitalConfig.particles?.speed ?? 1),
       size: Math.random() * 0.1 + 0.05,
       color: this.digitalConfig.particles?.color ?? 0x00ff00,
-      lifetime: Math.random() * 5 + 5
+      lifetime: Math.random() * 5 + 5,
     };
   }
 
@@ -267,13 +286,16 @@ export class DigitalLayer extends Layer {
   private updateParticles(deltaTime: number): void {
     if (!this.particleSystem) return;
 
-    const positions = this.particleSystem.geometry.attributes.position.array as Float32Array;
+    const positions = this.particleSystem.geometry.attributes.position
+      .array as Float32Array;
 
     for (let i = 0; i < this.particles.length; i++) {
       const particle = this.particles[i];
 
       // Update position
-      particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
+      particle.position.add(
+        particle.velocity.clone().multiplyScalar(deltaTime)
+      );
 
       // Update lifetime
       if (particle.lifetime !== undefined) {
@@ -371,10 +393,13 @@ export class DigitalLayer extends Layer {
     speed?: number;
   }): void {
     if (properties.color !== undefined) {
-      (this.resources.materials.get('particle') as PointsMaterial).color.setHex(properties.color);
+      (this.resources.materials.get('particle') as PointsMaterial).color.setHex(
+        properties.color
+      );
     }
     if (properties.size !== undefined) {
-      (this.resources.materials.get('particle') as PointsMaterial).size = properties.size;
+      (this.resources.materials.get('particle') as PointsMaterial).size =
+        properties.size;
     }
     if (properties.count !== undefined || properties.speed !== undefined) {
       // Recreate particle system with new properties
