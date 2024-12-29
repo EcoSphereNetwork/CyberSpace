@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
-import { NetworkScene } from '@/scenes/NetworkScene';
+import { EarthScene } from '@/scenes/EarthScene';
 import { Overlay } from './ui/Overlay';
 
 const Container = styled.div`
@@ -12,13 +12,13 @@ const Container = styled.div`
 
 const App: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<NetworkScene | null>(null);
+  const sceneRef = useRef<EarthScene | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     // Initialize scene
-    sceneRef.current = new NetworkScene(containerRef.current);
+    sceneRef.current = new EarthScene(containerRef.current);
 
     // Cleanup
     return () => {
