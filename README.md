@@ -1,39 +1,195 @@
 # CyberSpace
-CyberSpace is a project under the EcoSphere Network, focusing on developing innovative solutions in the digital realm.
 
-### **Project Structure**
-The repository is organized as follows:
+An immersive 3D platform for network visualization, data analysis, and collaborative interaction in virtual environments.
 
-    Project_Structure/: Contains the overall architecture and design documents.
-    src/: Includes the source code for the project.
-    index.html: The main HTML file for the project.
-    style.css: Stylesheet for the project.
-    app.js: JavaScript file containing the core logic.
-  
-Technologies Used
+## Features
 
-    JavaScript: 80.9%
-    HTML: 18.4%
-    Python: 0.7%
+### Core Features
+- 3D network visualization
+- Real-time data analysis
+- Multi-user collaboration
+- Plugin system
+- VR/AR support
 
-### **Getting Started**
-To get a local copy up and running, follow these steps:
+### Visualization
+- Network topology
+- Data flows
+- System metrics
+- Performance analytics
+- Custom visualizations
 
-### **Clone the repository:**
+### Interaction
+- 3D navigation
+- Object manipulation
+- Data interaction
+- VR controls
+- Touch support
 
-    git clone https://github.com/EcoSphereNetwork/CyberSpace.git
-  
-**Navigate to the project directory:**
+### Integration
+- Network monitoring
+- Security tools
+- Blockchain integration
+- Custom data sources
+- API access
 
-    cd CyberSpace/src
-  
-Open index.html in your preferred web browser to view the project.
+## Quick Start
 
-### **Contributing**
-Contributions are welcome! Please fork the repository and create a pull request with your proposed changes.
+1. **Prerequisites**
+   - Node.js 18+
+   - npm 9+
+   - Modern web browser with WebGL 2.0
+   - Git
 
-### **License**
-This project is licensed under the MIT License. See the LICENSE file for more details.
+2. **Clone Repository**
+   ```bash
+   git clone https://github.com/EcoSphereNetwork/CyberSpace.git
+   cd CyberSpace
+   ```
 
-### **Contact**
-For more information, visit the EcoSphere Network GitHub page.
+3. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open Application**
+   - Navigate to http://localhost:5173
+   - Allow WebGL and 3D acceleration
+   - Optional: Connect VR headset for immersive mode
+
+## Development
+
+### Commands
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run test` - Run tests
+- `npm run test:e2e` - Run end-to-end tests
+- `npm run lint` - Run linter
+- `npm run format` - Format code
+- `npm run docs` - Generate documentation
+
+### Project Structure
+```
+CyberSpace/
+├── src/                 # Source code
+│   ├── components/     # React components
+│   ├── core/          # Core systems
+│   ├── layers/        # Visualization layers
+│   ├── scenes/        # Scene management
+│   ├── services/      # Service layer
+│   ├── utils/         # Utilities
+│   └── vr/           # VR/AR features
+├── docs/              # Documentation
+│   ├── PROJECT_DESCRIPTION.md
+│   ├── UI_COMPONENTS.md
+│   ├── GAMIFICATION.md
+│   └── PLUGIN_SYSTEM.md
+├── public/            # Static assets
+├── tests/             # Test files
+└── scripts/           # Utility scripts
+```
+
+### Core Systems
+
+#### Layer System
+- Physical Layer: 3D environment
+- Digital Layer: Network visualization
+- UI Layer: Interface elements
+- Effect Layer: Visual effects
+
+#### Scene System
+- Scene management
+- Camera controls
+- Resource loading
+- Performance optimization
+
+#### Plugin System
+- Plugin API
+- Resource management
+- Security sandbox
+- Event system
+
+## Documentation
+
+### Core Documentation
+- [Project Description](docs/PROJECT_DESCRIPTION.md)
+- [UI Components](docs/UI_COMPONENTS.md)
+- [Gamification](docs/GAMIFICATION.md)
+- [Plugin System](docs/PLUGIN_SYSTEM.md)
+
+### Development Guides
+- [API Documentation](docs/api/README.md)
+- [Getting Started](docs/guides/getting-started.md)
+- [Plugin Development](docs/guides/plugin-development.md)
+
+## Testing
+
+### Unit Tests
+```bash
+npm run test:unit
+```
+
+### Integration Tests
+```bash
+npm run test:integration
+```
+
+### End-to-End Tests
+```bash
+npm run test:e2e
+```
+
+## Performance
+
+### Requirements
+- **Minimum:**
+  - CPU: 4 cores
+  - RAM: 8GB
+  - GPU: WebGL 2.0 support
+  - Storage: 1GB
+  - Network: 10Mbps
+
+- **Recommended:**
+  - CPU: 8 cores
+  - RAM: 16GB
+  - GPU: Dedicated graphics
+  - Storage: 5GB
+  - Network: 50Mbps
+
+### VR Support
+- **Supported Devices:**
+  - Oculus Quest 2/3
+  - Valve Index
+  - HTC Vive
+  - Windows Mixed Reality
+
+- **Requirements:**
+  - WebXR compatible browser
+  - GPU with VR support
+  - 16GB RAM recommended
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+3. Make your changes
+4. Run tests
+   ```bash
+   npm run test
+   npm run lint
+   ```
+5. Submit a pull request
+
+## Support
+
+- [Issue Tracker](https://github.com/EcoSphereNetwork/CyberSpace/issues)
+- [Discussions](https://github.com/EcoSphereNetwork/CyberSpace/discussions)
+- [Documentation](docs/)
