@@ -19,3 +19,18 @@ body {
   width: 100%;
   height: 100%;
 }
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
