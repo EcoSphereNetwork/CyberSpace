@@ -1,39 +1,86 @@
 # CyberSpace
-CyberSpace is a project under the EcoSphere Network, focusing on developing innovative solutions in the digital realm.
 
-### **Project Structure**
-The repository is organized as follows:
+A 3D immersive platform for network visualization and interaction.
 
-    Project_Structure/: Contains the overall architecture and design documents.
-    src/: Includes the source code for the project.
-    index.html: The main HTML file for the project.
-    style.css: Stylesheet for the project.
-    app.js: JavaScript file containing the core logic.
-  
-Technologies Used
+## Project Structure
 
-    JavaScript: 80.9%
-    HTML: 18.4%
-    Python: 0.7%
+```
+cyberspace/
+├── src/                    # Source code
+│   ├── core/              # Core functionality
+│   │   ├── Scene.ts
+│   │   ├── WindowManager.ts
+│   │   ├── PluginSystem.ts
+│   │   └── NetworkVisualizer.ts
+│   ├── components/        # React components
+│   ├── utils/            # Utility functions
+│   ├── services/         # Service layer
+│   ├── plugins/          # Plugin system
+│   ├── blockchain/       # Blockchain integration
+│   ├── vr/              # VR/AR features
+│   ├── game/            # Game mechanics
+│   ├── assets/          # Static assets
+│   ├── styles/          # Global styles
+│   └── types/           # TypeScript types
+├── public/              # Public assets
+│   └── assets/
+│       ├── models/      # 3D models
+│       ├── textures/    # Textures
+│       └── fonts/       # Custom fonts
+├── docs/               # Documentation
+│   ├── api/           # API documentation
+│   ├── guides/        # User guides
+│   └── architecture/  # Architecture docs
+├── tests/             # Test files
+│   ├── unit/         # Unit tests
+│   ├── integration/  # Integration tests
+│   └── e2e/          # End-to-end tests
+├── config/           # Configuration files
+├── scripts/          # Build and utility scripts
+├── package.json      # Project dependencies
+├── tsconfig.json     # TypeScript configuration
+├── vite.config.ts    # Vite configuration
+└── README.md         # Project documentation
 
-### **Getting Started**
-To get a local copy up and running, follow these steps:
+## Setup
 
-### **Clone the repository:**
+1. Clone the repository
+\`\`\`bash
+git clone <repository-url>
+cd cyberspace
+\`\`\`
 
-    git clone https://github.com/EcoSphereNetwork/CyberSpace.git
-  
-**Navigate to the project directory:**
+2. Install dependencies
+\`\`\`bash
+npm install
+\`\`\`
 
-    cd CyberSpace/src
-  
-Open index.html in your preferred web browser to view the project.
+3. Start development server
+\`\`\`bash
+npm run dev
+\`\`\`
 
-### **Contributing**
-Contributions are welcome! Please fork the repository and create a pull request with your proposed changes.
+## Development
 
-### **License**
-This project is licensed under the MIT License. See the LICENSE file for more details.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run test` - Run tests
+- `npm run lint` - Run linter
+- `npm run format` - Format code
 
-### **Contact**
-For more information, visit the EcoSphere Network GitHub page.
+## Documentation
+
+- API documentation is available in the `docs/api` directory
+- User guides are available in the `docs/guides` directory
+- Architecture documentation is available in the `docs/architecture` directory
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request
+
+## License
+
+MIT
