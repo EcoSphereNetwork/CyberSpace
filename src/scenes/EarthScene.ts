@@ -8,7 +8,6 @@ import {
   MeshPhongMaterial,
   MeshBasicMaterial,
   Mesh,
-  TextureLoader,
   BackSide,
   Vector3,
 } from 'three';
