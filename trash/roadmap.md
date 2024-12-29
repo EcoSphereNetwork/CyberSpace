@@ -1,199 +1,113 @@
-### CyberSpace Entwicklungs-Roadmap
-
-#### **Vision**
-
-Ein interaktives und immersives Framework, das physische und digitale Welten visualisiert, vernetzt und analysiert. Nutzer sollen Ressourcen, Netzwerke und Systeme in einer einzigartigen 3D-Umgebung verwalten, erweitern und simulieren können.
+### **Roadmap und Sprint-Plan für die Entwicklung des CyberSpace**
 
 ---
 
-### **Phase 1: Grundlagenentwicklung** ✅ **Abgeschlossen**
-
-#### **1. Infrastruktur & Setup** ✅
-
-- *Auswahl und Konfiguration der Basis-Technologien:*
-  - ***Frontend:*** Three.js, React.
-  - ***Backend:*** Node.js, WebSockets, REST APIs, Python für spezialisierte Aufgaben.
-  - ***Datenbank:*** MongoDB/PostgreSQL.
-- *Einrichtung der Entwicklungsumgebung:*
-  - *CI/CD-Pipeline.*
-  - *Versionskontrolle (Git).*
-
-#### ***2. Haupt-3D-Szene***\* ✅\*
-
-- *Erstellung eines interaktiven 3D-Weltmodells:*
-  - *Physisches Layer: Geografische Weltkarte.*
-  - *Digitales Layer: Graph-basierte Visualisierung.*
-  - *Hybrid-Layer: Kombination physischer und digitaler Elemente.*
-- *Implementierung grundlegender Navigation:*
-  - *Zoomen, Rotieren, Klicken.*
-
-#### ***3. Basis-UI-Komponenten***\* ✅\*
-
-- *Entwicklung grundlegender UI-Elemente:*
-  - *Navigation Bar (NavBar).*
-  - *Sidebar.*
-  - *Toolbar.*
-- *Integration des Canvas Overlay für Datenanzeige und Interaktionen.*
+#### **Sprint 1: Grundlegende 3D-Szene (6 Wochen)**
+- **Ziel:** Erstellung einer interaktiven 3D-Szene mit einem Firmengebäude als Ausgangspunkt.
+- **Aufgaben:**
+  - Modellierung eines Platzes und des Firmengebäudes.
+  - Betretbare Innenräume wie Lobby und Produktgalerie erstellen.
+  - Implementierung von interaktiver Navigation (z. B. Türen, Bewegung im Raum).
+  - Platzhalter für zukünftige UI-Elemente und PluginWindows integrieren.
+  - Performance- und Interaktivitätstests durchführen.
 
 ---
 
-### ***Phase 2: Funktionserweiterung***\* ✅ **Abgeschlossen**\*
-
-#### ***1. Netzwerk- und Datenintegration***\* ✅\*
-
-- *Anbindung an externe Datenquellen:*
-  - *Geo-Datenbanken (z. B. OpenStreetMap).*
-  - *Netzwerk-Monitoring-Tools (z. B. Prometheus).*
-- *Echtzeit-Datenkommunikation:*
-  - *WebSocket-Integration für Live-Updates.*
-
-#### ***2. Plugin-System***\* ✅\*
-
-- *Fertigstellung der API für Plugins.*
-- *Erstellung eines Plugin Manager Windows:*
-  - *Installation, Aktivierung/Deaktivierung und Verwaltung von Plugins.*
-- *Sicherheitsfeatures:*
-  - *Implementierung einer Sandbox für Plugins.*
-  - *Tests und Dokumentation.*
-
-#### ***3. Sicherheit & Benutzerverwaltung***\* ✅\*
-
-- *Erste Implementierung von Berechtigungssystemen:*
-  - *Definition von Benutzerrollen (z. B. Admin, Nutzer).*
-  - *Zugriffsrechte für verschiedene Funktionen.*
-- *Netzwerkisolation und erweiterte Sicherheitsmaßnahmen.*
+#### **Sprint 2: UI-Grundlagen und Interaktionssystem (4 Wochen)**
+- **Ziel:** Entwicklung der ersten UI-Elemente und grundlegender Interaktionsmechanismen.
+- **Aufgaben:**
+  - WindowManager entwickeln (Fenster öffnen, schließen, verschieben).
+  - Erste PluginWindows integrieren (z. B. Produktinformationen oder Terminal).
+  - Navigationsmenü und Tooltips hinzufügen.
+  - Grundlegendes Benachrichtigungssystem implementieren.
+  - Test und Feedback sammeln, um die Benutzerfreundlichkeit zu verbessern.
 
 ---
 
-### ***Phase 3: Interaktive Module***\* ✅ **Abgeschlossen**\*
-
-#### ***1. PvP und CyberWar-Integration***\* ✅\*
-
-- *Entwicklung des CyberWar-Games:*
-  - *PvP Dashboard.*
-  - *Scoreboard.*
-  - *Mission Panel.*
-- *Echtzeit-Visualisierung von Angriffen und Verteidigungen:*
-  - *DDoS-Angriffe.*
-  - *Firewall-Mechaniken.*
-
-#### ***2. Erweiterte Visualisierung***\* ✅\*
-
-- *Heatmaps für Ressourcennutzung:*
-  - *Visualisierung von Bandbreitennutzung und Energieflüssen.*
-  - *Dynamische Farbwechsel basierend auf Nutzungswerten.*
-- *Historische Daten in Zeitachsen:*
-  - *Zeit-Schieberegler zur Darstellung vergangener Netzwerkzustände.*
-  - *Analyse von Änderungen im Netzwerk.*
-- *Minimap:*
-  - *Interaktive Minimap zur Darstellung und Navigation in der Szene.*
-
-#### ***3. Interaktive Funktionen***\* ✅\*
-
-- *Node Inspector:*
-  - *Detaillierte Analyse von Nodes und Verbindungen.*
-- *Ressourcenmanager:*
-  - *Verwaltung und Optimierung von Bandbreite, Energie und Speicher.*
+#### **Sprint 3: Erweiterung der 3D-Szene und Produktgalerie (5 Wochen)**
+- **Ziel:** Erweiterung der Szene und Integration von interaktiven Elementen für spezifische Anwendungsfälle.
+- **Aufgaben:**
+  - Produktgalerie mit dynamischen Inhalten (z. B. 3D-Modelle, Fotos, Videos).
+  - Integration von Animationen für Objekte (z. B. Produktrotation).
+  - Optimierung der Räume und Szenenbeleuchtung.
+  - Import und Darstellung von Standard-3D-Dateiformaten (GLTF/GLB, FBX).
 
 ---
 
-###
-
-### &#x20;**Phase 4: Benutzeranpassung & Kollaboration**  ✅ **Abgeschlossen**&#x20;
-
-
-
-#### **1. Benutzerprofile**  ✅
-
-\- Speicherung individueller Einstellungen:
-
-&#x20; \- UI-Layouts.
-
-&#x20; \- Farb- und Designoptionen.
-
-
-
-#### **2. Multi-User-Unterstützung**  ✅
-
-\- Synchronisierung und Zusammenarbeit in Echtzeit:
-
-&#x20; \- Gemeinsame Bearbeitung der 3D-Szene.
-
-&#x20; \- Chat und Kommunikationsmodule.
-
-
-
-#### **3. Erweiterung der AR/VR-Funktionalitäten**  ✅
-
-\- Darstellung der Haupt-3D-Szene und Module in immersiven Umgebungen.
-
-\- Interaktion mit Nodes und Graphen in AR/VR.
-
-\- Optimierungen für Drag-and-Drop, Level-of-Detail, Frustum-Culling und Beleuchtung.
-
-
-
-\---
-
-
-
-### **Phase 5: Optimierung & Erweiterung\*\* 🔄 \*\*In Arbeit**&#x20;
-
-
-
-#### **1. KI-Integration**&#x20;
-
-\- Einbindung von neuronalen Netzen:
-
-&#x20; \- Automatische Analyse und Optimierung von Netzwerken.
-
-&#x20; \- Visualisierung aktiver KI-Agenten.
-
-
-
-#### **2. Marktplatz für Plugins**&#x20;
-
-\- Aufbau eines zentralen Marktplatzes:
-
-&#x20; \- Benutzer können Plugins kaufen, verkaufen oder teilen.
-
-
-
-#### **3. Performance-Tuning**&#x20;
-
-\- Optimierung der Rendering-Engine für große Datenmengen.
-
-\- Skalierung der Plattform für viele gleichzeitige Nutzer.
+#### **Sprint 4: Erweiterte Interaktivität und Plugin-Integration (6 Wochen)**
+- **Ziel:** Einführung von erweiterten Interaktionsmöglichkeiten und einer Basis für Drittanbieter-Plugins.
+- **Aufgaben:**
+  - Plugin-System entwickeln, um externe Tools zu integrieren.
+  - Einbindung eines iFrame-Systems zur einfachen Integration webbasierter Anwendungen.
+  - Vorbereitung für API-Kommunikation mit externen Plattformen.
+  - Erstellen eines Beispiels für ein interaktives Plugin (z. B. Kalender oder Whiteboard).
+  - Einführung von Benutzerkonten für personalisierte Einstellungen und Zugriffsrechte.
 
 ---
 
-### ***Phase 6: Zukunftserweiterungen***\* 🔲\*\*\*
-
-#### ***1. Vollautomatisiertes System***
-
-- *Implementierung autonomer Agenten:*
-  - *Selbstoptimierende Netzwerke.*
-  - *KI-gesteuerte Entscheidungen basierend auf Echtzeitdaten.*
-
-#### ***2. Erweiterte AR/VR-Anwendungen***
-
-- *Entwicklung immersiver Dashboards für CyberWar-Games.*
-- *Nutzung von Mixed Reality für die Manipulation physischer und digitaler Assets.*
-
-#### ***3. Globale Vernetzung***
-
-- *Aufbau eines verteilten Systems:*
-  - *Benutzer auf der ganzen Welt können ihre Netzwerke verbinden und visualisieren.*
+#### **Sprint 5: Kollaborations- und Präsentationsfunktionen (6 Wochen)**
+- **Ziel:** Entwicklung kollaborativer Features für Co-Working und Präsentationen.
+- **Aufgaben:**
+  - Einführung eines Mehrbenutzermodus mit Echtzeit-Interaktion.
+  - Integration von Dokumentenfreigabe und Live-Sharing-Funktionen.
+  - Erstellung eines virtuellen Konferenzraums mit Tools für Präsentationen (z. B. PowerPoint-Integration).
+  - Erweiterung der Produktgalerie um Verkaufsoptionen (z. B. als NFT oder Online-Shop).
 
 ---
 
-### ***Zeitleiste***
-
-- ***Monat 1-3:***\* Grundlagenentwicklung (Phase 1). ✅\*
-- ***Monat 4-6:***\* Funktionserweiterung (Phase 2). ✅\*
-- ***Monat 7-9:***\* Interaktive Module (Phase 3). ✅\*
-- ***Monat 10-12:***\* Benutzeranpassung und Kollaboration (Phase 4). 🔄\*
-- ***Fortlaufend:***\* Optimierung und Erweiterung (Phase 5, Phase 6). 🔲\*
+#### **Sprint 6: Erweiterung der digitalen Welt (8 Wochen)**
+- **Ziel:** Erstellung einer dynamischen digitalen Schicht über der physischen Szene.
+- **Aufgaben:**
+  - Entwicklung des Netzwerk-Layers mit Knotenpunkten und Datenströmen.
+  - Interaktive Visualisierung von Netzwerken, Servern und Verbindungen.
+  - Hinzufügen von Animationen für Datenpakete, KI-Agenten und Bedrohungen.
+  - Einführung eines Sandbox-Modus für IT-Simulationen (z. B. CyberWar).
 
 ---
 
+#### **Sprint 7: AR/VR-Integration und erweiterte Features (8 Wochen)**
+- **Ziel:** Vorbereitung des CyberSpace für immersive Erlebnisse.
+- **Aufgaben:**
+  - Implementierung von WebXR/OpenXR für AR/VR-Kompatibilität.
+  - Anpassung der UI für VR-Controller (z. B. Greifen und Ablegen von Fenstern).
+  - Einführung von Spatial Audio für realistische Kommunikation.
+  - Erstellung eines Tutorials für neue Nutzer, um den CyberSpace kennenzulernen.
+
+---
+
+#### **Sprint 8: Monetarisierung und Marktplätze (6 Wochen)**
+- **Ziel:** Aufbau eines Systems für Monetarisierung und kreative Freiheit.
+- **Aufgaben:**
+  - Einführung von virtuellen Shops, um Produkte oder Inhalte zu verkaufen.
+  - Integration von NFT-Marktplätzen für Kunstwerke und digitale Inhalte.
+  - Einführung von Premium-Funktionen für Unternehmen (z. B. personalisierte Räume, Branding).
+
+---
+
+#### **Sprint 9: Optimierung und Sicherheit (4 Wochen)**
+- **Ziel:** Stabilisierung und Absicherung der Plattform.
+- **Aufgaben:**
+  - Performance-Optimierung für große Szenen und viele Nutzer.
+  - Verbesserung der Sicherheit (z. B. Sandbox-Isolation, OAuth 2.0).
+  - Durchführung umfangreicher Usability- und Belastungstests.
+  - Feedbackschleifen mit Nutzern zur finalen Verbesserung.
+
+---
+
+#### **Sprint 10: Veröffentlichung und Community-Aufbau (6 Wochen)**
+- **Ziel:** Einführung des CyberSpace für die Öffentlichkeit und den Aufbau einer aktiven Community.
+- **Aufgaben:**
+  - Erstellung einer öffentlichen Beta-Version.
+  - Aufbau einer Entwicklerplattform für Plugin-Erweiterungen.
+  - Erstellung von Dokumentationen, Tutorials und Marketingmaterialien.
+  - Aufbau einer Community-Plattform für Feedback, Support und Austausch.
+
+---
+
+### **Zusammenfassung der Roadmap**
+- **Sprint 1-3:** Aufbau der Basis (3D-Szene, Navigation, grundlegende UI).
+- **Sprint 4-5:** Integration externer Tools und Entwicklung kollaborativer Features.
+- **Sprint 6-7:** Erweiterung zur digitalen Welt und AR/VR-Kompatibilität.
+- **Sprint 8-10:** Monetarisierung, Optimierung und Veröffentlichung.
+
+Diese Roadmap bietet eine klare Orientierung für die schrittweise Entwicklung des CyberSpace, von den Grundlagen bis hin zur finalen Version mit umfangreichen Funktionen.
