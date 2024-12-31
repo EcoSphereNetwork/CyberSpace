@@ -10,6 +10,10 @@ interface LayerConfig {
   description: string;
   visible: boolean;
   enabled: boolean;
+  resources: Array<{
+    url: string;
+    type: 'texture' | 'model' | 'audio' | 'json';
+  }>;
 }
 
 export class LayerManager extends EventEmitter {
@@ -17,12 +21,14 @@ export class LayerManager extends EventEmitter {
   private layers: Map<LayerType, any>;
   private configs: Map<LayerType, LayerConfig>;
   private scene: Scene | null;
+  private resourceManager: ResourceManager;
 
   private constructor() {
     super();
     this.layers = new Map();
     this.configs = new Map();
     this.scene = null;
+    this.resourceManager = ResourceManager.getInstance();
     this.initializeConfigs();
   }
 
@@ -42,6 +48,11 @@ export class LayerManager extends EventEmitter {
         description: 'Network topology and traffic visualization',
         visible: true,
         enabled: true,
+        resources: [
+          { url: '/models/node.glb', type: 'model' },
+          { url: '/textures/node.jpg', type: 'texture' },
+          { url: '/data/network.json', type: 'json' },
+        ],
       },
       data: {
         type: 'data',
@@ -49,6 +60,10 @@ export class LayerManager extends EventEmitter {
         description: 'Data flow and analytics visualization',
         visible: true,
         enabled: true,
+        resources: [
+          { url: '/data/flows.json', type: 'json' },
+          { url: '/textures/particle.png', type: 'texture' },
+        ],
       },
       ui: {
         type: 'ui',
@@ -56,12 +71,16 @@ export class LayerManager extends EventEmitter {
         description: 'User interface elements',
         visible: true,
         enabled: true,
+        resources: [
+          { url: '/textures/icons.png', type: 'texture' },
+          { url: '/data/ui.json', type: 'json' },
+        ],
       },
     };
 
     // Store configurations
-    for (const config of Object.values(configs)) {
-      this.configs.set(config.type, config);
+    for (const [type, config] of Object.entries(configs)) {
+      this.configs.set(type as LayerType, config);
     }
   }
 
@@ -70,17 +89,46 @@ export class LayerManager extends EventEmitter {
     this.initializeLayers();
   }
 
-  private initializeLayers(): void {
+  async loadLayers(types: LayerType[]): Promise<void> {
     if (!this.scene) {
       throw new Error('Scene not initialized');
     }
 
-    // Initialize network layer
-    const networkLayer = new NetworkLayer(this.scene);
-    this.layers.set('network', networkLayer);
+    for (const type of types) {
+      // Check if layer already exists
+      if (this.layers.has(type)) continue;
 
-    // Initialize other layers as needed
-    // ...
+      // Get layer config
+      const config = this.configs.get(type);
+      if (!config) {
+        throw new Error(`Layer ${type} not found`);
+      }
+
+      // Load layer resources
+      await this.resourceManager.preload(config.resources);
+
+      // Create layer instance
+      let layer;
+      switch (type) {
+        case 'network':
+          layer = new NetworkLayer(this.scene);
+          break;
+        case 'data':
+          // TODO: Implement DataLayer
+          break;
+        case 'ui':
+          // TODO: Implement UILayer
+          break;
+        default:
+          throw new Error(`Unknown layer type: ${type}`);
+      }
+
+      // Store layer
+      if (layer) {
+        this.layers.set(type, layer);
+        this.emit('layerLoaded', type);
+      }
+    }
 
     // Emit initialization complete event
     this.emit('initialized');

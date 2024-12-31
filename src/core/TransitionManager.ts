@@ -1,4 +1,4 @@
-import { Scene, WebGLRenderer, Camera, ShaderMaterial, PlaneGeometry, Mesh, OrthographicCamera } from 'three';
+import * as THREE from 'three';
 import { EventEmitter } from '@/utils/EventEmitter';
 
 interface TransitionOptions {

@@ -1,10 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { EarthScene } from '@/scenes/EarthScene';
-import { Overlay } from './ui/Overlay';
 import { LoadingScreen } from './ui/LoadingScreen';
 import { ErrorScreen } from './ui/ErrorScreen';
 import { DebugOverlay } from './ui/DebugOverlay';
+import { SceneManager } from '@/core/SceneManager';
+import { LayerManager } from '@/core/LayerManager';
+import { ResourceManager } from '@/core/ResourceManager';
+import { LoadingManager } from '@/core/LoadingManager';
+import { OptimizationManager } from '@/core/OptimizationManager';
+import { TransitionManager } from '@/core/TransitionManager';
 
 const Container = styled.div`
   width: 100vw;
@@ -13,9 +17,8 @@ const Container = styled.div`
   background: #000;
 `;
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<EarthScene | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,67 +26,95 @@ const App: React.FC = () => {
     if (!containerRef.current) return;
 
     const loadingManager = LoadingManager.getInstance();
+    const sceneManager = SceneManager.getInstance();
+    const layerManager = LayerManager.getInstance();
+    const resourceManager = ResourceManager.getInstance();
+    const optimizationManager = OptimizationManager.getInstance();
+    const transitionManager = TransitionManager.getInstance();
+
+    // Reset loading state
     loadingManager.reset();
 
+    // Initialize core resources
+    const coreResources = [
+      { url: '/textures/earth.jpg', type: 'texture' as const },
+      { url: '/textures/clouds.jpg', type: 'texture' as const },
+      { url: '/textures/stars.jpg', type: 'texture' as const },
+      { url: '/models/node.glb', type: 'model' as const },
+      { url: '/data/network.json', type: 'json' as const },
+    ];
+
     // Add loading items
-    loadingManager.addItem('scene');
-    loadingManager.addItem('textures');
-    loadingManager.addItem('models');
-    loadingManager.addItem('network');
+    loadingManager.addItem('core');
+    loadingManager.addItem('scenes');
+    loadingManager.addItem('layers');
 
-    try {
-      // Initialize scene
-      loadingManager.setCurrentItem('scene');
-      sceneRef.current = new EarthScene(containerRef.current);
+    const initializeApp = async () => {
+      try {
+        // Load core resources
+        loadingManager.setCurrentItem('Loading core resources...');
+        await resourceManager.preload(coreResources);
+        loadingManager.completeItem('core');
 
-      // Simulate loading textures
-      loadingManager.setCurrentItem('textures');
-      setTimeout(() => {
-        loadingManager.completeItem('textures');
-        
-        // Simulate loading models
-        loadingManager.setCurrentItem('models');
-        setTimeout(() => {
-          loadingManager.completeItem('models');
+        // Initialize scene manager
+        loadingManager.setCurrentItem('Initializing scenes...');
+        sceneManager.initialize(containerRef.current);
+        await sceneManager.loadScene('earth');
+        loadingManager.completeItem('scenes');
 
-          // Simulate loading network
-          loadingManager.setCurrentItem('network');
-          setTimeout(() => {
-            loadingManager.completeItem('network');
-            loadingManager.completeItem('scene');
-            setIsLoading(false);
-          }, 1000);
-        }, 1000);
-      }, 1000);
-    } catch (err) {
-      console.error('Failed to initialize scene:', err);
-      setError(err instanceof Error ? err.message : 'Failed to initialize scene');
-    }
+        // Initialize layers
+        loadingManager.setCurrentItem('Initializing layers...');
+        const scene = sceneManager.getActiveScene();
+        if (scene) {
+          layerManager.initialize(scene);
+          await layerManager.loadLayers(['network', 'data', 'ui']);
+        }
+        loadingManager.completeItem('layers');
+
+        // Initialize optimization
+        const renderer = scene?.renderer;
+        if (renderer) {
+          optimizationManager.initialize(renderer);
+          transitionManager.initialize(renderer);
+        }
+
+        // Complete loading
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to initialize app:', err);
+        setError(err instanceof Error ? err.message : 'Failed to initialize application');
+      }
+    };
+
+    initializeApp();
 
     // Cleanup
     return () => {
-      if (sceneRef.current) {
-        sceneRef.current.dispose();
-        sceneRef.current = null;
-      }
+      sceneManager.dispose();
+      layerManager.dispose();
+      resourceManager.dispose();
+      optimizationManager.dispose();
+      transitionManager.dispose();
       loadingManager.reset();
     };
   }, []);
 
   const handleReset = () => {
-    if (sceneRef.current) {
-      sceneRef.current.resetCamera();
+    const scene = SceneManager.getInstance().getActiveScene();
+    if (scene) {
+      scene.resetCamera();
     }
   };
 
-  const handleToggleVR = () => {
-    if (sceneRef.current) {
-      sceneRef.current.toggleVR();
+  const handleVR = () => {
+    const scene = SceneManager.getInstance().getActiveScene();
+    if (scene) {
+      scene.toggleVR();
     }
   };
 
   if (error) {
-    return <ErrorScreen message={error} />;
+    return <ErrorScreen error={error} />;
   }
 
   if (isLoading) {
@@ -91,11 +122,9 @@ const App: React.FC = () => {
   }
 
   return (
-    <Container ref={containerRef}>
-      <Overlay onReset={handleReset} onToggleVR={handleToggleVR} />
-      <DebugOverlay />
-    </Container>
+    <>
+      <Container ref={containerRef} />
+      <DebugOverlay onReset={handleReset} onVR={handleVR} />
+    </>
   );
 };
-
-export default App;
