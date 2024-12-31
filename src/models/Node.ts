@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { Mesh, BoxGeometry, SphereGeometry, CylinderGeometry, MeshPhongMaterial, BufferGeometry, Material } from 'three';
 
 export class Node {
   private mesh: THREE.Mesh;

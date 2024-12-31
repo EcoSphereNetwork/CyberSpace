@@ -28,7 +28,9 @@
       "@layers/*": ["./src/layers/*"],
       "@utils/*": ["./src/utils/*"],
       "@assets/*": ["./src/assets/*"],
-      "@workers/*": ["./src/workers/*"]
+      "@workers/*": ["./src/workers/*"],
+      "three": ["./node_modules/three/src/Three"],
+      "three/*": ["./node_modules/three/src/*"]
     }
   },
   "include": [

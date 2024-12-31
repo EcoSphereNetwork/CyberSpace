@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { useThree, useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import { ResourceManager } from '@/core/ResourceManager';
 import { Node } from '@/models/Node';
 
