@@ -270,6 +270,16 @@ export class EarthScene {
     this.renderer.render(this.scene, this.camera);
   };
 
+  resetCamera(): void {
+    this.camera.position.set(0, 2, 5);
+    this.camera.lookAt(0, 0, 0);
+  }
+
+  toggleVR(): void {
+    // TODO: Implement VR mode
+    console.log('VR mode not implemented yet');
+  }
+
   dispose(): void {
     // Remove event listeners
     this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown);
