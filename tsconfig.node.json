@@ -5,45 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "target": "ESNext",
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
-    "types": [
-      "node",
-      "vite/client",
-      "three",
-      "jest",
-      "react",
-      "react-dom",
-      "@types/three"
-    ],
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@core/*": ["./src/core/*"],
-      "@components/*": ["./src/components/*"],
-      "@scenes/*": ["./src/scenes/*"],
-      "@layers/*": ["./src/layers/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@assets/*": ["./src/assets/*"],
-      "@workers/*": ["./src/workers/*"],
-      "three": ["./node_modules/three/src/Three"],
-      "three/*": ["./node_modules/three/src/*"]
-    }
+    "strict": true
   },
-  "include": [
-    "vite.config.ts",
-    "vitest.config.ts",
-    ".eslintrc.cjs",
-    "postcss.config.js",
-    "jest.config.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.json",
-    "src/**/*.worker.ts",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
-  ]
+  "include": ["vite.config.ts"]
 }

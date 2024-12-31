@@ -14,6 +14,33 @@ const Container = styled.div`
   background: #000;
 `;
 
+const SceneSelector = styled.div`
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+`;
+
+const Button = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.3);
+  }
+`;
+
 export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,10 +68,6 @@ export const App: React.FC = () => {
     return <ErrorScreen error={error} />;
   }
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <>
       <Container>
@@ -56,6 +79,23 @@ export const App: React.FC = () => {
           )}
         </Canvas>
       </Container>
+
+      <SceneSelector>
+        <Button
+          className={activeScene === 'earth' ? 'active' : ''}
+          onClick={() => setActiveScene('earth')}
+        >
+          Earth View
+        </Button>
+        <Button
+          className={activeScene === 'network' ? 'active' : ''}
+          onClick={() => setActiveScene('network')}
+        >
+          Network View
+        </Button>
+      </SceneSelector>
+
+      {isLoading && <LoadingScreen />}
       <DebugOverlay onReset={handleReset} onVR={handleVR} />
     </>
   );
