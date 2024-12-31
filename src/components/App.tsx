@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import styled from '@emotion/styled';
 import { Canvas } from '@react-three/fiber';
 import { LoadingScreen } from './ui/LoadingScreen';
@@ -72,11 +72,13 @@ export const App: React.FC = () => {
     <>
       <Container>
         <Canvas>
-          {activeScene === 'earth' ? (
-            <EarthScene onLoad={handleLoad} onError={handleError} />
-          ) : (
-            <NetworkScene onLoad={handleLoad} onError={handleError} />
-          )}
+          <Suspense fallback={null}>
+            {activeScene === 'earth' ? (
+              <EarthScene onLoad={handleLoad} onError={handleError} />
+            ) : (
+              <NetworkScene onLoad={handleLoad} onError={handleError} />
+            )}
+          </Suspense>
         </Canvas>
       </Container>
 
