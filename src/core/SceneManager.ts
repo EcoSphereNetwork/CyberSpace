@@ -1,9 +1,10 @@
-import { Scene, PerspectiveCamera, WebGLRenderer } from 'three';
+import * as THREE from 'three';
 import { ResourceManager } from './ResourceManager';
 import { LoadingManager } from './LoadingManager';
 import { EventEmitter } from '@/utils/EventEmitter';
 import { EarthScene } from '@/scenes/EarthScene';
 import { NetworkScene } from '@/scenes/NetworkScene';
+import { TransitionManager } from './TransitionManager';
 
 export type SceneType = 'earth' | 'network';
 
@@ -20,18 +21,23 @@ interface SceneConfig {
 export class SceneManager extends EventEmitter {
   private static instance: SceneManager;
   private scenes: Map<SceneType, any>;
+  private configs: Map<SceneType, SceneConfig>;
   private activeScene: SceneType | null;
   private container: HTMLElement | null;
   private resourceManager: ResourceManager;
   private loadingManager: LoadingManager;
+  private transitionManager: TransitionManager;
 
   private constructor() {
     super();
     this.scenes = new Map();
+    this.configs = new Map();
     this.activeScene = null;
     this.container = null;
     this.resourceManager = ResourceManager.getInstance();
     this.loadingManager = LoadingManager.getInstance();
+    this.transitionManager = TransitionManager.getInstance();
+    this.initializeConfigs();
   }
 
   static getInstance(): SceneManager {
@@ -41,14 +47,9 @@ export class SceneManager extends EventEmitter {
     return SceneManager.instance;
   }
 
-  initialize(container: HTMLElement): void {
-    this.container = container;
-    this.initializeScenes();
-  }
-
-  private initializeScenes(): void {
+  private initializeConfigs(): void {
     // Define scene configurations
-    const sceneConfigs: Record<SceneType, SceneConfig> = {
+    const configs: Record<SceneType, SceneConfig> = {
       earth: {
         type: 'earth',
         name: 'Earth View',
@@ -71,43 +72,50 @@ export class SceneManager extends EventEmitter {
       },
     };
 
-    // Initialize each scene
-    for (const config of Object.values(sceneConfigs)) {
-      this.loadingManager.addItem(`scene_${config.type}`);
-      this.loadingManager.setCurrentItem(`Loading scene: ${config.name}`);
-
-      // Preload scene resources
-      this.resourceManager.preload(config.resources)
-        .then(() => {
-          // Create scene instance
-          let scene;
-          switch (config.type) {
-            case 'earth':
-              scene = new EarthScene(this.container!);
-              break;
-            case 'network':
-              scene = new NetworkScene(this.container!);
-              break;
-          }
-
-          // Store scene
-          if (scene) {
-            this.scenes.set(config.type, scene);
-            this.loadingManager.completeItem(`scene_${config.type}`);
-            this.emit('sceneLoaded', config.type);
-          }
-        })
-        .catch(error => {
-          console.error(`Failed to load scene ${config.type}:`, error);
-          this.loadingManager.completeItem(`scene_${config.type}`);
-          this.emit('error', { type: 'sceneLoad', scene: config.type, error });
-        });
+    // Store configurations
+    for (const [type, config] of Object.entries(configs)) {
+      this.configs.set(type as SceneType, config);
     }
+  }
+
+  initialize(container: HTMLElement): void {
+    this.container = container;
+    this.emit('initialized');
+  }
+
+  async loadScene(type: SceneType): Promise<void> {
+    // Check if scene exists
+    const config = this.configs.get(type);
+    if (!config) {
+      throw new Error(`Scene ${type} not found`);
+    }
+
+    // Load scene resources
+    await this.resourceManager.preload(config.resources);
+
+    // Create scene instance
+    let scene;
+    switch (type) {
+      case 'earth':
+        scene = new EarthScene(this.container!);
+        break;
+      case 'network':
+        scene = new NetworkScene(this.container!);
+        break;
+      default:
+        throw new Error(`Unknown scene type: ${type}`);
+    }
+
+    // Store scene
+    this.scenes.set(type, scene);
+    this.activeScene = type;
+    this.emit('sceneLoaded', type);
   }
 
   async switchScene(type: SceneType): Promise<void> {
     if (!this.scenes.has(type)) {
-      throw new Error(`Scene ${type} not found`);
+      await this.loadScene(type);
+      return;
     }
 
     // Hide current scene
@@ -141,8 +149,9 @@ export class SceneManager extends EventEmitter {
     });
   }
 
-  getActiveScene(): SceneType | null {
-    return this.activeScene;
+  getActiveScene(): any | null {
+    if (!this.activeScene) return null;
+    return this.scenes.get(this.activeScene) || null;
   }
 
   getScene(type: SceneType): any | undefined {
