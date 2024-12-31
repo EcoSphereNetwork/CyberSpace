@@ -31,7 +31,14 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/core/*"],
+      "@components/*": ["./src/components/*"],
+      "@scenes/*": ["./src/scenes/*"],
+      "@layers/*": ["./src/layers/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@workers/*": ["./src/workers/*"]
     },
     "types": ["vite/client", "three", "node", "jest", "react", "react-dom"]
   },

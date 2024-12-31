@@ -2,7 +2,7 @@ import { EventEmitter } from '@/utils/EventEmitter';
 import { LoadingManager } from './LoadingManager';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { useGLTF } from '@react-three/drei';
 
 export type ResourceType = 'texture' | 'model' | 'audio' | 'json';
 
@@ -17,7 +17,6 @@ export class ResourceManager extends EventEmitter {
   private resources: Map<string, Resource>;
   private loadingManager: LoadingManager;
   private textureLoader: THREE.TextureLoader;
-  private gltfLoader: GLTFLoader;
   private audioLoader: THREE.AudioLoader;
 
   private constructor() {
@@ -43,7 +42,6 @@ export class ResourceManager extends EventEmitter {
     );
 
     this.textureLoader = new THREE.TextureLoader(manager);
-    this.gltfLoader = new GLTFLoader(manager);
     this.audioLoader = new THREE.AudioLoader(manager);
   }
 
@@ -77,8 +75,8 @@ export class ResourceManager extends EventEmitter {
           data = await this.loadTexture(url);
           break;
         case 'model':
-          data = await this.loadModel(url);
-          break;
+          // Models should be loaded using useGLTF hook in React components
+          throw new Error('Models should be loaded using useGLTF hook in React components');
         case 'audio':
           data = await this.loadAudio(url);
           break;
@@ -108,17 +106,6 @@ export class ResourceManager extends EventEmitter {
       this.textureLoader.load(
         url,
         (texture) => resolve(texture),
-        undefined,
-        (error) => reject(error)
-      );
-    });
-  }
-
-  private loadModel(url: string): Promise<GLTF> {
-    return new Promise((resolve, reject) => {
-      this.gltfLoader.load(
-        url,
-        (gltf) => resolve(gltf),
         undefined,
         (error) => reject(error)
       );
@@ -158,21 +145,6 @@ export class ResourceManager extends EventEmitter {
       switch (resource.type) {
         case 'texture':
           (resource.data as THREE.Texture).dispose();
-          break;
-        case 'model':
-          const gltf = resource.data as GLTF;
-          gltf.scenes.forEach((scene) => {
-            scene.traverse((object) => {
-              if (object instanceof THREE.Mesh) {
-                object.geometry.dispose();
-                if (Array.isArray(object.material)) {
-                  object.material.forEach((material) => material.dispose());
-                } else {
-                  object.material.dispose();
-                }
-              }
-            });
-          });
           break;
       }
     }

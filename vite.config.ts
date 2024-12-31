@@ -51,9 +51,6 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
       '@assets': path.resolve(__dirname, './src/assets'),
       '@workers': path.resolve(__dirname, './src/workers'),
-      'three/examples/jsm/loaders/GLTFLoader': path.resolve(__dirname, './node_modules/three/examples/jsm/loaders/GLTFLoader.js'),
-      'three/examples/jsm/loaders/DRACOLoader': path.resolve(__dirname, './node_modules/three/examples/jsm/loaders/DRACOLoader.js'),
-      'three/examples/jsm/controls/OrbitControls': path.resolve(__dirname, './node_modules/three/examples/jsm/controls/OrbitControls.js'),
     },
   },
   build: {
@@ -64,18 +61,21 @@ export default defineConfig({
       fileName: (format) => `cyberspace.${format}.js`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'three'],
+      external: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           three: 'THREE',
+          '@react-three/fiber': 'ReactThreeFiber',
+          '@react-three/drei': 'Drei',
         },
       },
     },
   },
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei'],
+    exclude: ['@react-three/fiber', '@react-three/drei'],
   },
   server: {
     port: 3000,
