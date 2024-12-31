@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { Scene, PerspectiveCamera, WebGLRenderer, SphereGeometry, MeshPhongMaterial, Mesh, AmbientLight, DirectionalLight, Material } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { ResourceManager } from '@/core/ResourceManager';
 
