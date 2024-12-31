@@ -1,41 +1,59 @@
 import React, { useRef, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { ResourceManager } from '@/core/ResourceManager';
-import { Node } from '@/models/Node';
+import * as THREE from 'three';
 
 interface NetworkSceneProps {
   onLoad?: () => void;
   onError?: (error: Error) => void;
 }
 
+interface NetworkNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number; z: number };
+}
+
+interface NetworkConnection {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+}
+
+interface NetworkData {
+  nodes: NetworkNode[];
+  connections: NetworkConnection[];
+}
+
 export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) => {
-  const { scene } = useThree();
-  const resourceManager = ResourceManager.getInstance();
-  const nodesRef = useRef<Map<string, THREE.Object3D>>(new Map());
+  const nodesRef = useRef<Map<string, THREE.Mesh>>(new Map());
   const connectionsRef = useRef<Map<string, THREE.Line>>(new Map());
 
   useEffect(() => {
-    const loadResources = async () => {
+    const loadNetwork = async () => {
       try {
-        // Load resources
-        const networkData = await resourceManager.load('/data/network.json', 'json');
+        // Load network data
+        const response = await fetch('/data/network.json');
+        const networkData: NetworkData = await response.json();
 
         // Create nodes
-        for (const nodeData of networkData.nodes) {
-          const node = new Node(nodeData.type);
-          const mesh = node.getMesh();
+        networkData.nodes.forEach((nodeData) => {
+          const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+          const material = new THREE.MeshPhongMaterial({
+            color: getNodeColor(nodeData.type),
+          });
+          const mesh = new THREE.Mesh(geometry, material);
           mesh.position.set(
             nodeData.position.x,
             nodeData.position.y,
             nodeData.position.z
           );
-          scene.add(mesh);
           nodesRef.current.set(nodeData.id, mesh);
-        }
+        });
 
         // Create connections
-        for (const connectionData of networkData.connections) {
+        networkData.connections.forEach((connectionData) => {
           const sourceNode = nodesRef.current.get(connectionData.source);
           const targetNode = nodesRef.current.get(connectionData.target);
 
@@ -43,14 +61,12 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
             const points = [sourceNode.position, targetNode.position];
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
             const material = new THREE.LineBasicMaterial({
-              color: 0x00ff00,
-              linewidth: 2,
+              color: getConnectionColor(connectionData.type),
             });
             const line = new THREE.Line(geometry, material);
-            scene.add(line);
             connectionsRef.current.set(connectionData.id, line);
           }
-        }
+        });
 
         // Notify load complete
         onLoad?.();
@@ -60,43 +76,45 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
       }
     };
 
-    loadResources();
+    loadNetwork();
 
     // Cleanup
     return () => {
-      // Remove nodes
-      for (const node of nodesRef.current.values()) {
-        scene.remove(node);
-        if ('geometry' in node) {
-          node.geometry.dispose();
-        }
-        if ('material' in node) {
-          const material = node.material;
-          if (Array.isArray(material)) {
-            material.forEach(m => m.dispose());
-          } else {
-            material.dispose();
-          }
-        }
-      }
       nodesRef.current.clear();
-
-      // Remove connections
-      for (const connection of connectionsRef.current.values()) {
-        scene.remove(connection);
-        connection.geometry.dispose();
-        (connection.material as THREE.Material).dispose();
-      }
       connectionsRef.current.clear();
     };
-  }, [scene, onLoad, onError]);
+  }, [onLoad, onError]);
 
   // Update node rotations
   useFrame(() => {
-    for (const node of nodesRef.current.values()) {
+    nodesRef.current.forEach((node) => {
       node.rotation.y += 0.01;
-    }
+    });
   });
+
+  const getNodeColor = (type: string): number => {
+    switch (type) {
+      case 'server':
+        return 0x4caf50; // Green
+      case 'client':
+        return 0x2196f3; // Blue
+      case 'router':
+        return 0x9c27b0; // Purple
+      default:
+        return 0xcccccc; // Gray
+    }
+  };
+
+  const getConnectionColor = (type: string): number => {
+    switch (type) {
+      case 'data':
+        return 0x00ff00; // Green
+      case 'control':
+        return 0xff0000; // Red
+      default:
+        return 0xcccccc; // Gray
+    }
+  };
 
   return (
     <>
@@ -108,6 +126,18 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
         minDistance={5}
         maxDistance={20}
       />
+
+      {/* Nodes */}
+      {Array.from(nodesRef.current.values()).map((node, index) => (
+        <primitive key={index} object={node} />
+      ))}
+
+      {/* Connections */}
+      {Array.from(connectionsRef.current.values()).map((line, index) => (
+        <primitive key={index} object={line} />
+      ))}
+
+      {/* Lights */}
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 3, 5]} intensity={1} />
     </>
