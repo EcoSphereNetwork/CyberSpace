@@ -24,6 +24,15 @@ export class NotificationSystem extends EventEmitter {
     this.idCounter = 0;
   }
 
+  initialize(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  shutdown(): Promise<void> {
+    this.notifications.clear();
+    return Promise.resolve();
+  }
+
   show(notification: Omit<Notification, 'id' | 'timestamp'>): string {
     const id = `notification_${++this.idCounter}`;
     const fullNotification: Notification = {
