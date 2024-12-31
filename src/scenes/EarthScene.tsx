@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
