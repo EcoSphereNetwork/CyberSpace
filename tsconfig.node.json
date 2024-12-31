@@ -8,9 +8,17 @@
     "strict": true,
     "target": "ESNext",
     "lib": ["ESNext"],
-    "types": ["node"],
+    "types": ["node", "vite/client"],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    ".eslintrc.cjs",
+    "postcss.config.js"
+  ]
 }
