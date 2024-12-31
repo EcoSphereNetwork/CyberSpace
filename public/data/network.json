@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    {
+      "id": "node1",
+      "type": "server",
+      "position": { "x": 0, "y": 0, "z": 0 }
+    },
+    {
+      "id": "node2",
+      "type": "client",
+      "position": { "x": 2, "y": 1, "z": 1 }
+    },
+    {
+      "id": "node3",
+      "type": "router",
+      "position": { "x": -2, "y": -1, "z": 1 }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn1",
+      "source": "node1",
+      "target": "node2",
+      "type": "data"
+    },
+    {
+      "id": "conn2",
+      "source": "node1",
+      "target": "node3",
+      "type": "control"
+    },
+    {
+      "id": "conn3",
+      "source": "node2",
+      "target": "node3",
+      "type": "data"
+    }
+  ]
+}

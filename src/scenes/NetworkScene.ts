@@ -1,254 +1,190 @@
-import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  AmbientLight,
-  DirectionalLight,
-  GridHelper,
-  Color,
-  Vector3,
-} from 'three';
+import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { NetworkLayer, NetworkNode, NetworkConnection, DataFlow } from '@/layers/network/NetworkLayer';
+import { ResourceManager } from '@/core/ResourceManager';
+import { Node } from '@/models/Node';
 
 export class NetworkScene {
-  private scene: Scene;
-  private camera: PerspectiveCamera;
-  private renderer: WebGLRenderer;
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
+  private _renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
-  private networkLayer: NetworkLayer;
+  private nodes: Map<string, THREE.Object3D>;
+  private connections: Map<string, THREE.Line>;
+  private resourceManager: ResourceManager;
 
   constructor(container: HTMLElement) {
-    // Create scene
-    this.scene = new Scene();
-    this.scene.background = new Color(0x1a1a1a);
+    // Initialize scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x000000);
 
-    // Create camera
-    this.camera = new PerspectiveCamera(
+    // Initialize camera
+    this.camera = new THREE.PerspectiveCamera(
       75,
       container.clientWidth / container.clientHeight,
       0.1,
       1000
     );
-    this.camera.position.set(5, 5, 5);
-    this.camera.lookAt(0, 0, 0);
+    this.camera.position.z = 10;
 
-    // Create renderer
-    this.renderer = new WebGLRenderer({ antialias: true });
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(this.renderer.domElement);
+    // Initialize renderer
+    this._renderer = new THREE.WebGLRenderer({ antialias: true });
+    this._renderer.setSize(container.clientWidth, container.clientHeight);
+    this._renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(this._renderer.domElement);
 
-    // Create controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    // Initialize controls
+    this.controls = new OrbitControls(this.camera, this._renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
+    this.controls.rotateSpeed = 0.5;
+    this.controls.enableZoom = true;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 20;
 
-    // Add lights
-    const ambientLight = new AmbientLight(0xffffff, 0.5);
-    this.scene.add(ambientLight);
+    // Get resource manager
+    this.resourceManager = ResourceManager.getInstance();
 
-    const directionalLight = new DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    this.scene.add(directionalLight);
+    // Initialize collections
+    this.nodes = new Map();
+    this.connections = new Map();
 
-    // Add grid helper
-    const gridHelper = new GridHelper(10, 10);
-    this.scene.add(gridHelper);
-
-    // Create network layer
-    this.networkLayer = new NetworkLayer(this.scene);
-
-    // Add example network
-    this.createExampleNetwork();
+    // Initialize scene
+    this.initializeScene();
 
     // Start animation
     this.animate();
 
-    // Handle resize
-    window.addEventListener('resize', this.onWindowResize.bind(this));
+    // Add resize handler
+    window.addEventListener('resize', this.onWindowResize);
   }
 
-  private createExampleNetwork(): void {
-    // Create nodes
-    const nodes: NetworkNode[] = [
-      {
-        id: 'server1',
-        position: new Vector3(0, 1, 0),
-        type: 'server',
-        status: 'active',
-      },
-      {
-        id: 'router1',
-        position: new Vector3(-2, 1, -2),
-        type: 'router',
-        status: 'active',
-      },
-      {
-        id: 'router2',
-        position: new Vector3(2, 1, -2),
-        type: 'router',
-        status: 'active',
-      },
-      {
-        id: 'switch1',
-        position: new Vector3(-2, 1, 2),
-        type: 'switch',
-        status: 'active',
-      },
-      {
-        id: 'switch2',
-        position: new Vector3(2, 1, 2),
-        type: 'switch',
-        status: 'active',
-      },
-      {
-        id: 'client1',
-        position: new Vector3(-4, 1, 2),
-        type: 'client',
-        status: 'active',
-      },
-      {
-        id: 'client2',
-        position: new Vector3(0, 1, 4),
-        type: 'client',
-        status: 'active',
-      },
-      {
-        id: 'client3',
-        position: new Vector3(4, 1, 2),
-        type: 'client',
-        status: 'active',
-      },
-    ];
+  private async initializeScene(): Promise<void> {
+    try {
+      // Load resources
+      const nodeModel = await this.resourceManager.load('/models/node.glb', 'model');
+      const nodeTexture = await this.resourceManager.load('/textures/node.jpg', 'texture');
+      const networkData = await this.resourceManager.load('/data/network.json', 'json');
 
-    // Add nodes
-    nodes.forEach((node) => this.networkLayer.addNode(node));
+      // Create nodes
+      for (const nodeData of networkData.nodes) {
+        const node = new Node(nodeData.type);
+        const mesh = node.getMesh();
+        mesh.position.set(
+          nodeData.position.x,
+          nodeData.position.y,
+          nodeData.position.z
+        );
+        this.scene.add(mesh);
+        this.nodes.set(nodeData.id, mesh);
+      }
 
-    // Create connections
-    const connections: NetworkConnection[] = [
-      {
-        id: 'conn1',
-        source: 'server1',
-        target: 'router1',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn2',
-        source: 'server1',
-        target: 'router2',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn3',
-        source: 'router1',
-        target: 'switch1',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn4',
-        source: 'router2',
-        target: 'switch2',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn5',
-        source: 'switch1',
-        target: 'client1',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn6',
-        source: 'switch1',
-        target: 'client2',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn7',
-        source: 'switch2',
-        target: 'client2',
-        type: 'physical',
-        status: 'active',
-      },
-      {
-        id: 'conn8',
-        source: 'switch2',
-        target: 'client3',
-        type: 'physical',
-        status: 'active',
-      },
-    ];
+      // Create connections
+      for (const connectionData of networkData.connections) {
+        const sourceNode = this.nodes.get(connectionData.source);
+        const targetNode = this.nodes.get(connectionData.target);
 
-    // Add connections
-    connections.forEach((conn) => this.networkLayer.addConnection(conn));
+        if (sourceNode && targetNode) {
+          const points = [sourceNode.position, targetNode.position];
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const material = new THREE.LineBasicMaterial({
+            color: 0x00ff00,
+            linewidth: 2,
+          });
+          const line = new THREE.Line(geometry, material);
+          this.scene.add(line);
+          this.connections.set(connectionData.id, line);
+        }
+      }
 
-    // Simulate data flows
-    setInterval(() => {
-      const flow: DataFlow = {
-        id: `flow_${Date.now()}`,
-        connection: connections[Math.floor(Math.random() * connections.length)].id,
-        type: Math.random() > 0.5 ? 'request' : 'response',
-        size: Math.random() * 100,
-        speed: 1 + Math.random() * 2,
-      };
-      this.networkLayer.addDataFlow(flow);
-    }, 1000);
+      // Add lights
+      const ambientLight = new THREE.AmbientLight(0x404040);
+      this.scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 3, 5);
+      this.scene.add(directionalLight);
+    } catch (error) {
+      console.error('Failed to initialize scene:', error);
+      throw error;
+    }
   }
 
-  private animate = () => {
+  private animate = (): void => {
     requestAnimationFrame(this.animate);
 
     // Update controls
     this.controls.update();
 
-    // Update network layer
-    this.networkLayer.update(0.016); // Assuming 60fps
+    // Update node rotations
+    for (const node of this.nodes.values()) {
+      node.rotation.y += 0.01;
+    }
 
     // Render
-    this.renderer.render(this.scene, this.camera);
+    this._renderer.render(this.scene, this.camera);
   };
 
-  private onWindowResize() {
-    const container = this.renderer.domElement.parentElement;
+  private onWindowResize = (): void => {
+    const container = this._renderer.domElement.parentElement;
     if (!container) return;
 
     this.camera.aspect = container.clientWidth / container.clientHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
+    this._renderer.setSize(container.clientWidth, container.clientHeight);
+  };
+
+  resetCamera(): void {
+    this.camera.position.set(0, 0, 10);
+    this.camera.lookAt(0, 0, 0);
+    this.controls.reset();
   }
 
-  dispose() {
+  toggleVR(): void {
+    // TODO: Implement VR mode
+    console.log('VR mode not implemented yet');
+  }
+
+  dispose(): void {
     // Remove event listeners
-    window.removeEventListener('resize', this.onWindowResize.bind(this));
+    window.removeEventListener('resize', this.onWindowResize);
 
-    // Dispose of network layer
-    this.networkLayer.dispose();
-
-    // Dispose of Three.js objects
-    this.scene.traverse((object) => {
-      if ('geometry' in object) {
-        object.geometry?.dispose();
+    // Dispose nodes
+    for (const node of this.nodes.values()) {
+      this.scene.remove(node);
+      if ('geometry' in node) {
+        node.geometry.dispose();
       }
-      if ('material' in object) {
-        const material = object.material;
+      if ('material' in node) {
+        const material = node.material;
         if (Array.isArray(material)) {
-          material.forEach((m) => m.dispose());
+          material.forEach(m => m.dispose());
         } else {
-          material?.dispose();
+          material.dispose();
         }
       }
-    });
+    }
+    this.nodes.clear();
 
-    // Dispose of renderer
-    this.renderer.dispose();
+    // Dispose connections
+    for (const connection of this.connections.values()) {
+      this.scene.remove(connection);
+      connection.geometry.dispose();
+      (connection.material as THREE.Material).dispose();
+    }
+    this.connections.clear();
 
-    // Remove canvas
-    this.renderer.domElement.remove();
+    // Dispose renderer
+    this._renderer.dispose();
+
+    // Remove from DOM
+    this._renderer.domElement.remove();
+  }
+
+  get renderer(): THREE.WebGLRenderer {
+    return this._renderer;
+  }
+
+  getScene(): THREE.Scene {
+    return this.scene;
   }
 }
