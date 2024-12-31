@@ -1,8 +1,7 @@
 import { EventEmitter } from '@/utils/EventEmitter';
 import { LoadingManager } from './LoadingManager';
 import * as THREE from 'three';
-import { useLoader } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { GLTF } from '@react-three/drei/helpers/types/GLTF';
 
 export type ResourceType = 'texture' | 'model' | 'audio' | 'json';
 

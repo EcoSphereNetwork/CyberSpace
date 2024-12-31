@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF } from '@react-three/drei/helpers/types/GLTF';
 
 interface ModelProps {
   url: string;
