@@ -51,8 +51,9 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
       '@assets': path.resolve(__dirname, './src/assets'),
       '@workers': path.resolve(__dirname, './src/workers'),
-      'three': path.resolve(__dirname, './node_modules/three/src/Three'),
-      'three/*': path.resolve(__dirname, './node_modules/three/src/*'),
+      'three/examples/jsm/loaders/GLTFLoader': path.resolve(__dirname, './node_modules/three/examples/jsm/loaders/GLTFLoader.js'),
+      'three/examples/jsm/loaders/DRACOLoader': path.resolve(__dirname, './node_modules/three/examples/jsm/loaders/DRACOLoader.js'),
+      'three/examples/jsm/controls/OrbitControls': path.resolve(__dirname, './node_modules/three/examples/jsm/controls/OrbitControls.js'),
     },
   },
   build: {
@@ -74,7 +75,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['three'],
+    include: ['three', '@react-three/fiber', '@react-three/drei'],
   },
   server: {
     port: 3000,
