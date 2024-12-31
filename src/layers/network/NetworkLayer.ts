@@ -1,23 +1,5 @@
-import {
-  Scene,
-  Object3D,
-  Vector3,
-  SphereGeometry,
-  MeshStandardMaterial,
-  Mesh,
-  CylinderGeometry,
-  Color,
-  Line,
-  BufferGeometry,
-  LineBasicMaterial,
-  Float32BufferAttribute,
-  Group,
-  AnimationMixer,
-  NumberKeyframeTrack,
-  AnimationClip,
-  LoopOnce,
-} from 'three';
-import { Layer } from '@/core/layers/Layer';
+import { Scene, Object3D, Vector3, SphereGeometry, MeshStandardMaterial, Mesh, CylinderGeometry, Color, Line, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Group, AnimationMixer, NumberKeyframeTrack, AnimationClip, LoopOnce } from 'three';
+import { Layer } from '@/core/Layer';
 
 export interface NetworkNode {
   id: string;
@@ -61,10 +43,8 @@ export class NetworkLayer extends Layer {
     this.flows = new Map();
     this.animations = new Map();
 
-    // Create container for network objects
-    this.container = new Group();
+    // Set container name
     this.container.name = 'network-layer';
-    this.scene.add(this.container);
   }
 
   addNode(node: NetworkNode): void {
@@ -235,14 +215,11 @@ export class NetworkLayer extends Layer {
   }
 
   update(deltaTime: number): void {
+    if (!this.enabled) return;
+
     // Update animations
     for (const mixer of this.animations.values()) {
       mixer.update(deltaTime);
-    }
-
-    // Update node positions
-    for (const node of this.nodes.values()) {
-      // Add any node-specific updates here
     }
 
     // Update connection positions
@@ -329,7 +306,7 @@ export class NetworkLayer extends Layer {
     return new Color(colors[type]);
   }
 
-  dispose(): void {
+  override dispose(): void {
     // Clean up animations
     for (const mixer of this.animations.values()) {
       mixer.stopAllAction();
@@ -352,7 +329,7 @@ export class NetworkLayer extends Layer {
     }
     this.flows.clear();
 
-    // Remove container
-    this.scene.remove(this.container);
+    // Call parent dispose
+    super.dispose();
   }
 }
