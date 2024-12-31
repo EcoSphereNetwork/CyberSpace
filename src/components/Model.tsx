@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import type { GLTF as GLTFType } from 'three/examples/jsm/loaders/GLTFLoader';
 import type { Object3D, Material, BufferGeometry } from 'three';
 
 interface ModelProps {
@@ -12,10 +11,11 @@ interface ModelProps {
   onError?: (error: Error) => void;
 }
 
-type GLTFResult = GLTFType & {
+interface GLTFResult {
   nodes: { [key: string]: Object3D };
   materials: { [key: string]: Material };
-};
+  scene: Object3D;
+}
 
 export const Model: React.FC<ModelProps> = ({
   url,

@@ -1,7 +1,6 @@
 import { EventEmitter } from '@/utils/EventEmitter';
 import { LoadingManager } from './LoadingManager';
 import * as THREE from 'three';
-import type { GLTF as GLTFType } from 'three/examples/jsm/loaders/GLTFLoader';
 import type { Object3D, Material } from 'three';
 
 export type ResourceType = 'texture' | 'model' | 'audio' | 'json';
@@ -12,10 +11,11 @@ interface Resource {
   data?: any;
 }
 
-type GLTFResult = GLTFType & {
+interface GLTFResult {
   nodes: { [key: string]: Object3D };
   materials: { [key: string]: Material };
-};
+  scene: Object3D;
+}
 
 export class ResourceManager extends EventEmitter {
   private static instance: ResourceManager;
