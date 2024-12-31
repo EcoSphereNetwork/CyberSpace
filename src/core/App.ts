@@ -62,11 +62,11 @@ export class App extends EventEmitter {
 
     // Initialize core systems
     this.resources = new ResourceManager();
-    this.security = new SecurityManager();
-    this.plugins = new PluginManager();
+    this.security = new SecurityManager({ apiUrl: '' }); // TODO: Add API URL to config
+    this.plugins = new PluginManager(this);
     this.notifications = new NotificationSystem();
     this.layers = new LayerManager();
-    this.scenes = new SceneManager();
+    this.scenes = new SceneManager(this);
     this.xr = new WebXRManager(config.vr);
     this.performance = new PerformanceMonitor(config.performance);
 
