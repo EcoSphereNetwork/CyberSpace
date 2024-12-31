@@ -22,10 +22,39 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const loadingManager = LoadingManager.getInstance();
+    loadingManager.reset();
+
+    // Add loading items
+    loadingManager.addItem('scene');
+    loadingManager.addItem('textures');
+    loadingManager.addItem('models');
+    loadingManager.addItem('network');
+
     try {
       // Initialize scene
+      loadingManager.setCurrentItem('scene');
       sceneRef.current = new EarthScene(containerRef.current);
-      setIsLoading(false);
+
+      // Simulate loading textures
+      loadingManager.setCurrentItem('textures');
+      setTimeout(() => {
+        loadingManager.completeItem('textures');
+        
+        // Simulate loading models
+        loadingManager.setCurrentItem('models');
+        setTimeout(() => {
+          loadingManager.completeItem('models');
+
+          // Simulate loading network
+          loadingManager.setCurrentItem('network');
+          setTimeout(() => {
+            loadingManager.completeItem('network');
+            loadingManager.completeItem('scene');
+            setIsLoading(false);
+          }, 1000);
+        }, 1000);
+      }, 1000);
     } catch (err) {
       console.error('Failed to initialize scene:', err);
       setError(err instanceof Error ? err.message : 'Failed to initialize scene');
@@ -37,6 +66,7 @@ const App: React.FC = () => {
         sceneRef.current.dispose();
         sceneRef.current = null;
       }
+      loadingManager.reset();
     };
   }, []);
 
