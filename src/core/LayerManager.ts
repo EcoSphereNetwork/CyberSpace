@@ -1,6 +1,8 @@
-import { Scene } from 'three';
-import { EventEmitter } from '@/utils/EventEmitter';
+import * as THREE from 'three';
 import { NetworkLayer } from '@/layers/network/NetworkLayer';
+import { ResourceManager } from './ResourceManager';
+import { LoadingManager } from './LoadingManager';
+import { EventEmitter } from '@/utils/EventEmitter';
 
 export type LayerType = 'network' | 'data' | 'ui';
 
@@ -20,8 +22,9 @@ export class LayerManager extends EventEmitter {
   private static instance: LayerManager;
   private layers: Map<LayerType, any>;
   private configs: Map<LayerType, LayerConfig>;
-  private scene: Scene | null;
+  private scene: THREE.Scene | null;
   private resourceManager: ResourceManager;
+  private loadingManager: LoadingManager;
 
   private constructor() {
     super();
@@ -29,6 +32,7 @@ export class LayerManager extends EventEmitter {
     this.configs = new Map();
     this.scene = null;
     this.resourceManager = ResourceManager.getInstance();
+    this.loadingManager = LoadingManager.getInstance();
     this.initializeConfigs();
   }
 
@@ -84,9 +88,9 @@ export class LayerManager extends EventEmitter {
     }
   }
 
-  initialize(scene: Scene): void {
+  initialize(scene: THREE.Scene): void {
     this.scene = scene;
-    this.initializeLayers();
+    this.emit('initialized');
   }
 
   async loadLayers(types: LayerType[]): Promise<void> {
@@ -94,39 +98,60 @@ export class LayerManager extends EventEmitter {
       throw new Error('Scene not initialized');
     }
 
+    // Add loading items
     for (const type of types) {
-      // Check if layer already exists
-      if (this.layers.has(type)) continue;
-
-      // Get layer config
       const config = this.configs.get(type);
-      if (!config) {
-        throw new Error(`Layer ${type} not found`);
+      if (config) {
+        this.loadingManager.addItem(`layer_${type}`);
       }
+    }
 
-      // Load layer resources
-      await this.resourceManager.preload(config.resources);
+    // Load layers
+    for (const type of types) {
+      try {
+        // Check if layer already exists
+        if (this.layers.has(type)) continue;
 
-      // Create layer instance
-      let layer;
-      switch (type) {
-        case 'network':
-          layer = new NetworkLayer(this.scene);
-          break;
-        case 'data':
-          // TODO: Implement DataLayer
-          break;
-        case 'ui':
-          // TODO: Implement UILayer
-          break;
-        default:
-          throw new Error(`Unknown layer type: ${type}`);
-      }
+        // Get layer config
+        const config = this.configs.get(type);
+        if (!config) {
+          throw new Error(`Layer ${type} not found`);
+        }
 
-      // Store layer
-      if (layer) {
-        this.layers.set(type, layer);
-        this.emit('layerLoaded', type);
+        // Set current item
+        this.loadingManager.setCurrentItem(`Loading layer: ${config.name}`);
+
+        // Load layer resources
+        await this.resourceManager.preload(config.resources);
+
+        // Create layer instance
+        let layer;
+        switch (type) {
+          case 'network':
+            layer = new NetworkLayer(this.scene);
+            break;
+          case 'data':
+            // TODO: Implement DataLayer
+            break;
+          case 'ui':
+            // TODO: Implement UILayer
+            break;
+          default:
+            throw new Error(`Unknown layer type: ${type}`);
+        }
+
+        // Store layer
+        if (layer) {
+          this.layers.set(type, layer);
+          this.emit('layerLoaded', type);
+        }
+
+        // Complete loading item
+        this.loadingManager.completeItem(`layer_${type}`);
+      } catch (error) {
+        console.error(`Failed to load layer ${type}:`, error);
+        this.loadingManager.completeItem(`layer_${type}`);
+        throw error;
       }
     }
 

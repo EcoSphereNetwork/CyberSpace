@@ -86,7 +86,11 @@ export const App: React.FC = () => {
       }
     };
 
-    initializeApp();
+    // Start initialization
+    initializeApp().catch((err) => {
+      console.error('Failed to initialize app:', err);
+      setError(err instanceof Error ? err.message : 'Failed to initialize application');
+    });
 
     // Cleanup
     return () => {
