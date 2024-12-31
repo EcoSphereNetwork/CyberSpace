@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import { GLTF } from '@react-three/drei/helpers/types/GLTF';
+import type { GLTF as GLTFType } from 'three/examples/jsm/loaders/GLTFLoader';
+import type { Object3D, Material, BufferGeometry } from 'three';
 
 interface ModelProps {
   url: string;
@@ -11,6 +12,11 @@ interface ModelProps {
   onError?: (error: Error) => void;
 }
 
+type GLTFResult = GLTFType & {
+  nodes: { [key: string]: Object3D };
+  materials: { [key: string]: Material };
+};
+
 export const Model: React.FC<ModelProps> = ({
   url,
   position = [0, 0, 0],
@@ -19,7 +25,7 @@ export const Model: React.FC<ModelProps> = ({
   onLoad,
   onError,
 }) => {
-  const { scene } = useGLTF(url) as GLTF;
+  const { scene } = useGLTF(url) as GLTFResult;
 
   useEffect(() => {
     try {
@@ -29,15 +35,15 @@ export const Model: React.FC<ModelProps> = ({
       return () => {
         // Cleanup
         clonedScene.traverse((object) => {
-          if ('geometry' in object) {
-            object.geometry?.dispose();
+          if ((object as any).geometry instanceof BufferGeometry) {
+            (object as any).geometry.dispose();
           }
-          if ('material' in object) {
-            const material = object.material;
+          if ((object as any).material instanceof Material) {
+            const material = (object as any).material;
             if (Array.isArray(material)) {
               material.forEach((m) => m.dispose());
             } else {
-              material?.dispose();
+              material.dispose();
             }
           }
         });
@@ -57,3 +63,6 @@ export const Model: React.FC<ModelProps> = ({
     />
   );
 };
+
+// Pre-load the model to avoid loading it multiple times
+useGLTF.preload('/models/default.glb');
