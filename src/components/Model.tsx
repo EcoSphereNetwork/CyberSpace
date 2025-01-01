@@ -66,3 +66,4 @@ export const Model: React.FC<ModelProps> = ({
 
 // Pre-load the model to avoid loading it multiple times
 useGLTF.preload('/models/default.glb');
+// Fixed imports
