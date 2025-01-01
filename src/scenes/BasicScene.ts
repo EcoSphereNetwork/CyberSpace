@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OrbitControls } from '@react-three/drei';
 
 export class BasicScene {
   protected scene: THREE.Scene;

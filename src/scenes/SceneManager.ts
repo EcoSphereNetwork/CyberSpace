@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OrbitControls } from '@react-three/drei';
 import { ResourceManager } from '@/core/ResourceManager';
 
 export class SceneManager {
