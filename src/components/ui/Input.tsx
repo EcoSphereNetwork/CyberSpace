@@ -6,61 +6,61 @@ type InputSize = "small" | "medium" | "large";
 type InputVariant = "outlined" | "filled" | "standard";
 
 interface InputStyleProps {
-  size?: InputSize;
-  variant?: InputVariant;
-  error?: boolean;
-  fullWidth?: boolean;
-  disabled?: boolean;
+  $size?: InputSize;
+  $variant?: InputVariant;
+  $error?: boolean;
+  $fullWidth?: boolean;
+  $disabled?: boolean;
 }
 
 const getInputStyles = ({
-  size = "medium",
-  variant = "outlined",
-  error = false,
-  fullWidth = false,
-  disabled = false,
+  $size = "medium",
+  $variant = "outlined",
+  $error = false,
+  $fullWidth = false,
+  $disabled = false,
   theme,
 }: InputStyleProps & { theme: any }) => css`
-  width: ${fullWidth ? "100%" : "auto"};
+  width: ${$fullWidth ? "100%" : "auto"};
   font-family: inherit;
   border-radius: 4px;
   transition: all 0.2s;
-  cursor: ${disabled ? "not-allowed" : "text"};
-  opacity: ${disabled ? 0.5 : 1};
+  cursor: ${$disabled ? "not-allowed" : "text"};
+  opacity: ${$disabled ? 0.5 : 1};
 
   // Size styles
-  ${size === "small" && css`
+  ${$size === "small" && css`
     padding: 6px 12px;
     font-size: 0.8125rem;
   `}
-  ${size === "medium" && css`
+  ${$size === "medium" && css`
     padding: 8px 16px;
     font-size: 0.875rem;
   `}
-  ${size === "large" && css`
+  ${$size === "large" && css`
     padding: 10px 20px;
     font-size: 0.9375rem;
   `}
 
   // Variant styles
-  ${variant === "outlined" && css`
-    border: 1px solid ${error ? theme.colors.error.main : theme.colors.divider};
+  ${$variant === "outlined" && css`
+    border: 1px solid ${$error ? theme.colors.error.main : theme.colors.divider};
     background: transparent;
 
     &:hover:not(:disabled) {
-      border-color: ${error ? theme.colors.error.dark : theme.colors.text.primary};
+      border-color: ${$error ? theme.colors.error.dark : theme.colors.text.primary};
     }
 
     &:focus {
       outline: none;
-      border-color: ${error ? theme.colors.error.main : theme.colors.primary.main};
-      box-shadow: 0 0 0 3px ${error ? theme.colors.error.main : theme.colors.primary.main}40;
+      border-color: ${$error ? theme.colors.error.main : theme.colors.primary.main};
+      box-shadow: 0 0 0 3px ${$error ? theme.colors.error.main : theme.colors.primary.main}40;
     }
   `}
-  ${variant === "filled" && css`
+  ${$variant === "filled" && css`
     border: none;
     background: ${theme.colors.action.hover};
-    border-bottom: 2px solid ${error ? theme.colors.error.main : "transparent"};
+    border-bottom: 2px solid ${$error ? theme.colors.error.main : "transparent"};
 
     &:hover:not(:disabled) {
       background: ${theme.colors.action.hover}CC;
@@ -69,25 +69,25 @@ const getInputStyles = ({
     &:focus {
       outline: none;
       background: ${theme.colors.action.hover}99;
-      border-bottom-color: ${error ? theme.colors.error.main : theme.colors.primary.main};
+      border-bottom-color: ${$error ? theme.colors.error.main : theme.colors.primary.main};
     }
   `}
-  ${variant === "standard" && css`
+  ${$variant === "standard" && css`
     border: none;
-    border-bottom: 1px solid ${error ? theme.colors.error.main : theme.colors.divider};
+    border-bottom: 1px solid ${$error ? theme.colors.error.main : theme.colors.divider};
     border-radius: 0;
     background: transparent;
     padding-left: 0;
     padding-right: 0;
 
     &:hover:not(:disabled) {
-      border-bottom-color: ${error ? theme.colors.error.dark : theme.colors.text.primary};
+      border-bottom-color: ${$error ? theme.colors.error.dark : theme.colors.text.primary};
     }
 
     &:focus {
       outline: none;
       border-bottom-width: 2px;
-      border-bottom-color: ${error ? theme.colors.error.main : theme.colors.primary.main};
+      border-bottom-color: ${$error ? theme.colors.error.main : theme.colors.primary.main};
     }
   `}
 
@@ -100,12 +100,20 @@ const StyledInput = styled.input<InputStyleProps>`
   ${props => getInputStyles(props)}
 `;
 
-export interface InputProps extends InputStyleProps, Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+  size?: InputSize;
+  variant?: InputVariant;
+  error?: boolean;
+  fullWidth?: boolean;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({
+  size,
+  variant,
+  error,
+  fullWidth,
   startAdornment,
   endAdornment,
   ...props
@@ -120,6 +128,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
         )}
         <StyledInput
           ref={ref}
+          $size={size}
+          $variant={variant}
+          $error={error}
+          $fullWidth={fullWidth}
           style={{
             paddingLeft: startAdornment ? 36 : undefined,
             paddingRight: endAdornment ? 36 : undefined,
@@ -135,7 +147,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     );
   }
 
-  return <StyledInput ref={ref} {...props} />;
+  return (
+    <StyledInput
+      ref={ref}
+      $size={size}
+      $variant={variant}
+      $error={error}
+      $fullWidth={fullWidth}
+      {...props}
+    />
+  );
 });
 
 Input.displayName = "Input";

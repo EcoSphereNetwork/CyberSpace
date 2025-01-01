@@ -1,62 +1,131 @@
-import * as THREE from 'three';
+import { Scene } from "three";
+import { EventEmitter } from "@/utils/EventEmitter";
 
-export class ExampleScene {
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
+export class ExampleScene extends Scene {
+  private readonly events: EventEmitter;
 
-  constructor(container: HTMLElement) {
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(
-      75,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      1000
-    );
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(this.renderer.domElement);
-
-    // Add example objects
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    this.scene.add(cube);
-
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    this.scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 3, 5);
-    this.scene.add(directionalLight);
-
-    // Position camera
-    this.camera.position.z = 5;
+  constructor() {
+    super();
+    this.events = new EventEmitter();
   }
 
-  public animate(): void {
-    requestAnimationFrame(() => this.animate());
-    this.renderer.render(this.scene, this.camera);
+  public async initialize(): Promise<void> {
+    // Implementation
   }
 
-  public resize(width: number, height: number): void {
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
+  public async dispose(): Promise<void> {
+    // Implementation
   }
 
-  public dispose(): void {
-    this.renderer.dispose();
-    this.scene.traverse((object) => {
-      if (object instanceof THREE.Mesh) {
-        object.geometry.dispose();
-        if (Array.isArray(object.material)) {
-          object.material.forEach((material) => material.dispose());
-        } else {
-          object.material.dispose();
-        }
-      }
-    });
+  public async update(_deltaTime: number): Promise<void> {
+    // Implementation
+  }
+
+  public async render(): Promise<void> {
+    // Implementation
+  }
+
+  public on(event: string, listener: (...args: any[]) => void): void {
+    this.events.on(event, listener);
+  }
+
+  public off(event: string, listener: (...args: any[]) => void): void {
+    this.events.off(event, listener);
+  }
+
+  public emit(event: string, ...args: any[]): void {
+    this.events.emit(event, ...args);
+  }
+}
+
+export class SceneManager {
+  private readonly scenes: Map<string, ExampleScene>;
+  private readonly events: EventEmitter;
+
+  constructor() {
+    this.scenes = new Map();
+    this.events = new EventEmitter();
+  }
+
+  public async addScene(id: string, scene: ExampleScene): Promise<void> {
+    if (this.scenes.has(id)) {
+      throw new Error(`Scene with id "${id}" already exists`);
+    }
+
+    await scene.initialize();
+    this.scenes.set(id, scene);
+    this.emit("sceneLoaded", scene);
+  }
+
+  public async removeScene(id: string): Promise<void> {
+    const scene = this.scenes.get(id);
+    if (!scene) {
+      throw new Error(`Scene with id "${id}" not found`);
+    }
+
+    await scene.dispose();
+    this.scenes.delete(id);
+  }
+
+  public getScene(id: string): ExampleScene | undefined {
+    return this.scenes.get(id);
+  }
+
+  public getScenes(): ExampleScene[] {
+    return Array.from(this.scenes.values());
+  }
+
+  public async update(deltaTime: number): Promise<void> {
+    for (const scene of this.getScenes()) {
+      await scene.update(deltaTime);
+    }
+  }
+
+  public async render(): Promise<void> {
+    for (const scene of this.getScenes()) {
+      await scene.render();
+    }
+  }
+
+  public async dispose(): Promise<void> {
+    for (const scene of this.getScenes()) {
+      await scene.dispose();
+    }
+    this.scenes.clear();
+  }
+
+  public on(event: string, listener: (...args: any[]) => void): void {
+    this.events.on(event, listener);
+  }
+
+  public off(event: string, listener: (...args: any[]) => void): void {
+    this.events.off(event, listener);
+  }
+
+  public emit(event: string, ...args: any[]): void {
+    this.events.emit(event, ...args);
+  }
+
+  public async transitionToScene(config: {
+    from: string;
+    to: string;
+    duration?: number;
+    easing?: string;
+    type?: "fade" | "zoom" | "slide" | "custom";
+    direction?: "up" | "down" | "left" | "right";
+    metadata?: Record<string, any>;
+  }): Promise<void> {
+    const fromScene = this.getScene(config.from);
+    const toScene = this.getScene(config.to);
+
+    if (!fromScene || !toScene) {
+      throw new Error("Invalid scene IDs");
+    }
+
+    this.emit("transitionStart", config);
+
+    // Implementation
+
+    this.emit("transitionComplete", config);
   }
 }

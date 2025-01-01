@@ -1,133 +1,137 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import { useAuth } from "@/hooks/useAuth";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ChatMessage } from "./ChatMessage";
+import { useAuth } from "@/contexts/AuthContext";
+import { ChatMessageComponent } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { ChatHeader } from "./ChatHeader";
-import { ChatUserList } from "./ChatUserList";
 import { ChatTypingIndicator } from "./ChatTypingIndicator";
+import { ChatUserList } from "./ChatUserList";
 
-const ChatContainer = styled.div`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
   background: ${props => props.theme.colors.background.paper};
-  border-radius: 8px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid ${props => props.theme.colors.divider};
+`;
+
+const Title = styled.h2`
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex: 1;
   overflow: hidden;
 `;
 
-const ChatBody = styled.div`
+const MessageList = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  display: flex;
-  flex-direction: column-reverse;
 `;
 
-const ChatFooter = styled.div`
-  padding: 16px;
-  border-top: 1px solid ${props => props.theme.colors.divider};
+const Sidebar = styled.div`
+  width: 240px;
+  border-left: 1px solid ${props => props.theme.colors.divider};
+  overflow-y: auto;
 `;
 
-interface ChatWindowProps {
+export interface ChatWindowProps {
   channelId: string;
-  onClose?: () => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ channelId, onClose }) => {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
-  const [users, setUsers] = useState<ChatUserType[]>([]);
-  const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const chatBodyRef = useRef<HTMLDivElement>(null);
+export const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
   const { user } = useAuth();
-  const { socket, isConnected } = useWebSocket();
+  const [messages, setMessages] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [typingUsers, setTypingUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!socket || !isConnected) return;
+    // Mock data
+    setMessages([
+      {
+        id: "1",
+        userId: "1",
+        userName: "User 1",
+        text: "Hello, world!",
+        timestamp: new Date().toISOString(),
+      },
+    ]);
 
-    // Load initial messages
-    socket.emit("chat:join", channelId);
-    socket.emit("chat:history", { channelId, limit: 50 });
-
-    // Handle incoming messages
-    socket.on("chat:message", (message: ChatMessageType) => {
-      setMessages(prev => [message, ...prev]);
-    });
-
-    // Handle user presence
-    socket.on("chat:users", (channelUsers: ChatUserType[]) => {
-      setUsers(channelUsers);
-    });
-
-    // Handle typing indicators
-    socket.on("chat:typing", (data: { userId: string; isTyping: boolean }) => {
-      setTypingUsers(prev => {
-        if (data.isTyping) {
-          return [...prev, data.userId];
-        } else {
-          return prev.filter(id => id !== data.userId);
-        }
-      });
-    });
-
-    return () => {
-      socket.emit("chat:leave", channelId);
-      socket.off("chat:message");
-      socket.off("chat:users");
-      socket.off("chat:typing");
-    };
-  }, [socket, isConnected, channelId]);
+    setUsers([
+      {
+        id: "1",
+        name: "User 1",
+        status: "online",
+      },
+      {
+        id: "2",
+        name: "User 2",
+        status: "offline",
+      },
+    ]);
+  }, [channelId]);
 
   const handleSendMessage = (text: string) => {
-    if (!socket || !isConnected) return;
+    if (!user) return;
 
-    socket.emit("chat:message", {
-      channelId,
+    const newMessage = {
+      id: Date.now().toString(),
+      userId: user.id,
+      userName: user.name,
       text,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    setMessages(prev => [...prev, newMessage]);
   };
 
   const handleTyping = (isTyping: boolean) => {
-    if (!socket || !isConnected) return;
+    if (!user) return;
 
-    socket.emit("chat:typing", {
-      channelId,
-      isTyping,
-    });
+    if (isTyping) {
+      setTypingUsers(prev => {
+        if (!prev.find(u => u.id === user.id)) {
+          return [...prev, user];
+        }
+        return prev;
+      });
+    } else {
+      setTypingUsers(prev => prev.filter(u => u.id !== user.id));
+    }
   };
 
   return (
-    <ErrorBoundary>
-      <ChatContainer>
-        <ChatHeader
-          channelId={channelId}
-          onClose={onClose}
-          userCount={users.length}
-        />
-        <ChatBody ref={chatBodyRef}>
+    <Container>
+      <Header>
+        <Title>Channel Name</Title>
+      </Header>
+      <Content>
+        <MessageList>
           {messages.map(message => (
-            <ChatMessage
+            <ChatMessageComponent
               key={message.id}
               message={message}
-              isOwnMessage={message.userId === user?.id}
+              isOwn={message.userId === user?.id}
             />
           ))}
-        </ChatBody>
-        <ChatTypingIndicator users={users} typingUsers={typingUsers} />
-        <ChatFooter>
-          <ChatInput
-            onSend={handleSendMessage}
-            onTyping={handleTyping}
-            disabled={!isConnected}
-          />
-        </ChatFooter>
-        <ChatUserList users={users} />
-      </ChatContainer>
-    </ErrorBoundary>
+          {typingUsers.length > 0 && (
+            <ChatTypingIndicator users={typingUsers} />
+          )}
+        </MessageList>
+        <Sidebar>
+          <ChatUserList users={users} />
+        </Sidebar>
+      </Content>
+      <ChatInput onSend={handleSendMessage} onTyping={handleTyping} />
+    </Container>
   );
 };

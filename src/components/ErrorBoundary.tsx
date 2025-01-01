@@ -1,10 +1,43 @@
-import { Component, ErrorInfo, ReactNode } from "react";
+import React, { Component, ErrorInfo } from "react";
 import styled from "@emotion/styled";
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+`;
+
+const Title = styled.h3`
+  color: ${props => props.theme.colors.error.main};
+  margin-bottom: 1rem;
+`;
+
+const Message = styled.p`
+  color: ${props => props.theme.colors.text.secondary};
+  margin-bottom: 2rem;
+`;
+
+const RetryButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: ${props => props.theme.colors.primary.main};
+  color: ${props => props.theme.colors.primary.contrastText};
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.primary.dark};
+  }
+`;
+
 interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
+  children: React.ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  onRetry?: () => void;
 }
 
 interface State {
@@ -12,77 +45,45 @@ interface State {
   error: Error | null;
 }
 
-const ErrorContainer = styled.div`
-  padding: 20px;
-  margin: 20px;
-  border: 1px solid ${props => props.theme.colors.status.error};
-  border-radius: 4px;
-  background-color: ${props => props.theme.colors.background.paper};
-  color: ${props => props.theme.colors.text.primary};
-`;
-
-const ErrorHeading = styled.h2`
-  color: ${props => props.theme.colors.status.error};
-  margin-bottom: 10px;
-`;
-
-const ErrorMessage = styled.pre`
-  background-color: ${props => props.theme.colors.background.default};
-  padding: 10px;
-  border-radius: 4px;
-  overflow: auto;
-  max-height: 200px;
-`;
-
-const RetryButton = styled.button`
-  background-color: ${props => props.theme.colors.primary.main};
-  color: ${props => props.theme.colors.text.primary};
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: ${props => props.theme.colors.primary.dark};
-  }
-`;
-
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+    };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
-    this.props.onError?.(error, errorInfo);
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error,
+    };
   }
 
-  private handleRetry = () => {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+  }
+
+  handleRetry = (): void => {
     this.setState({ hasError: false, error: null });
+    if (this.props.onRetry) {
+      this.props.onRetry();
+    }
   };
 
-  public render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
       return (
-        <ErrorContainer>
-          <ErrorHeading>Something went wrong</ErrorHeading>
-          <ErrorMessage>
-            {this.state.error?.message}
-          </ErrorMessage>
-          <RetryButton onClick={this.handleRetry}>
-            Try Again
-          </RetryButton>
-        </ErrorContainer>
+        <Container>
+          <Title>Something went wrong</Title>
+          <Message>
+            {this.state.error?.message || "An unexpected error occurred"}
+          </Message>
+          <RetryButton onClick={this.handleRetry}>Try Again</RetryButton>
+        </Container>
       );
     }
 

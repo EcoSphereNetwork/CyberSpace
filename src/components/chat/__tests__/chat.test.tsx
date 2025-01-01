@@ -1,50 +1,53 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { theme } from '@/styles/theme';
-import { ChatModule } from '../index';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ThemeProvider } from "@emotion/react";
+import { theme } from "@/styles/theme";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatWindow } from "../ChatWindow";
+import { ChatMessageComponent } from "../ChatMessage";
+import { ChatTypingIndicator } from "../ChatTypingIndicator";
+import { ChatUserList } from "../ChatUserList";
 
-describe('ChatModule', () => {
-  const mockProps = {
-    messages: [],
-    contacts: [{ name: 'John' }, { name: 'Jane' }],
-    onSendMessage: jest.fn(),
-    onGroupCreate: jest.fn(),
-    onFileAttach: jest.fn(),
-    onToolSelect: jest.fn(),
-  };
+const mockMessage = {
+  id: "1",
+  userId: "user1",
+  userName: "User 1",
+  text: "Hello, world!",
+  timestamp: "2023-01-01T00:00:00.000Z",
+};
 
-  it('renders without crashing', () => {
-    render(
-      <ThemeProvider theme={theme}>
-        <ChatModule {...mockProps} />
-      </ThemeProvider>
-    );
-    expect(screen.getByText('Chat')).toBeInTheDocument();
+const mockUser = {
+  id: "user1",
+  name: "User 1",
+  email: "user1@example.com",
+  status: "online",
+};
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <ThemeProvider theme={theme}>
+      <AuthProvider>
+        {ui}
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
+
+describe("Chat Components", () => {
+  it("renders ChatWindow without crashing", () => {
+    renderWithProviders(<ChatWindow channelId="test" />);
   });
 
-  it('displays contacts', () => {
-    render(
-      <ThemeProvider theme={theme}>
-        <ChatModule {...mockProps} />
-      </ThemeProvider>
-    );
-    expect(screen.getByText('John')).toBeInTheDocument();
-    expect(screen.getByText('Jane')).toBeInTheDocument();
+  it("renders ChatMessage without crashing", () => {
+    renderWithProviders(<ChatMessageComponent message={mockMessage} />);
   });
 
-  it('sends message on button click', () => {
-    render(
-      <ThemeProvider theme={theme}>
-        <ChatModule {...mockProps} />
-      </ThemeProvider>
-    );
-    const input = screen.getByPlaceholderText('Type a message');
-    const sendButton = screen.getByText('Send');
+  it("renders ChatTypingIndicator without crashing", () => {
+    renderWithProviders(<ChatTypingIndicator users={[mockUser]} />);
+  });
 
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.click(sendButton);
-
-    expect(mockProps.onSendMessage).toHaveBeenCalled();
+  it("renders ChatUserList without crashing", () => {
+    renderWithProviders(<ChatUserList users={[mockUser]} />);
   });
 });

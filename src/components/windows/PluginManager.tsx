@@ -1,224 +1,132 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Plugin, PluginStatus } from "@/types/plugin";
+import { IconButton } from "@/components/ui/IconButton";
 import { Icon } from "@/components/ui/Icon";
-import { Plugin, PluginStatus } from "./types";
+import { Switch } from "@/components/ui/Switch";
 
-const PluginContainer = styled.div`
-  padding: 16px;
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: ${props => props.theme.colors.background.paper};
 `;
 
-const SearchBar = styled.div`
-  margin-bottom: 16px;
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid ${props => props.theme.colors.divider};
+`;
+
+const Title = styled.h2`
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
 `;
 
 const PluginList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
 `;
 
 const PluginCard = styled.div`
-  background: ${props => props.theme.colors.background.default};
-  border-radius: 8px;
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  background: ${props => props.theme.colors.background.default};
+  box-shadow: ${props => props.theme.shadows[1]};
 `;
 
 const PluginHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  margin-bottom: 8px;
 `;
 
-const PluginIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: ${props => props.theme.colors.primary.main}20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${props => props.theme.colors.primary.main};
-`;
-
-const PluginInfo = styled.div`
+const PluginTitle = styled.div`
   flex: 1;
-`;
-
-const PluginTitle = styled.h3`
-  margin: 0;
-  font-size: 1rem;
   font-weight: 500;
-  color: ${props => props.theme.colors.text.primary};
 `;
 
-const PluginAuthor = styled.div`
-  font-size: 0.875rem;
+const PluginDescription = styled.div`
   color: ${props => props.theme.colors.text.secondary};
+  margin-bottom: 8px;
 `;
 
-const PluginDescription = styled.p`
-  margin: 0;
-  font-size: 0.875rem;
-  color: ${props => props.theme.colors.text.secondary};
-`;
-
-const PluginFooter = styled.div`
+const PluginMeta = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
+  color: ${props => props.theme.colors.text.secondary};
+  font-size: 0.875rem;
 `;
 
 const PluginStatus = styled.div<{ status: PluginStatus }>`
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: ${props => {
     switch (props.status) {
       case "active":
         return props.theme.colors.success.main;
-      case "inactive":
-        return props.theme.colors.text.disabled;
       case "error":
         return props.theme.colors.error.main;
+      case "updating":
+        return props.theme.colors.warning.main;
       default:
         return props.theme.colors.text.secondary;
     }
   }};
 `;
 
-interface PluginManagerProps {
+export interface PluginManagerProps {
   plugins: Plugin[];
-  onInstall?: (plugin: Plugin) => void;
-  onUninstall?: (plugin: Plugin) => void;
-  onEnable?: (plugin: Plugin) => void;
-  onDisable?: (plugin: Plugin) => void;
+  onToggle?: (pluginId: string, enabled: boolean) => void;
 }
 
 export const PluginManager: React.FC<PluginManagerProps> = ({
   plugins,
-  onInstall,
-  onUninstall,
-  onEnable,
-  onDisable,
+  onToggle,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredPlugins, setFilteredPlugins] = useState(plugins);
-
-  useEffect(() => {
-    const query = searchQuery.toLowerCase();
-    setFilteredPlugins(
-      plugins.filter(plugin =>
-        plugin.name.toLowerCase().includes(query) ||
-        plugin.description.toLowerCase().includes(query) ||
-        plugin.author.toLowerCase().includes(query)
-      )
-    );
-  }, [searchQuery, plugins]);
-
-  const handleAction = (plugin: Plugin) => {
-    switch (plugin.status) {
-      case "available":
-        onInstall?.(plugin);
-        break;
-      case "installed":
-        onEnable?.(plugin);
-        break;
-      case "active":
-        onDisable?.(plugin);
-        break;
-      case "error":
-        onUninstall?.(plugin);
-        break;
-    }
-  };
-
-  const getActionButton = (plugin: Plugin) => {
-    switch (plugin.status) {
-      case "available":
-        return (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleAction(plugin)}
-          >
-            Install
-          </Button>
-        );
-      case "installed":
-        return (
-          <Button
-            variant="outlined"
-            color="primary"
-            size="small"
-            onClick={() => handleAction(plugin)}
-          >
-            Enable
-          </Button>
-        );
-      case "active":
-        return (
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => handleAction(plugin)}
-          >
-            Disable
-          </Button>
-        );
-      case "error":
-        return (
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => handleAction(plugin)}
-          >
-            Uninstall
-          </Button>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
-    <PluginContainer>
-      <SearchBar>
-        <Input
-          fullWidth
-          placeholder="Search plugins..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          startAdornment={<Icon name="search" />}
-        />
-      </SearchBar>
+    <Container>
+      <Header>
+        <Title>Plugins</Title>
+        <IconButton aria-label="Add Plugin">
+          <Icon name="add" />
+        </IconButton>
+      </Header>
       <PluginList>
-        {filteredPlugins.map(plugin => (
+        {plugins.map(plugin => (
           <PluginCard key={plugin.id}>
             <PluginHeader>
-              <PluginIcon>
-                <Icon name={plugin.icon || "extension"} />
-              </PluginIcon>
-              <PluginInfo>
-                <PluginTitle>{plugin.name}</PluginTitle>
-                <PluginAuthor>{plugin.author}</PluginAuthor>
-              </PluginInfo>
+              <PluginTitle>{plugin.name}</PluginTitle>
+              <Switch
+                checked={plugin.enabled}
+                onChange={() => onToggle?.(plugin.id, !plugin.enabled)}
+              />
             </PluginHeader>
             <PluginDescription>{plugin.description}</PluginDescription>
-            <PluginFooter>
+            <PluginMeta>
+              <div>v{plugin.version}</div>
+              <div>by {plugin.author}</div>
               <PluginStatus status={plugin.status}>
-                {plugin.status.charAt(0).toUpperCase() + plugin.status.slice(1)}
+                <Icon name={
+                  plugin.status === "active" ? "check_circle" :
+                  plugin.status === "error" ? "error" :
+                  plugin.status === "updating" ? "update" :
+                  "circle"
+                } />
+                {plugin.status}
               </PluginStatus>
-              {getActionButton(plugin)}
-            </PluginFooter>
+            </PluginMeta>
           </PluginCard>
         ))}
       </PluginList>
-    </PluginContainer>
+    </Container>
   );
 };

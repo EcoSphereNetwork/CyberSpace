@@ -1,79 +1,70 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { keyframes } from "@emotion/react";
+import { User } from "@/contexts/AuthContext";
 
-const bounce = keyframes`
-  0%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-4px);
-  }
-`;
-
-const TypingContainer = styled.div`
-  padding: 4px 16px;
-  font-size: 0.875rem;
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
   color: ${props => props.theme.colors.text.secondary};
-  min-height: 24px;
+  font-style: italic;
 `;
 
-const TypingDots = styled.div`
-  display: inline-flex;
-  gap: 2px;
-  margin-left: 4px;
+const Dots = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `;
 
 const Dot = styled.div`
   width: 4px;
   height: 4px;
-  background-color: currentColor;
   border-radius: 50%;
-  animation: ${bounce} 1s infinite;
+  background: ${props => props.theme.colors.text.secondary};
+  animation: bounce 1.4s infinite ease-in-out both;
 
-  &:nth-of-type(2) {
-    animation-delay: 0.2s;
+  &:nth-of-type(1) {
+    animation-delay: -0.32s;
   }
 
-  &:nth-of-type(3) {
-    animation-delay: 0.4s;
+  &:nth-of-type(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes bounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
   }
 `;
 
-interface ChatTypingIndicatorProps {
-  users: ChatUserType[];
-  typingUsers: string[];
+export interface ChatTypingIndicatorProps {
+  users: User[];
 }
 
 export const ChatTypingIndicator: React.FC<ChatTypingIndicatorProps> = ({
   users,
-  typingUsers,
 }) => {
-  if (typingUsers.length === 0) return null;
+  if (users.length === 0) return null;
 
-  const typingNames = users
-    .filter(user => typingUsers.includes(user.id))
-    .map(user => user.name);
-
-  let message = "";
-  if (typingNames.length === 1) {
-    message = `${typingNames[0]} is typing`;
-  } else if (typingNames.length === 2) {
-    message = `${typingNames[0]} and ${typingNames[1]} are typing`;
-  } else if (typingNames.length === 3) {
-    message = `${typingNames[0]}, ${typingNames[1]}, and ${typingNames[2]} are typing`;
-  } else {
-    message = "Several people are typing";
-  }
+  const text = users.length === 1
+    ? `${users[0].name} is typing...`
+    : users.length === 2
+    ? `${users[0].name} and ${users[1].name} are typing...`
+    : `${users.length} users are typing...`;
 
   return (
-    <TypingContainer>
-      {message}
-      <TypingDots>
+    <Container>
+      {text}
+      <Dots>
         <Dot />
         <Dot />
         <Dot />
-      </TypingDots>
-    </TypingContainer>
+      </Dots>
+    </Container>
   );
 };

@@ -1,98 +1,72 @@
-import { useState } from "react";
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ThemeProvider } from "@emotion/react";
-import { theme } from "@/styles/theme";
 import { ErrorBoundary } from "../ErrorBoundary";
 
-const ThrowError = () => {
+const ErrorComponent = () => {
   throw new Error("Test error");
 };
 
-const TestComponent = ({ shouldThrow = false }) => {
-  if (shouldThrow) {
-    throw new Error("Test error");
-  }
-  return <div>Test content</div>;
-};
+const MockComponent = () => <div>Mock Component</div>;
 
 describe("ErrorBoundary", () => {
-  const consoleError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
+  beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  afterAll(() => {
-    console.error = consoleError;
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  it("renders children when no error occurs", () => {
+  it("renders children when no error", () => {
     render(
-      <ThemeProvider theme={theme}>
-        <ErrorBoundary>
-          <div>Test content</div>
-        </ErrorBoundary>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <MockComponent />
+      </ErrorBoundary>
     );
 
-    expect(screen.getByText("Test content")).toBeInTheDocument();
+    expect(screen.getByText("Mock Component")).toBeInTheDocument();
   });
 
-  it("renders error UI when error occurs", () => {
+  it("renders error message when error occurs", () => {
     render(
-      <ThemeProvider theme={theme}>
-        <ErrorBoundary>
-          <ThrowError />
-        </ErrorBoundary>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ErrorComponent />
+      </ErrorBoundary>
     );
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-    expect(screen.getByText("Test error")).toBeInTheDocument();
   });
 
-  it("calls onError prop when error occurs", () => {
+  it("renders retry button when error occurs", () => {
+    render(
+      <ErrorBoundary>
+        <ErrorComponent />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText("Try Again")).toBeInTheDocument();
+  });
+
+  it("calls onError when error occurs", () => {
     const onError = jest.fn();
     render(
-      <ThemeProvider theme={theme}>
-        <ErrorBoundary onError={onError}>
-          <ThrowError />
-        </ErrorBoundary>
-      </ThemeProvider>
+      <ErrorBoundary onError={onError}>
+        <ErrorComponent />
+      </ErrorBoundary>
     );
 
     expect(onError).toHaveBeenCalled();
   });
 
-  it("renders custom fallback when provided", () => {
-    const fallback = <div>Custom error message</div>;
+  it("resets error state when retry button is clicked", () => {
+    const onRetry = jest.fn();
     render(
-      <ThemeProvider theme={theme}>
-        <ErrorBoundary fallback={fallback}>
-          <ThrowError />
-        </ErrorBoundary>
-      </ThemeProvider>
+      <ErrorBoundary onRetry={onRetry}>
+        <ErrorComponent />
+      </ErrorBoundary>
     );
 
-    expect(screen.getByText("Custom error message")).toBeInTheDocument();
-  });
-
-  it("resets error state when retry button is clicked", () => {
-    const TestWrapper = () => {
-      const [shouldThrow, setShouldThrow] = useState(true);
-      return (
-        <ThemeProvider theme={theme}>
-          <ErrorBoundary>
-            <TestComponent shouldThrow={shouldThrow} />
-            <button onClick={() => setShouldThrow(false)}>Reset</button>
-          </ErrorBoundary>
-        </ThemeProvider>
-      );
-    };
-
-    render(<TestWrapper />);
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-
     fireEvent.click(screen.getByText("Try Again"));
-    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
+    expect(onRetry).toHaveBeenCalled();
   });
 });
