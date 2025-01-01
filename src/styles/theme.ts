@@ -1,52 +1,80 @@
-export interface Theme {
-  colors: {
-    background: {
-      default: string;
-      paper: string;
+import { Theme } from '@emotion/react';
+
+declare module '@emotion/react' {
+  export interface Theme {
+    colors: {
+      background: {
+        default: string;
+        paper: string;
+      };
+      surface: {
+        default: string;
+        hover: string;
+        active: string;
+      };
+      primary: {
+        main: string;
+        dark: string;
+        light: string;
+      };
+      secondary: {
+        main: string;
+        dark: string;
+        light: string;
+      };
+      text: {
+        primary: string;
+        secondary: string;
+      };
+      status: {
+        error: string;
+        warning: string;
+        success: string;
+        info: string;
+      };
     };
-    surface: {
-      default: string;
-      hover: string;
+    typography: {
+      fontSizes: {
+        xs: string;
+        sm: string;
+        md: string;
+        lg: string;
+        xl: string;
+      };
     };
-    text: {
-      primary: string;
-      secondary: string;
-    };
-    primary: {
-      main: string;
-      light: string;
-      dark: string;
-    };
-  };
-  typography: {
-    fontSizes: {
-      xs: string;
-      sm: string;
-      md: string;
-      lg: string;
-      xl: string;
-    };
-  };
+  }
 }
 
 export const theme: Theme = {
   colors: {
     background: {
-      default: '#121212',
-      paper: '#1e1e1e',
+      default: '#1a1a1a',
+      paper: '#2a2a2a',
     },
     surface: {
-      default: '#2e2e2e',
-      hover: '#3e3e3e',
+      default: '#333333',
+      hover: '#444444',
+      active: '#555555',
+    },
+    primary: {
+      main: '#00cc66',
+      dark: '#009944',
+      light: '#33ff99',
+    },
+    secondary: {
+      main: '#00ccff',
+      dark: '#0099cc',
+      light: '#33ffff',
     },
     text: {
       primary: '#ffffff',
-      secondary: '#b0b0b0',
+      secondary: '#cccccc',
     },
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+    status: {
+      error: '#ff0000',
+      warning: '#ffaa00',
+      success: '#00cc66',
+      info: '#00ccff',
     },
   },
   typography: {

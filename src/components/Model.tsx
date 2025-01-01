@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
+import { Object3D, Material, BufferGeometry } from 'three';
 
 interface ModelProps {
   url: string;
@@ -23,6 +24,20 @@ export const Model: React.FC<ModelProps> = ({
       onLoad?.();
     }
   }, [scene, onLoad]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup
+      scene.traverse((object: Object3D) => {
+        if ((object as any).geometry instanceof BufferGeometry) {
+          (object as any).geometry.dispose();
+        }
+        if ((object as any).material instanceof Material) {
+          (object as any).material.dispose();
+        }
+      });
+    };
+  }, [scene]);
 
   return (
     <primitive
