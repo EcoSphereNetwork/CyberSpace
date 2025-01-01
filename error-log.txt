@@ -1,0 +1,1181 @@
+npm run build 2> error-log.txt
+
+> cyberspace@0.1.0 build
+> tsc && vite build
+
+src/App.tsx:11:10 - error TS2786: 'SceneManager' cannot be used as a JSX component.
+  Its type 'typeof SceneManager' is not a valid JSX element type.
+    Type 'typeof SceneManager' is not assignable to type 'new (props: any, deprecatedLegacyContext?: any) => Component<any, any, any>'.
+      Cannot assign a 'private' constructor type to a 'public' constructor type.
+
+11         <SceneManager />
+            ~~~~~~~~~~~~
+
+src/components/App.tsx:1:8 - error TS6133: 'React' is declared but its value is never read.
+
+1 import React, { useState, Suspense } from 'react';
+         ~~~~~
+
+src/components/Model.tsx:38:51 - error TS1361: 'BufferGeometry' cannot be used as a value because it was imported using 'import type'.
+
+38           if ((object as any).geometry instanceof BufferGeometry) {
+                                                     ~~~~~~~~~~~~~~
+
+  src/components/Model.tsx:3:35
+    3 import type { Object3D, Material, BufferGeometry } from 'three';
+                                        ~~~~~~~~~~~~~~
+    'BufferGeometry' was imported here.
+
+src/components/Model.tsx:41:51 - error TS1361: 'Material' cannot be used as a value because it was imported using 'import type'.
+
+41           if ((object as any).material instanceof Material) {
+                                                     ~~~~~~~~
+
+  src/components/Model.tsx:3:25
+    3 import type { Object3D, Material, BufferGeometry } from 'three';
+                              ~~~~~~~~
+    'Material' was imported here.
+
+src/components/windows/PluginManager.tsx:9:40 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+9   background: ${(props) => props.theme.colors.background.paper};
+                                         ~~~~~~
+
+src/components/windows/PluginManager.tsx:18:53 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+18   border-bottom: 1px solid ${(props) => props.theme.colors.surface.hover};
+                                                       ~~~~~~
+
+src/components/windows/PluginManager.tsx:26:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+26   font-size: ${(props) => props.theme.typography.fontSizes.xl};
+                                         ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:27:35 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+27   color: ${(props) => props.theme.colors.text.primary};
+                                     ~~~~~~
+
+src/components/windows/PluginManager.tsx:56:40 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+56   background: ${(props) => props.theme.colors.surface.default};
+                                          ~~~~~~
+
+src/components/windows/PluginManager.tsx:65:23 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+65         ? props.theme.colors.primary.main
+                         ~~~~~~
+
+src/components/windows/PluginManager.tsx:66:23 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+66         : props.theme.colors.surface.hover};
+                         ~~~~~~
+
+src/components/windows/PluginManager.tsx:70:44 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+70     border-color: ${(props) => props.theme.colors.primary.main};
+                                              ~~~~~~
+
+src/components/windows/PluginManager.tsx:87:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+87   font-size: ${(props) => props.theme.typography.fontSizes.lg};
+                                         ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:88:35 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+88   color: ${(props) => props.theme.colors.text.primary};
+                                     ~~~~~~
+
+src/components/windows/PluginManager.tsx:92:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+92   font-size: ${(props) => props.theme.typography.fontSizes.sm};
+                                         ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:93:35 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+93   color: ${(props) => props.theme.colors.text.secondary};
+                                     ~~~~~~
+
+src/components/windows/PluginManager.tsx:98:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+98   font-size: ${(props) => props.theme.typography.fontSizes.md};
+                                         ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:99:35 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+99   color: ${(props) => props.theme.colors.text.secondary};
+                                     ~~~~~~
+
+src/components/windows/PluginManager.tsx:106:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+106   font-size: ${(props) => props.theme.typography.fontSizes.sm};
+                                          ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:107:35 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+107   color: ${(props) => props.theme.colors.text.secondary};
+                                      ~~~~~~
+
+src/components/windows/PluginManager.tsx:126:39 - error TS2339: Property 'typography' does not exist on type 'Theme'.
+
+126   font-size: ${(props) => props.theme.typography.fontSizes.sm};
+                                          ~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:134:37 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+134           background: ${props.theme.colors.primary.main};
+                                        ~~~~~~
+
+src/components/windows/PluginManager.tsx:135:32 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+135           color: ${props.theme.colors.text.primary};
+                                   ~~~~~~
+
+src/components/windows/PluginManager.tsx:137:39 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+137             background: ${props.theme.colors.primary.dark};
+                                          ~~~~~~
+
+src/components/windows/PluginManager.tsx:142:37 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+142           background: ${props.theme.colors.status.error};
+                                        ~~~~~~
+
+src/components/windows/PluginManager.tsx:143:32 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+143           color: ${props.theme.colors.text.primary};
+                                   ~~~~~~
+
+src/components/windows/PluginManager.tsx:145:39 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+145             background: ${props.theme.colors.status.error}dd;
+                                          ~~~~~~
+
+src/components/windows/PluginManager.tsx:150:37 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+150           background: ${props.theme.colors.surface.hover};
+                                        ~~~~~~
+
+src/components/windows/PluginManager.tsx:151:32 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+151           color: ${props.theme.colors.text.primary};
+                                   ~~~~~~
+
+src/components/windows/PluginManager.tsx:153:39 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+153             background: ${props.theme.colors.surface.active};
+                                          ~~~~~~
+
+src/components/windows/PluginManager.tsx:166:21 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+166       ? props.theme.colors.primary.main
+                        ~~~~~~
+
+src/components/windows/PluginManager.tsx:167:21 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+167       : props.theme.colors.surface.hover};
+                        ~~~~~~
+
+src/components/windows/PluginManager.tsx:181:42 - error TS2339: Property 'colors' does not exist on type 'Theme'.
+
+181     background: ${(props) => props.theme.colors.text.primary};
+                                             ~~~~~~
+
+src/components/windows/PluginManager.tsx:225:57 - error TS2554: Expected 1 arguments, but got 2.
+
+225       app.notifications.show('Failed to toggle plugin', { type: 'error' });
+                                                            ~~~~~~~~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:233:30 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'Omit<Notification, "id" | "timestamp">'.
+
+233       app.notifications.show('Plugin uninstalled successfully');
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/windows/PluginManager.tsx:236:60 - error TS2554: Expected 1 arguments, but got 2.
+
+236       app.notifications.show('Failed to uninstall plugin', { type: 'error' });
+                                                               ~~~~~~~~~~~~~~~~~
+
+src/core/App.ts:64:22 - error TS2673: Constructor of class 'ResourceManager' is private and only accessible within the class declaration.
+
+64     this.resources = new ResourceManager();
+                        ~~~~~~~~~~~~~~~~~~~~~
+
+src/core/App.ts:68:19 - error TS2554: Expected 1-2 arguments, but got 0.
+
+68     this.layers = new LayerManager();
+                     ~~~~~~~~~~~~~~~~~~
+
+  src/core/layers/LayerManager.ts:25:15
+    25   constructor(scene: Scene, config: LayerManagerConfig = {}) {
+                     ~~~~~~~~~~~~
+    An argument for 'scene' was not provided.
+
+src/core/App.ts:69:19 - error TS2673: Constructor of class 'SceneManager' is private and only accessible within the class declaration.
+
+69     this.scenes = new SceneManager(this);
+                     ~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/App.ts:103:24 - error TS2339: Property 'initialize' does not exist on type 'ResourceManager'.
+
+103         this.resources.initialize(),
+                           ~~~~~~~~~~
+
+src/core/App.ts:104:23 - error TS2339: Property 'initialize' does not exist on type 'SecurityManager'.
+
+104         this.security.initialize(),
+                          ~~~~~~~~~~
+
+src/core/App.ts:108:21 - error TS2339: Property 'initialize' does not exist on type 'SceneManager'.
+
+108         this.scenes.initialize(),
+                        ~~~~~~~~~~
+
+src/core/App.ts:137:25 - error TS2339: Property 'shutdown' does not exist on type 'SceneManager'.
+
+137       await this.scenes.shutdown();
+                            ~~~~~~~~
+
+src/core/App.ts:141:27 - error TS2339: Property 'shutdown' does not exist on type 'SecurityManager'.
+
+141       await this.security.shutdown();
+                              ~~~~~~~~
+
+src/core/App.ts:142:28 - error TS2339: Property 'shutdown' does not exist on type 'ResourceManager'.
+
+142       await this.resources.shutdown();
+                               ~~~~~~~~
+
+src/core/Layer.ts:47:26 - error TS2339: Property 'dispose' does not exist on type '{}'.
+
+47         object.geometry?.dispose();
+                            ~~~~~~~
+
+src/core/Layer.ts:54:21 - error TS2339: Property 'dispose' does not exist on type '{}'.
+
+54           material?.dispose();
+                       ~~~~~~~
+
+src/core/LayerDependencyManager.ts:151:17 - error TS6133: 'layer' is declared but its value is never read.
+
+151   isLayerActive(layer: LayerType): boolean {
+                    ~~~~~
+
+src/core/LayerManager.ts:125:44 - error TS2345: Argument of type '{ url: string; type: "texture" | "audio" | "json" | "model"; }[]' is not assignable to parameter of type '{ url: string; type: ResourceType; }[]'.
+  Type '{ url: string; type: "texture" | "audio" | "json" | "model"; }' is not assignable to type '{ url: string; type: ResourceType; }'.
+    Types of property 'type' are incompatible.
+      Type '"texture" | "audio" | "json" | "model"' is not assignable to type 'ResourceType'.
+        Type '"model"' is not assignable to type 'ResourceType'.
+
+125         await this.resourceManager.preload(config.resources);
+                                               ~~~~~~~~~~~~~~~~
+
+src/core/OptimizationManager.ts:2:32 - error TS6133: 'Camera' is declared but its value is never read.
+
+2 import { WebGLRenderer, Scene, Camera, WebGLRenderTarget, Clock } from 'three';
+                                 ~~~~~~
+
+src/core/OptimizationManager.ts:215:27 - error TS2339: Property 'computeBoundingBox' does not exist on type '{}'.
+
+215           object.geometry.computeBoundingBox();
+                              ~~~~~~~~~~~~~~~~~~
+
+src/core/OptimizationManager.ts:216:27 - error TS2339: Property 'computeBoundingSphere' does not exist on type '{}'.
+
+216           object.geometry.computeBoundingSphere();
+                              ~~~~~~~~~~~~~~~~~~~~~
+
+src/core/OptimizationManager.ts:243:19 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+243       type: hdr ? THREE.HalfFloatType : THREE.UnsignedByteType,
+                      ~~~~~
+
+src/core/OptimizationManager.ts:243:41 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+243       type: hdr ? THREE.HalfFloatType : THREE.UnsignedByteType,
+                                            ~~~~~
+
+src/core/SceneManager.ts:1:1 - error TS6133: 'THREE' is declared but its value is never read.
+
+1 import * as THREE from 'three';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:28:11 - error TS6133: 'loadingManager' is declared but its value is never read.
+
+28   private loadingManager: LoadingManager;
+             ~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:29:11 - error TS6133: 'transitionManager' is declared but its value is never read.
+
+29   private transitionManager: TransitionManager;
+             ~~~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:94:40 - error TS2345: Argument of type '{ url: string; type: "texture" | "audio" | "json" | "model"; }[]' is not assignable to parameter of type '{ url: string; type: ResourceType; }[]'.
+  Type '{ url: string; type: "texture" | "audio" | "json" | "model"; }' is not assignable to type '{ url: string; type: ResourceType; }'.
+    Types of property 'type' are incompatible.
+      Type '"texture" | "audio" | "json" | "model"' is not assignable to type 'ResourceType'.
+
+94     await this.resourceManager.preload(config.resources);
+                                          ~~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:100:17 - error TS7009: 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+
+100         scene = new EarthScene(this.container!);
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:100:32 - error TS2559: Type 'HTMLElement' has no properties in common with type 'EarthSceneProps'.
+
+100         scene = new EarthScene(this.container!);
+                                   ~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:103:17 - error TS7009: 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+
+103         scene = new NetworkScene(this.container!);
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:103:34 - error TS2559: Type 'HTMLElement' has no properties in common with type 'NetworkSceneProps'.
+
+103         scene = new NetworkScene(this.container!);
+                                     ~~~~~~~~~~~~~~~
+
+src/core/SceneManager.ts:138:25 - error TS6133: 'scene' is declared but its value is never read.
+
+138   private async fadeOut(scene: any): Promise<void> {
+                            ~~~~~
+
+src/core/SceneManager.ts:145:24 - error TS6133: 'scene' is declared but its value is never read.
+
+145   private async fadeIn(scene: any): Promise<void> {
+                           ~~~~~
+
+src/core/TransitionManager.ts:1:1 - error TS6133: 'THREE' is declared but its value is never read.
+
+1 import * as THREE from 'three';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:13:21 - error TS2552: Cannot find name 'WebGLRenderer'. Did you mean 'WebGLRenderbuffer'?
+
+13   private renderer: WebGLRenderer | null;
+                       ~~~~~~~~~~~~~
+
+  node_modules/typescript/lib/lib.dom.d.ts:24321:13
+    24321 declare var WebGLRenderbuffer: {
+                      ~~~~~~~~~~~~~~~~~
+    'WebGLRenderbuffer' is declared here.
+
+src/core/TransitionManager.ts:14:27 - error TS2304: Cannot find name 'Mesh'.
+
+14   private transitionMesh: Mesh | null;
+                             ~~~~
+
+src/core/TransitionManager.ts:15:29 - error TS2304: Cannot find name 'OrthographicCamera'.
+
+15   private transitionCamera: OrthographicCamera | null;
+                               ~~~~~~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:16:28 - error TS2304: Cannot find name 'Scene'.
+
+16   private transitionScene: Scene | null;
+                              ~~~~~
+
+src/core/TransitionManager.ts:35:24 - error TS2552: Cannot find name 'WebGLRenderer'. Did you mean 'WebGLRenderbuffer'?
+
+35   initialize(renderer: WebGLRenderer): void {
+                          ~~~~~~~~~~~~~
+
+  node_modules/typescript/lib/lib.dom.d.ts:24321:13
+    24321 declare var WebGLRenderbuffer: {
+                      ~~~~~~~~~~~~~~~~~
+    'WebGLRenderbuffer' is declared here.
+
+src/core/TransitionManager.ts:42:33 - error TS2304: Cannot find name 'OrthographicCamera'.
+
+42     this.transitionCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+                                   ~~~~~~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:45:32 - error TS2304: Cannot find name 'Scene'.
+
+45     this.transitionScene = new Scene();
+                                  ~~~~~
+
+src/core/TransitionManager.ts:48:26 - error TS2304: Cannot find name 'PlaneGeometry'.
+
+48     const geometry = new PlaneGeometry(2, 2);
+                            ~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:49:26 - error TS2304: Cannot find name 'ShaderMaterial'.
+
+49     const material = new ShaderMaterial({
+                            ~~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:77:31 - error TS2304: Cannot find name 'Mesh'.
+
+77     this.transitionMesh = new Mesh(geometry, material);
+                                 ~~~~
+
+src/core/TransitionManager.ts:82:16 - error TS2304: Cannot find name 'Scene'.
+
+82     fromScene: Scene,
+                  ~~~~~
+
+src/core/TransitionManager.ts:83:14 - error TS2304: Cannot find name 'Scene'.
+
+83     toScene: Scene,
+                ~~~~~
+
+src/core/TransitionManager.ts:84:13 - error TS2304: Cannot find name 'Camera'.
+
+84     camera: Camera,
+               ~~~~~~
+
+src/core/TransitionManager.ts:106:54 - error TS2304: Cannot find name 'ShaderMaterial'.
+
+106     const material = this.transitionMesh.material as ShaderMaterial;
+                                                         ~~~~~~~~~~~~~~
+
+src/core/TransitionManager.ts:202:40 - error TS2304: Cannot find name 'ShaderMaterial'.
+
+202       (this.transitionMesh.material as ShaderMaterial).dispose();
+                                           ~~~~~~~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:2:10 - error TS6133: 'Layer' is declared but its value is never read.
+
+2 import { Layer, LayerConfig } from './Layer';
+           ~~~~~
+
+src/core/layers/LayerIntegration.ts:4:19 - error TS6133: 'Object3D' is declared but its value is never read.
+
+4 import { Vector3, Object3D, Scene, WebGLRenderer, Camera } from 'three';
+                    ~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:5:22 - error TS2307: Cannot find module 'gsap' or its corresponding type declarations.
+
+5 import { gsap } from 'gsap';
+                       ~~~~~~
+
+src/core/layers/LayerIntegration.ts:64:20 - error TS6133: 'scene' is declared but its value is never read.
+
+64   private readonly scene: Scene;
+                      ~~~~~
+
+src/core/layers/LayerIntegration.ts:65:20 - error TS6133: 'renderer' is declared but its value is never read.
+
+65   private readonly renderer: WebGLRenderer;
+                      ~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:66:20 - error TS6133: 'camera' is declared but its value is never read.
+
+66   private readonly camera: Camera;
+                      ~~~~~~
+
+src/core/layers/LayerIntegration.ts:130:11 - error TS2322: Type '{ from: string; to: string; duration?: number | undefined; easing?: string | undefined; type?: "zoom" | "fade" | "slide" | "custom" | undefined; direction?: "left" | "right" | "up" | "down" | undefined; onStart?: (() => void) | undefined; onComplete?: (() => void) | undefined; metadata?: Record<...> | undefined; }' is not assignable to type 'Required<LayerTransition>'.
+  Types of property 'duration' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+
+130     const transitionConfig: Required<LayerTransition> = {
+              ~~~~~~~~~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:270:11 - error TS2322: Type '{ layers: string[]; mode: "add" | "overlay" | "multiply" | "custom" | "screen"; opacity?: number | undefined; mask?: { texture?: string | undefined; color?: number | undefined; invert?: boolean | undefined; } | undefined; metadata?: Record<...> | undefined; }' is not assignable to type 'Required<LayerBlend>'.
+  Types of property 'opacity' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+
+270     const blendConfig: Required<LayerBlend> = {
+              ~~~~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:398:18 - error TS2345: Argument of type '{ layers: string[]; mode?: "add" | "overlay" | "multiply" | "custom" | "screen" | undefined; opacity?: number | undefined; mask?: { texture?: string | undefined; color?: number | undefined; invert?: boolean | undefined; } | undefined; metadata?: Record<...> | undefined; }' is not assignable to parameter of type 'LayerBlend'.
+  Types of property 'mode' are incompatible.
+    Type '"add" | "overlay" | "multiply" | "custom" | "screen" | undefined' is not assignable to type '"add" | "overlay" | "multiply" | "custom" | "screen"'.
+      Type 'undefined' is not assignable to type '"add" | "overlay" | "multiply" | "custom" | "screen"'.
+
+398       this.blend({
+                     ~
+399         layers: group.layers,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+400         ...group.blend,
+    ~~~~~~~~~~~~~~~~~~~~~~~
+401       });
+    ~~~~~~~
+
+src/core/layers/LayerIntegration.ts:475:44 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'typeof Layer'.
+
+475           await this.layerManager.addLayer(layer.id, layer.config);
+                                               ~~~~~~~~
+
+src/core/layers/LayerIntegration.ts:496:20 - error TS6133: 'config' is declared but its value is never read.
+
+496   private blendAdd(config: Required<LayerBlend>): void {
+                       ~~~~~~
+
+src/core/layers/LayerIntegration.ts:500:25 - error TS6133: 'config' is declared but its value is never read.
+
+500   private blendMultiply(config: Required<LayerBlend>): void {
+                            ~~~~~~
+
+src/core/layers/LayerIntegration.ts:504:23 - error TS6133: 'config' is declared but its value is never read.
+
+504   private blendScreen(config: Required<LayerBlend>): void {
+                          ~~~~~~
+
+src/core/layers/LayerIntegration.ts:508:24 - error TS6133: 'config' is declared but its value is never read.
+
+508   private blendOverlay(config: Required<LayerBlend>): void {
+                           ~~~~~~
+
+src/core/layers/LayerIntegration.ts:512:23 - error TS6133: 'config' is declared but its value is never read.
+
+512   private blendCustom(config: Required<LayerBlend>): void {
+                          ~~~~~~
+
+src/core/layers/LayerManager.ts:66:26 - error TS6133: 'layer' is declared but its value is never read.
+
+66     for (const [layerId, layer] of this.layers) {
+                            ~~~~~
+
+src/core/layers/LayerManager.ts:89:19 - error TS2511: Cannot create an instance of an abstract class.
+
+89     const layer = new layerClass(config);
+                     ~~~~~~~~~~~~~~~~~~~~~~
+
+src/core/layers/LayerPresets.ts:1:1 - error TS6133: 'LayerConfig' is declared but its value is never read.
+
+1 import { LayerConfig } from './Layer';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/DataLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/DataLayer.ts:265:19 - error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.
+
+265         if (child.material instanceof THREE.ShaderMaterial) {
+                      ~~~~~~~~
+
+src/layers/DataLayer.ts:266:17 - error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.
+
+266           child.material.uniforms.time.value = this.animationTime;
+                    ~~~~~~~~
+
+src/layers/DigitalLayer.ts:3:3 - error TS6133: 'Mesh' is declared but its value is never read.
+
+3   Mesh,
+    ~~~~
+
+src/layers/DigitalLayer.ts:4:3 - error TS6133: 'BoxGeometry' is declared but its value is never read.
+
+4   BoxGeometry,
+    ~~~~~~~~~~~
+
+src/layers/DigitalLayer.ts:5:3 - error TS6133: 'MeshBasicMaterial' is declared but its value is never read.
+
+5   MeshBasicMaterial,
+    ~~~~~~~~~~~~~~~~~
+
+src/layers/DigitalLayer.ts:162:31 - error TS2345: Argument of type 'Material' is not assignable to parameter of type 'SpriteMaterial'.
+  Type 'Material' is missing the following properties from type 'SpriteMaterial': isSpriteMaterial, color, map, alphaMap, and 3 more.
+
+162     const sprite = new Sprite(this.resources.materials.get('node')!.clone());
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/DigitalLayer.ts:321:29 - error TS6133: 'deltaTime' is declared but its value is never read.
+
+321   private updateConnections(deltaTime: number): void {
+                                ~~~~~~~~~
+
+src/layers/DigitalLayer.ts:323:31 - error TS6133: 'line' is declared but its value is never read.
+
+323     this.connections.forEach((line, id) => {
+                                  ~~~~
+
+src/layers/DigitalLayer.ts:323:37 - error TS6133: 'id' is declared but its value is never read.
+
+323     this.connections.forEach((line, id) => {
+                                        ~~
+
+src/layers/EffectLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/EffectLayer.ts:320:9 - error TS2531: Object is possibly 'null'.
+
+320         (effect.material as THREE.PointsMaterial).map.dispose();
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:39:32 - error TS2339: Property 'getContainer' does not exist on type 'Layer'.
+
+39       this.container.add(layer.getContainer());
+                                  ~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:61:30 - error TS2339: Property 'getContainer' does not exist on type 'Layer'.
+
+61     this.container.add(layer.getContainer());
+                                ~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:69:35 - error TS2339: Property 'getContainer' does not exist on type 'Layer'.
+
+69       this.container.remove(layer.getContainer());
+                                     ~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:111:13 - error TS2339: Property 'setOpacity' does not exist on type 'Layer'.
+
+111       layer.setOpacity(opacity);
+                ~~~~~~~~~~
+
+src/layers/HybridLayer.ts:119:13 - error TS2339: Property 'setOpacity' does not exist on type 'Layer'.
+
+119       layer.setOpacity(1);
+                ~~~~~~~~~~
+
+src/layers/HybridLayer.ts:120:13 - error TS2339: Property 'getContainer' does not exist on type 'Layer'.
+
+120       layer.getContainer().renderOrder = index;
+                ~~~~~~~~~~~~
+
+src/layers/HybridLayer.ts:133:15 - error TS2339: Property 'setOpacity' does not exist on type 'Layer'.
+
+133         layer.setOpacity(1 - this.transitionProgress);
+                  ~~~~~~~~~~
+
+src/layers/HybridLayer.ts:136:15 - error TS2339: Property 'setOpacity' does not exist on type 'Layer'.
+
+136         layer.setOpacity(this.transitionProgress);
+                  ~~~~~~~~~~
+
+src/layers/HybridLayer.ts:147:15 - error TS2339: Property 'setOpacity' does not exist on type 'Layer'.
+
+147         layer.setOpacity(1);
+                  ~~~~~~~~~~
+
+src/layers/PhysicalLayer.ts:86:25 - error TS6133: 'deltaTime' is declared but its value is never read.
+
+86   protected updateLayer(deltaTime: number): void {
+                           ~~~~~~~~~
+
+src/layers/TerrainLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/TerrainLayer.ts:111:17 - error TS6133: 'deltaTime' is declared but its value is never read.
+
+111   public update(deltaTime: number): void {
+                    ~~~~~~~~~
+
+src/layers/UILayer.tsx:2:1 - error TS6133: 'useFrame' is declared but its value is never read.
+
+2 import { useFrame } from '@react-three/fiber';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/UILayer.tsx:3:1 - error TS6192: All imports in import declaration are unused.
+
+3 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/WeatherLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/WeatherLayer.ts:197:9 - error TS2531: Object is possibly 'null'.
+
+197         (this.particles.material as THREE.PointsMaterial).map.dispose();
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/network/NetworkLayer.ts:3:1 - error TS6133: 'EventEmitter' is declared but its value is never read.
+
+3 import { EventEmitter } from '@/utils/EventEmitter';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/layers/network/NetworkLayer.ts:52:5 - error TS2300: Duplicate identifier 'error'.
+
+52     error?: number;
+       ~~~~~
+
+src/layers/network/NetworkLayer.ts:56:5 - error TS2300: Duplicate identifier 'error'.
+
+56     error?: number;
+       ~~~~~
+
+src/layers/network/NetworkLayer.ts:97:9 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+97         error: config.colors?.error ?? 0xf44336,
+           ~~~~~
+
+src/layers/network/NetworkLayer.ts:245:64 - error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+
+245     (node.material as THREE.MeshPhongMaterial).emissive.setHex(this.config.colors[status]);
+                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/models/Node.ts:1:1 - error TS6192: All imports in import declaration are unused.
+
+1 import { Mesh, BoxGeometry, SphereGeometry, CylinderGeometry, MeshPhongMaterial, BufferGeometry, Material } from 'three';
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/models/Node.ts:11:24 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+11         geometry = new THREE.BoxGeometry(1, 1, 1);
+                          ~~~~~
+
+src/models/Node.ts:14:24 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+14         geometry = new THREE.SphereGeometry(0.5, 32, 32);
+                          ~~~~~
+
+src/models/Node.ts:17:24 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+17         geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+                          ~~~~~
+
+src/models/Node.ts:22:26 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+22     const material = new THREE.MeshPhongMaterial({
+                            ~~~~~
+
+src/models/Node.ts:24:7 - error TS2353: Object literal may only specify known properties, and 'metalness' does not exist in type 'MeshPhongMaterialParameters'.
+
+24       metalness: 0.5,
+         ~~~~~~~~~
+
+src/models/Node.ts:29:21 - error TS2686: 'THREE' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+
+29     this.mesh = new THREE.Mesh(geometry, material);
+                       ~~~~~
+
+src/plugins/PluginAPI.ts:57:19 - error TS6133: 'deltaTime' is declared but its value is never read.
+
+57   public onUpdate(deltaTime: number): void {}
+                     ~~~~~~~~~
+
+src/plugins/PluginAPI.ts:97:37 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'typeof Layer'.
+
+97     return this.app.layers.addLayer(layerId, config);
+                                       ~~~~~~~
+
+src/plugins/PluginAPI.ts:110:31 - error TS2554: Expected 2 arguments, but got 1.
+
+110     return this.app.resources.load(resourceId);
+                                  ~~~~~~~~~~~~~~~~
+
+  src/core/ResourceManager.ts:58:27
+    58   async load(url: string, type: ResourceType): Promise<any> {
+                                 ~~~~~~~~~~~~~~~~~~
+    An argument for 'type' was not provided.
+
+src/plugins/PluginAPI.ts:114:31 - error TS2551: Property 'unload' does not exist on type 'ResourceManager'. Did you mean 'load'?
+
+114     return this.app.resources.unload(resourceId);
+                                  ~~~~~~
+
+  src/core/ResourceManager.ts:58:9
+    58   async load(url: string, type: ResourceType): Promise<any> {
+               ~~~~
+    'load' is declared here.
+
+src/plugins/PluginAPI.ts:119:5 - error TS2322: Type 'string' is not assignable to type 'void'.
+
+119     return this.app.notifications.show(message, options);
+        ~~~~~~
+
+src/plugins/PluginAPI.ts:119:49 - error TS2554: Expected 1 arguments, but got 2.
+
+119     return this.app.notifications.show(message, options);
+                                                    ~~~~~~~
+
+src/plugins/PluginAPI.ts:143:33 - error TS2339: Property 'getStats' does not exist on type 'PerformanceMonitor'.
+
+143     return this.app.performance.getStats();
+                                    ~~~~~~~~
+
+src/plugins/PluginAPI.ts:148:30 - error TS2551: Property 'checkPermission' does not exist on type 'SecurityManager'. Did you mean 'hasPermission'?
+
+148     return this.app.security.checkPermission(permission);
+                                 ~~~~~~~~~~~~~~~
+
+  src/services/auth/SecurityManager.ts:176:3
+    176   hasPermission(permission: string): boolean {
+          ~~~~~~~~~~~~~
+    'hasPermission' is declared here.
+
+src/plugins/PluginAPI.ts:152:30 - error TS2339: Property 'requestPermission' does not exist on type 'SecurityManager'.
+
+152     return this.app.security.requestPermission(permission);
+                                 ~~~~~~~~~~~~~~~~~
+
+src/plugins/PluginAPI.ts:157:24 - error TS2345: Argument of type 'Function' is not assignable to parameter of type 'EventHandler'.
+  Type 'Function' provides no match for the signature '(...args: any[]): void'.
+
+157     this.app.on(event, handler);
+                           ~~~~~~~
+
+src/plugins/PluginAPI.ts:161:25 - error TS2345: Argument of type 'Function' is not assignable to parameter of type 'EventHandler'.
+
+161     this.app.off(event, handler);
+                            ~~~~~~~
+
+src/plugins/PluginManager.ts:77:27 - error TS6133: 'plugin' is declared but its value is never read.
+
+77     for (const [pluginId, plugin] of this.plugins) {
+                             ~~~~~~
+
+src/plugins/PluginManager.ts:257:12 - error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'PluginMetadata'.
+  No index signature with a parameter of type 'string' was found on type 'PluginMetadata'.
+
+257       if (!metadata[field]) {
+               ~~~~~~~~~~~~~~~
+
+src/plugins/PluginManager.ts:271:24 - error TS6133: 'version' is declared but its value is never read.
+
+271     for (const [depId, version] of Object.entries(metadata.dependencies)) {
+                           ~~~~~~~
+
+src/scenes/SceneManager.ts:8:11 - error TS6133: 'resourceManager' is declared but its value is never read.
+
+8   private resourceManager: ResourceManager;
+            ~~~~~~~~~~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:4:10 - error TS2724: '"./ExampleScenes"' has no exported member named 'ExampleScenes'. Did you mean 'ExampleScene'?
+
+4 import { ExampleScenes } from './ExampleScenes';
+           ~~~~~~~~~~~~~
+
+  src/scenes/examples/ExampleScenes.ts:3:14
+    3 export class ExampleScene {
+                   ~~~~~~~~~~~~
+    'ExampleScene' is declared here.
+
+src/scenes/examples/ExampleApp.tsx:74:26 - error TS2673: Constructor of class 'SceneManager' is private and only accessible within the class declaration.
+
+ 74     managerRef.current = new SceneManager({
+                             ~~~~~~~~~~~~~~~~~~
+ 75       container: containerRef.current,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+... 
+ 78       autoStart: true,
+    ~~~~~~~~~~~~~~~~~~~~~~
+ 79     });
+    ~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:82:5 - error TS18047: 'managerRef.current' is possibly 'null'.
+
+82     managerRef.current.on('sceneLoaded', (scene) => {
+       ~~~~~~~~~~~~~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:82:24 - error TS2339: Property 'on' does not exist on type 'SceneManager'.
+
+82     managerRef.current.on('sceneLoaded', (scene) => {
+                          ~~
+
+src/scenes/examples/ExampleApp.tsx:82:43 - error TS7006: Parameter 'scene' implicitly has an 'any' type.
+
+82     managerRef.current.on('sceneLoaded', (scene) => {
+                                             ~~~~~
+
+src/scenes/examples/ExampleApp.tsx:87:5 - error TS18047: 'managerRef.current' is possibly 'null'.
+
+87     managerRef.current.on('transitionStart', (transition) => {
+       ~~~~~~~~~~~~~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:87:24 - error TS2339: Property 'on' does not exist on type 'SceneManager'.
+
+87     managerRef.current.on('transitionStart', (transition) => {
+                          ~~
+
+src/scenes/examples/ExampleApp.tsx:87:47 - error TS7006: Parameter 'transition' implicitly has an 'any' type.
+
+87     managerRef.current.on('transitionStart', (transition) => {
+                                                 ~~~~~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:92:5 - error TS18047: 'managerRef.current' is possibly 'null'.
+
+92     managerRef.current.on('transitionComplete', () => {
+       ~~~~~~~~~~~~~~~~~~
+
+src/scenes/examples/ExampleApp.tsx:92:24 - error TS2339: Property 'on' does not exist on type 'SceneManager'.
+
+92     managerRef.current.on('transitionComplete', () => {
+                          ~~
+
+src/scenes/examples/ExampleApp.tsx:106:32 - error TS2339: Property 'transitionToScene' does not exist on type 'SceneManager'.
+
+106       await managerRef.current.transitionToScene({
+                                   ~~~~~~~~~~~~~~~~~
+
+src/services/auth/SecurityManager.ts:84:7 - error TS2322: Type 'User | null' is not assignable to type 'User'.
+  Type 'null' is not assignable to type 'User'.
+
+84       return this.currentUser;
+         ~~~~~~
+
+src/utils/PerformanceMonitor.ts:110:21 - error TS2339: Property 'memory' does not exist on type 'Performance'.
+
+110     if (performance.memory) {
+                        ~~~~~~
+
+src/utils/PerformanceMonitor.ts:112:27 - error TS2339: Property 'memory' does not exist on type 'Performance'.
+
+112         used: performance.memory.usedJSHeapSize,
+                              ~~~~~~
+
+src/utils/PerformanceMonitor.ts:113:28 - error TS2339: Property 'memory' does not exist on type 'Performance'.
+
+113         total: performance.memory.totalJSHeapSize,
+                               ~~~~~~
+
+src/utils/PerformanceMonitor.ts:114:28 - error TS2339: Property 'memory' does not exist on type 'Performance'.
+
+114         limit: performance.memory.jsHeapSizeLimit,
+                               ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:3:1 - error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+3 describe('EventEmitter', () => {
+  ~~~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:6:3 - error TS2304: Cannot find name 'beforeEach'.
+
+6   beforeEach(() => {
+    ~~~~~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:10:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+10   it('should add and emit events', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:11:21 - error TS2304: Cannot find name 'jest'.
+
+11     const handler = jest.fn();
+                       ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:14:5 - error TS2304: Cannot find name 'expect'.
+
+14     expect(handler).toHaveBeenCalledWith('data');
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:17:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+17   it('should remove event listeners', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:18:21 - error TS2304: Cannot find name 'jest'.
+
+18     const handler = jest.fn();
+                       ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:22:5 - error TS2304: Cannot find name 'expect'.
+
+22     expect(handler).not.toHaveBeenCalled();
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:25:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+25   it('should handle once events', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:26:21 - error TS2304: Cannot find name 'jest'.
+
+26     const handler = jest.fn();
+                       ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:30:5 - error TS2304: Cannot find name 'expect'.
+
+30     expect(handler).toHaveBeenCalledTimes(1);
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:33:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+33   it('should remove all listeners', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:34:22 - error TS2304: Cannot find name 'jest'.
+
+34     const handler1 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:35:22 - error TS2304: Cannot find name 'jest'.
+
+35     const handler2 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:41:5 - error TS2304: Cannot find name 'expect'.
+
+41     expect(handler1).not.toHaveBeenCalled();
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:42:5 - error TS2304: Cannot find name 'expect'.
+
+42     expect(handler2).not.toHaveBeenCalled();
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:45:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+45   it('should remove listeners for specific event', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:46:22 - error TS2304: Cannot find name 'jest'.
+
+46     const handler1 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:47:22 - error TS2304: Cannot find name 'jest'.
+
+47     const handler2 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:53:5 - error TS2304: Cannot find name 'expect'.
+
+53     expect(handler1).not.toHaveBeenCalled();
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:54:5 - error TS2304: Cannot find name 'expect'.
+
+54     expect(handler2).toHaveBeenCalled();
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:57:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+57   it('should get listener count', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:58:22 - error TS2304: Cannot find name 'jest'.
+
+58     const handler1 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:59:22 - error TS2304: Cannot find name 'jest'.
+
+59     const handler2 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:62:5 - error TS2304: Cannot find name 'expect'.
+
+62     expect(emitter.listenerCount('test')).toBe(2);
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:65:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+65   it('should get event names', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:66:21 - error TS2304: Cannot find name 'jest'.
+
+66     const handler = jest.fn();
+                       ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:69:5 - error TS2304: Cannot find name 'expect'.
+
+69     expect(emitter.eventNames()).toEqual(['test1', 'test2']);
+       ~~~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:72:3 - error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+
+72   it('should get listeners for event', () => {
+     ~~
+
+src/utils/__tests__/EventEmitter.test.ts:73:22 - error TS2304: Cannot find name 'jest'.
+
+73     const handler1 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:74:22 - error TS2304: Cannot find name 'jest'.
+
+74     const handler2 = jest.fn();
+                        ~~~~
+
+src/utils/__tests__/EventEmitter.test.ts:77:5 - error TS2304: Cannot find name 'expect'.
+
+77     expect(emitter.listeners('test')).toEqual([handler1, handler2]);
+       ~~~~~~
+
+src/vr/WebXRManager.ts:2:25 - error TS6133: 'Scene' is declared but its value is never read.
+
+2 import { WebGLRenderer, Scene, Camera, XRFrame } from 'three';
+                          ~~~~~
+
+src/vr/WebXRManager.ts:2:32 - error TS6133: 'Camera' is declared but its value is never read.
+
+2 import { WebGLRenderer, Scene, Camera, XRFrame } from 'three';
+                                 ~~~~~~
+
+src/vr/WebXRManager.ts:2:40 - error TS2305: Module '"three"' has no exported member 'XRFrame'.
+
+2 import { WebGLRenderer, Scene, Camera, XRFrame } from 'three';
+                                         ~~~~~~~
+
+src/vr/WebXRManager.ts:110:7 - error TS2531: Object is possibly 'null'.
+
+110       this.session.addEventListener('end', this.onSessionEnded);
+          ~~~~~~~~~~~~
+
+src/vr/WebXRManager.ts:113:35 - error TS2531: Object is possibly 'null'.
+
+113       this.referenceSpace = await this.session.requestReferenceSpace(
+                                      ~~~~~~~~~~~~
+
+src/vr/WebXRManager.ts:117:7 - error TS2531: Object is possibly 'null'.
+
+117       this.session.requestAnimationFrame(this.onXRFrame);
+          ~~~~~~~~~~~~
+
+src/vr/WebXRManager.ts:183:5 - error TS2322: Type '"vr" | "ar" | "hybrid" | undefined' is not assignable to type '"vr" | "ar" | "hybrid"'.
+  Type 'undefined' is not assignable to type '"vr" | "ar" | "hybrid"'.
+
+183     this.config.mode = mode;
+        ~~~~~~~~~~~~~~~~
+
+src/workers/resourceLoader.worker.ts:35:30 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(message: any, targetOrigin: string, transfer?: Transferable[] | undefined): void', gave the following error.
+    Argument of type 'ArrayBuffer[]' is not assignable to parameter of type 'string'.
+  Overload 2 of 2, '(message: any, options?: WindowPostMessageOptions | undefined): void', gave the following error.
+    Type 'ArrayBuffer[]' has no properties in common with type 'WindowPostMessageOptions'.
+
+35     self.postMessage(result, [buffer]);
+                                ~~~~~~~~
+
+
+
+Found 210 errors in 33 files.
+
+Errors  Files
+     1  src/App.tsx:11
+     1  src/components/App.tsx:1
+     2  src/components/Model.tsx:38
+    32  src/components/windows/PluginManager.tsx:9
+     9  src/core/App.ts:64
+     2  src/core/Layer.ts:47
+     1  src/core/LayerDependencyManager.ts:151
+     1  src/core/LayerManager.ts:125
+     5  src/core/OptimizationManager.ts:2
+    10  src/core/SceneManager.ts:1
+    16  src/core/TransitionManager.ts:1
+    15  src/core/layers/LayerIntegration.ts:2
+     2  src/core/layers/LayerManager.ts:66
+     1  src/core/layers/LayerPresets.ts:1
+     3  src/layers/DataLayer.ts:3
+     7  src/layers/DigitalLayer.ts:3
+     2  src/layers/EffectLayer.ts:3
+    10  src/layers/HybridLayer.ts:3
+     1  src/layers/PhysicalLayer.ts:86
+     2  src/layers/TerrainLayer.ts:3
+     2  src/layers/UILayer.tsx:2
+     2  src/layers/WeatherLayer.ts:3
+     5  src/layers/network/NetworkLayer.ts:3
+     7  src/models/Node.ts:1
+    11  src/plugins/PluginAPI.ts:57
+     3  src/plugins/PluginManager.ts:77
+     1  src/scenes/SceneManager.ts:8
+    11  src/scenes/examples/ExampleApp.tsx:4
+     1  src/services/auth/SecurityManager.ts:84
+     4  src/utils/PerformanceMonitor.ts:110
+    32  src/utils/__tests__/EventEmitter.test.ts:3
+     7  src/vr/WebXRManager.ts:2
+     1  src/workers/resourceLoader.worker.ts:35
+
