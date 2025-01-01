@@ -43,28 +43,65 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({
     link?: NetworkLink;
   } | null>(null);
 
+  const [cameraPosition, setCameraPosition] = useState({ x: 0, y: 0, z: 50 });
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [activeLayer, setActiveLayer] = useState("default");
+
   const handleZoomIn = () => {
-    // Implementation
+    setZoomLevel(prev => Math.min(prev * 1.2, 5));
   };
 
   const handleZoomOut = () => {
-    // Implementation
+    setZoomLevel(prev => Math.max(prev * 0.8, 0.2));
   };
 
   const handleResetCamera = () => {
-    // Implementation
+    setCameraPosition({ x: 0, y: 0, z: 50 });
+    setZoomLevel(1);
   };
 
   const handleLayerChange = (layer: string) => {
-    // Implementation
+    setActiveLayer(layer);
   };
 
   const handleHelp = () => {
-    // Implementation
+    // Show help modal or documentation
+    console.info("Help requested");
   };
 
-  useFrame((_state, delta) => {
-    // Implementation
+  useFrame((state, delta) => {
+    // Smooth camera movement
+    state.camera.position.lerp(
+      new THREE.Vector3(
+        cameraPosition.x,
+        cameraPosition.y,
+        cameraPosition.z / zoomLevel
+      ),
+      0.1
+    );
+
+    // Update node positions based on simulation
+    nodes.forEach(node => {
+      if (node.ref?.current) {
+        node.ref.current.position.lerp(
+          new THREE.Vector3(node.x || 0, node.y || 0, 0),
+          0.1
+        );
+      }
+    });
+
+    // Update link positions
+    links.forEach(link => {
+      if (link.ref?.current) {
+        const source = nodes.find(n => n.id === link.source);
+        const target = nodes.find(n => n.id === link.target);
+        if (source?.ref?.current && target?.ref?.current) {
+          const start = source.ref.current.position;
+          const end = target.ref.current.position;
+          link.ref.current.geometry.setFromPoints([start, end]);
+        }
+      }
+    });
   });
 
   useEffect(() => {
