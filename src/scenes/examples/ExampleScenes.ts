@@ -1,116 +1,62 @@
-import { Vector3 } from 'three';
-import { SceneConfig } from '../SceneManager';
+import * as THREE from 'three';
 
-/**
- * Example scene configurations
- */
-export const ExampleScenes: SceneConfig[] = [
-  // Default scene
-  {
-    id: 'default',
-    preset: 'default',
-    camera: {
-      position: new Vector3(0, 10, 20),
-      target: new Vector3(0, 0, 0),
-      fov: 75,
-    },
-    controls: {
-      enabled: true,
-      autoRotate: false,
-      enableDamping: true,
-    },
-    onEnter: () => {
-      console.log('Entered default scene');
-    },
-  },
+export class ExampleScene {
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
+  private renderer: THREE.WebGLRenderer;
 
-  // Data visualization scene
-  {
-    id: 'dataViz',
-    preset: 'dataViz',
-    camera: {
-      position: new Vector3(0, 5, 10),
-      target: new Vector3(0, 0, 0),
-      fov: 60,
-    },
-    controls: {
-      enabled: true,
-      autoRotate: true,
-      enableDamping: true,
-    },
-    onEnter: () => {
-      // Start data updates
-      console.log('Starting data visualization');
-    },
-    onLeave: () => {
-      // Cleanup data updates
-      console.log('Stopping data visualization');
-    },
-  },
+  constructor(container: HTMLElement) {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(this.renderer.domElement);
 
-  // VR environment scene
-  {
-    id: 'vrWorld',
-    preset: 'vr',
-    camera: {
-      position: new Vector3(0, 2, 0),
-      target: new Vector3(0, 2, -1),
-      fov: 90,
-    },
-    controls: {
-      enabled: false, // VR controls will be used instead
-    },
-    onEnter: () => {
-      // Initialize VR
-      console.log('Entering VR mode');
-    },
-    onLeave: () => {
-      // Cleanup VR
-      console.log('Exiting VR mode');
-    },
-  },
+    // Add example objects
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    this.scene.add(cube);
 
-  // Night scene
-  {
-    id: 'night',
-    preset: 'night',
-    camera: {
-      position: new Vector3(0, 15, 30),
-      target: new Vector3(0, 0, 0),
-      fov: 70,
-    },
-    controls: {
-      enabled: true,
-      autoRotate: true,
-      enableDamping: true,
-    },
-    onEnter: () => {
-      // Start night cycle
-      console.log('Starting night cycle');
-    },
-  },
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    this.scene.add(ambientLight);
 
-  // Storm scene
-  {
-    id: 'storm',
-    preset: 'storm',
-    camera: {
-      position: new Vector3(0, 20, 40),
-      target: new Vector3(0, 0, 0),
-      fov: 65,
-    },
-    controls: {
-      enabled: true,
-      autoRotate: false,
-      enableDamping: true,
-    },
-    onEnter: () => {
-      // Start storm effects
-      console.log('Storm approaching');
-    },
-    onLeave: () => {
-      // Cleanup storm effects
-      console.log('Storm passing');
-    },
-  },
-];
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 3, 5);
+    this.scene.add(directionalLight);
+
+    // Position camera
+    this.camera.position.z = 5;
+  }
+
+  public animate(): void {
+    requestAnimationFrame(() => this.animate());
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  public resize(width: number, height: number): void {
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+  }
+
+  public dispose(): void {
+    this.renderer.dispose();
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        object.geometry.dispose();
+        if (Array.isArray(object.material)) {
+          object.material.forEach((material) => material.dispose());
+        } else {
+          object.material.dispose();
+        }
+      }
+    });
+  }
+}

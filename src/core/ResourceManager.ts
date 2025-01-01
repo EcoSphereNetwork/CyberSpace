@@ -1,10 +1,8 @@
 import { EventEmitter } from '@/utils/EventEmitter';
 import { LoadingManager } from './LoadingManager';
 import * as THREE from 'three';
-import { useLoader } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
 
-export type ResourceType = 'texture' | 'model' | 'audio' | 'json';
+export type ResourceType = 'texture' | 'audio' | 'json';
 
 interface Resource {
   url: string;
@@ -74,9 +72,6 @@ export class ResourceManager extends EventEmitter {
         case 'texture':
           data = await this.loadTexture(url);
           break;
-        case 'model':
-          // Models should be loaded using useGLTF hook in React components
-          throw new Error('Models should be loaded using useGLTF hook in React components');
         case 'audio':
           data = await this.loadAudio(url);
           break;
