@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "@/styles/theme";
@@ -78,7 +78,7 @@ describe("ErrorBoundary", () => {
 
   it("resets error state when retry button is clicked", () => {
     const TestWrapper = () => {
-      const [shouldThrow, setShouldThrow] = React.useState(true);
+      const [shouldThrow, setShouldThrow] = useState(true);
       return (
         <ThemeProvider theme={theme}>
           <ErrorBoundary>

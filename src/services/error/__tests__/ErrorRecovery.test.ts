@@ -6,6 +6,11 @@ describe("ErrorRecovery", () => {
   beforeEach(() => {
     errorRecovery = ErrorRecovery.getInstance();
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("creates a singleton instance", () => {
@@ -44,10 +49,10 @@ describe("ErrorRecovery", () => {
 
   it("handles network errors with retry strategy", async () => {
     const error = new Error("network error");
-    await errorRecovery.recover(error);
-    // Verify that the network retry strategy was attempted
-    // This would typically involve checking if setTimeout was called
-    expect(setTimeout).toHaveBeenCalled();
+    const promise = errorRecovery.recover(error);
+    jest.advanceTimersByTime(1000);
+    await promise;
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1000);
   });
 
   it("handles resource loading errors", async () => {
@@ -55,11 +60,13 @@ describe("ErrorRecovery", () => {
       delete: jest.fn().mockResolvedValue(undefined),
     };
     global.caches = mockCaches as any;
+    global.window = { location: { reload: jest.fn() } } as any;
 
     const error = new Error("resource loading error");
     await errorRecovery.recover(error);
 
     expect(mockCaches.delete).toHaveBeenCalledWith("resources");
+    expect(window.location.reload).toHaveBeenCalled();
   });
 
   it("handles state corruption errors", async () => {
@@ -69,6 +76,7 @@ describe("ErrorRecovery", () => {
     const mockSessionStorage = {
       clear: jest.fn(),
     };
+    global.window = { location: { reload: jest.fn() } } as any;
     Object.defineProperty(window, "localStorage", { value: mockLocalStorage });
     Object.defineProperty(window, "sessionStorage", { value: mockSessionStorage });
 
@@ -77,6 +85,7 @@ describe("ErrorRecovery", () => {
 
     expect(mockLocalStorage.clear).toHaveBeenCalled();
     expect(mockSessionStorage.clear).toHaveBeenCalled();
+    expect(window.location.reload).toHaveBeenCalled();
   });
 
   it("throws error when no matching strategy is found", async () => {
