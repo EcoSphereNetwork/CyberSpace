@@ -35,6 +35,9 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
       try {
         // Load network data
         const response = await fetch('/data/network.json');
+        if (!response.ok) {
+          throw new Error(`Failed to load network data: ${response.statusText}`);
+        }
         const networkData: NetworkData = await response.json();
 
         // Create nodes
@@ -42,6 +45,10 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
           const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
           const material = new THREE.MeshPhongMaterial({
             color: getNodeColor(nodeData.type),
+            emissive: getNodeColor(nodeData.type),
+            emissiveIntensity: 0.2,
+            specular: 0x666666,
+            shininess: 25,
           });
           const mesh = new THREE.Mesh(geometry, material);
           mesh.position.set(
@@ -62,6 +69,7 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
             const material = new THREE.LineBasicMaterial({
               color: getConnectionColor(connectionData.type),
+              linewidth: 2,
             });
             const line = new THREE.Line(geometry, material);
             connectionsRef.current.set(connectionData.id, line);
@@ -140,6 +148,13 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
       {/* Lights */}
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 3, 5]} intensity={1} />
+      <pointLight position={[5, 3, 5]} intensity={0.5} distance={20} decay={2} />
+
+      {/* Background */}
+      <mesh>
+        <sphereGeometry args={[50, 32, 32]} />
+        <meshBasicMaterial color={0x111111} side={THREE.BackSide} fog={false} />
+      </mesh>
     </>
   );
 };
