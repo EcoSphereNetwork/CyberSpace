@@ -1,335 +1,333 @@
-import { Scene, Object3D, Vector3, SphereGeometry, MeshStandardMaterial, Mesh, CylinderGeometry, Color, Line, BufferGeometry, LineBasicMaterial, Float32BufferAttribute, Group, AnimationMixer, NumberKeyframeTrack, AnimationClip, LoopOnce } from 'three';
+import * as THREE from 'three';
 import { Layer } from '@/core/Layer';
+import { EventEmitter } from '@/utils/EventEmitter';
 
-export interface NetworkNode {
+interface NetworkNode {
   id: string;
-  position: Vector3;
   type: 'server' | 'client' | 'router' | 'switch';
-  status: 'active' | 'inactive' | 'warning' | 'error';
-  data?: Record<string, any>;
+  position: THREE.Vector3;
+  status: 'online' | 'offline' | 'warning' | 'error';
+  metadata?: Record<string, any>;
 }
 
-export interface NetworkConnection {
+interface NetworkLink {
   id: string;
   source: string;
   target: string;
-  type: 'physical' | 'wireless' | 'virtual';
-  status: 'active' | 'inactive' | 'warning' | 'error';
-  bandwidth?: number;
-  latency?: number;
-  data?: Record<string, any>;
+  type: 'fiber' | 'copper' | 'wireless';
+  bandwidth: number;
+  latency: number;
+  status: 'active' | 'inactive' | 'congested' | 'failed';
+  metadata?: Record<string, any>;
 }
 
-export interface DataFlow {
+interface NetworkPacket {
   id: string;
-  connection: string;
-  type: 'data' | 'request' | 'response' | 'error';
+  source: string;
+  target: string;
+  type: 'data' | 'control' | 'error';
   size: number;
-  speed: number;
-  data?: Record<string, any>;
+  priority: number;
+  path: string[];
+  metadata?: Record<string, any>;
+}
+
+interface NetworkConfig {
+  nodeSize?: number;
+  linkWidth?: number;
+  packetSize?: number;
+  packetSpeed?: number;
+  showLabels?: boolean;
+  labelSize?: number;
+  colors?: {
+    server?: number;
+    client?: number;
+    router?: number;
+    switch?: number;
+    fiber?: number;
+    copper?: number;
+    wireless?: number;
+    data?: number;
+    control?: number;
+    error?: number;
+    online?: number;
+    offline?: number;
+    warning?: number;
+    error?: number;
+    active?: number;
+    inactive?: number;
+    congested?: number;
+    failed?: number;
+  };
 }
 
 export class NetworkLayer extends Layer {
-  private nodes: Map<string, Object3D>;
-  private connections: Map<string, Object3D>;
-  private flows: Map<string, Object3D>;
-  private animations: Map<string, AnimationMixer>;
+  private config: Required<NetworkConfig>;
+  private nodes: Map<string, THREE.Mesh> = new Map();
+  private links: Map<string, THREE.Line> = new Map();
+  private packets: Map<string, THREE.Mesh> = new Map();
+  private labels: Map<string, THREE.Sprite> = new Map();
+  private packetPaths: Map<string, number> = new Map();
+  private animationTime: number = 0;
 
-  constructor(scene: Scene) {
+  constructor(scene: THREE.Scene, config: NetworkConfig = {}) {
     super(scene);
 
-    this.nodes = new Map();
-    this.connections = new Map();
-    this.flows = new Map();
-    this.animations = new Map();
-
-    // Set container name
-    this.container.name = 'network-layer';
+    this.config = {
+      nodeSize: config.nodeSize ?? 0.5,
+      linkWidth: config.linkWidth ?? 0.1,
+      packetSize: config.packetSize ?? 0.2,
+      packetSpeed: config.packetSpeed ?? 1,
+      showLabels: config.showLabels ?? true,
+      labelSize: config.labelSize ?? 0.5,
+      colors: {
+        server: config.colors?.server ?? 0x4caf50,
+        client: config.colors?.client ?? 0x2196f3,
+        router: config.colors?.router ?? 0x9c27b0,
+        switch: config.colors?.switch ?? 0xff9800,
+        fiber: config.colors?.fiber ?? 0x00ff00,
+        copper: config.colors?.copper ?? 0xffeb3b,
+        wireless: config.colors?.wireless ?? 0x03a9f4,
+        data: config.colors?.data ?? 0x4caf50,
+        control: config.colors?.control ?? 0xff9800,
+        error: config.colors?.error ?? 0xf44336,
+        online: config.colors?.online ?? 0x4caf50,
+        offline: config.colors?.offline ?? 0x9e9e9e,
+        warning: config.colors?.warning ?? 0xff9800,
+        error: config.colors?.error ?? 0xf44336,
+        active: config.colors?.active ?? 0x4caf50,
+        inactive: config.colors?.inactive ?? 0x9e9e9e,
+        congested: config.colors?.congested ?? 0xff9800,
+        failed: config.colors?.failed ?? 0xf44336,
+      },
+    };
   }
 
-  addNode(node: NetworkNode): void {
-    if (this.nodes.has(node.id)) {
-      console.warn(`Node ${node.id} already exists`);
-      return;
+  public addNode(node: NetworkNode): void {
+    // Create node geometry based on type
+    let geometry: THREE.BufferGeometry;
+    switch (node.type) {
+      case 'server':
+        geometry = new THREE.BoxGeometry(
+          this.config.nodeSize,
+          this.config.nodeSize * 1.5,
+          this.config.nodeSize
+        );
+        break;
+      case 'client':
+        geometry = new THREE.SphereGeometry(this.config.nodeSize * 0.75);
+        break;
+      case 'router':
+        geometry = new THREE.CylinderGeometry(
+          this.config.nodeSize * 0.5,
+          this.config.nodeSize * 0.5,
+          this.config.nodeSize,
+          8
+        );
+        break;
+      case 'switch':
+        geometry = new THREE.OctahedronGeometry(this.config.nodeSize * 0.75);
+        break;
     }
 
-    // Create node mesh
-    const geometry = new SphereGeometry(0.5, 32, 32);
-    const material = new MeshStandardMaterial({
-      color: this.getNodeColor(node.type, node.status),
-      metalness: 0.5,
-      roughness: 0.5,
+    // Create material based on status
+    const material = new THREE.MeshPhongMaterial({
+      color: this.config.colors[node.type],
+      emissive: this.config.colors[node.status],
+      emissiveIntensity: 0.5,
+      shininess: 50,
     });
-    const mesh = new Mesh(geometry, material);
+
+    const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(node.position);
-    mesh.name = `node-${node.id}`;
     mesh.userData = { ...node };
 
-    // Add to container and map
-    this.container.add(mesh);
+    // Add label if enabled
+    if (this.config.showLabels) {
+      const label = this.createLabel(node.id, node.position);
+      this.labels.set(node.id, label);
+      this.container.add(label);
+    }
+
     this.nodes.set(node.id, mesh);
-
-    // Emit event
-    this.emit('nodeAdded', node);
+    this.container.add(mesh);
   }
 
-  addConnection(connection: NetworkConnection): void {
-    if (this.connections.has(connection.id)) {
-      console.warn(`Connection ${connection.id} already exists`);
+  public addLink(link: NetworkLink): void {
+    const sourceNode = this.nodes.get(link.source);
+    const targetNode = this.nodes.get(link.target);
+
+    if (!sourceNode || !targetNode) {
+      console.warn(`Cannot create link: nodes not found`);
       return;
     }
 
-    // Get source and target nodes
-    const source = this.nodes.get(connection.source);
-    const target = this.nodes.get(connection.target);
-    if (!source || !target) {
-      console.warn('Source or target node not found');
-      return;
-    }
-
-    // Create connection line
-    const points = [source.position, target.position];
-    const geometry = new BufferGeometry().setFromPoints(points);
-    const material = new LineBasicMaterial({
-      color: this.getConnectionColor(connection.type, connection.status),
-      linewidth: 2,
-    });
-    const line = new Line(geometry, material);
-    line.name = `connection-${connection.id}`;
-    line.userData = { ...connection };
-
-    // Add to container and map
-    this.container.add(line);
-    this.connections.set(connection.id, line);
-
-    // Emit event
-    this.emit('connectionAdded', connection);
-  }
-
-  addDataFlow(flow: DataFlow): void {
-    if (this.flows.has(flow.id)) {
-      console.warn(`Flow ${flow.id} already exists`);
-      return;
-    }
-
-    // Get connection
-    const connection = this.connections.get(flow.connection);
-    if (!connection) {
-      console.warn('Connection not found');
-      return;
-    }
-
-    // Create flow particle
-    const geometry = new SphereGeometry(0.1, 16, 16);
-    const material = new MeshStandardMaterial({
-      color: this.getFlowColor(flow.type),
-      emissive: this.getFlowColor(flow.type),
-      emissiveIntensity: 0.5,
-    });
-    const particle = new Mesh(geometry, material);
-    particle.name = `flow-${flow.id}`;
-    particle.userData = { ...flow };
-
-    // Add to container and map
-    this.container.add(particle);
-    this.flows.set(flow.id, particle);
-
-    // Create animation
-    const mixer = new AnimationMixer(particle);
-    const source = (connection as Line).geometry.attributes.position;
-    const track = new NumberKeyframeTrack(
-      '.position[x]',
-      [0, flow.speed],
-      [source.getX(0), source.getX(1)]
+    // Create curve for the link
+    const curve = new THREE.QuadraticBezierCurve3(
+      sourceNode.position,
+      new THREE.Vector3(
+        (sourceNode.position.x + targetNode.position.x) / 2,
+        (sourceNode.position.y + targetNode.position.y) / 2 + 1,
+        (sourceNode.position.z + targetNode.position.z) / 2
+      ),
+      targetNode.position
     );
-    const clip = new AnimationClip('flow', flow.speed, [track]);
-    const action = mixer.clipAction(clip);
-    action.setLoop(LoopOnce, 1);
-    action.play();
 
-    // Add to animations map
-    this.animations.set(flow.id, mixer);
+    const points = curve.getPoints(50);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-    // Emit event
-    this.emit('flowAdded', flow);
+    // Create material based on type and status
+    const material = new THREE.LineBasicMaterial({
+      color: this.config.colors[link.type],
+      linewidth: this.config.linkWidth,
+      transparent: true,
+      opacity: link.status === 'active' ? 1 : 0.3,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    line.userData = { ...link, curve };
+
+    this.links.set(link.id, line);
+    this.container.add(line);
   }
 
-  removeNode(id: string): void {
+  public sendPacket(packet: NetworkPacket): void {
+    // Create packet geometry
+    const geometry = new THREE.SphereGeometry(this.config.packetSize);
+    const material = new THREE.MeshPhongMaterial({
+      color: this.config.colors[packet.type],
+      emissive: this.config.colors[packet.type],
+      emissiveIntensity: 0.5,
+      transparent: true,
+      opacity: 0.8,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.userData = { ...packet, pathIndex: 0 };
+
+    // Position at source
+    const sourceNode = this.nodes.get(packet.source);
+    if (sourceNode) {
+      mesh.position.copy(sourceNode.position);
+    }
+
+    this.packets.set(packet.id, mesh);
+    this.container.add(mesh);
+    this.packetPaths.set(packet.id, 0);
+  }
+
+  private createLabel(text: string, position: THREE.Vector3): THREE.Sprite {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    context.font = '48px Arial';
+    context.fillStyle = '#ffffff';
+    context.fillText(text, 0, 48);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+    });
+
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.position.copy(position);
+    sprite.position.y += this.config.nodeSize * 2;
+    sprite.scale.set(this.config.labelSize, this.config.labelSize, 1);
+
+    return sprite;
+  }
+
+  public updateNodeStatus(id: string, status: 'online' | 'offline' | 'warning' | 'error'): void {
     const node = this.nodes.get(id);
     if (!node) return;
 
-    // Remove connected flows and connections
-    for (const [connectionId, connection] of this.connections) {
-      if (
-        connection.userData.source === id ||
-        connection.userData.target === id
-      ) {
-        this.removeConnection(connectionId);
+    node.userData.status = status;
+    (node.material as THREE.MeshPhongMaterial).emissive.setHex(this.config.colors[status]);
+  }
+
+  public updateLinkStatus(id: string, status: 'active' | 'inactive' | 'congested' | 'failed'): void {
+    const link = this.links.get(id);
+    if (!link) return;
+
+    link.userData.status = status;
+    (link.material as THREE.LineBasicMaterial).opacity = status === 'active' ? 1 : 0.3;
+  }
+
+  public update(deltaTime: number): void {
+    this.animationTime += deltaTime;
+
+    // Update packet positions
+    this.packets.forEach((packet, id) => {
+      const { path, pathIndex } = packet.userData;
+      if (pathIndex >= path.length - 1) {
+        // Packet reached destination
+        this.container.remove(packet);
+        this.packets.delete(id);
+        this.packetPaths.delete(id);
+        return;
       }
-    }
 
-    // Remove node
-    this.container.remove(node);
-    this.nodes.delete(id);
+      const currentLink = this.links.get(`${path[pathIndex]}-${path[pathIndex + 1]}`);
+      if (!currentLink) return;
 
-    // Emit event
-    this.emit('nodeRemoved', id);
-  }
+      const curve = currentLink.userData.curve as THREE.QuadraticBezierCurve3;
+      const progress = this.packetPaths.get(id)!;
+      const newProgress = progress + deltaTime * this.config.packetSpeed;
 
-  removeConnection(id: string): void {
-    const connection = this.connections.get(id);
-    if (!connection) return;
-
-    // Remove flows on this connection
-    for (const [flowId, flow] of this.flows) {
-      if (flow.userData.connection === id) {
-        this.removeFlow(flowId);
+      if (newProgress >= 1) {
+        // Move to next link
+        packet.userData.pathIndex++;
+        this.packetPaths.set(id, 0);
+      } else {
+        // Update position along curve
+        const position = curve.getPoint(newProgress);
+        packet.position.copy(position);
+        this.packetPaths.set(id, newProgress);
       }
-    }
+    });
 
-    // Remove connection
-    this.container.remove(connection);
-    this.connections.delete(id);
-
-    // Emit event
-    this.emit('connectionRemoved', id);
-  }
-
-  removeFlow(id: string): void {
-    const flow = this.flows.get(id);
-    if (!flow) return;
-
-    // Remove animation
-    const mixer = this.animations.get(id);
-    if (mixer) {
-      mixer.stopAllAction();
-      this.animations.delete(id);
-    }
-
-    // Remove flow
-    this.container.remove(flow);
-    this.flows.delete(id);
-
-    // Emit event
-    this.emit('flowRemoved', id);
-  }
-
-  update(deltaTime: number): void {
-    if (!this.enabled) return;
-
-    // Update animations
-    for (const mixer of this.animations.values()) {
-      mixer.update(deltaTime);
-    }
-
-    // Update connection positions
-    for (const connection of this.connections.values()) {
-      const source = this.nodes.get(connection.userData.source);
-      const target = this.nodes.get(connection.userData.target);
-      if (source && target) {
-        const geometry = (connection as Line).geometry;
-        const positions = geometry.attributes.position;
-        positions.setXYZ(0, source.position.x, source.position.y, source.position.z);
-        positions.setXYZ(1, target.position.x, target.position.y, target.position.z);
-        positions.needsUpdate = true;
+    // Update labels to face camera
+    if (this.config.showLabels) {
+      const cameraPosition = this.scene.getObjectByName('camera')?.position;
+      if (cameraPosition) {
+        this.labels.forEach((label) => {
+          label.lookAt(cameraPosition);
+        });
       }
     }
   }
 
-  private getNodeColor(type: NetworkNode['type'], status: NetworkNode['status']): Color {
-    const colors = {
-      server: {
-        active: 0x4caf50,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-      client: {
-        active: 0x2196f3,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-      router: {
-        active: 0x9c27b0,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-      switch: {
-        active: 0x00bcd4,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-    };
+  public dispose(): void {
+    // Dispose nodes
+    this.nodes.forEach((node) => {
+      node.geometry.dispose();
+      (node.material as THREE.Material).dispose();
+    });
 
-    return new Color(colors[type][status]);
-  }
+    // Dispose links
+    this.links.forEach((link) => {
+      link.geometry.dispose();
+      (link.material as THREE.Material).dispose();
+    });
 
-  private getConnectionColor(
-    type: NetworkConnection['type'],
-    status: NetworkConnection['status']
-  ): Color {
-    const colors = {
-      physical: {
-        active: 0x4caf50,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-      wireless: {
-        active: 0x2196f3,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-      virtual: {
-        active: 0x9c27b0,
-        inactive: 0x9e9e9e,
-        warning: 0xff9800,
-        error: 0xf44336,
-      },
-    };
+    // Dispose packets
+    this.packets.forEach((packet) => {
+      packet.geometry.dispose();
+      (packet.material as THREE.Material).dispose();
+    });
 
-    return new Color(colors[type][status]);
-  }
+    // Dispose labels
+    this.labels.forEach((label) => {
+      (label.material as THREE.SpriteMaterial).map?.dispose();
+      (label.material as THREE.Material).dispose();
+    });
 
-  private getFlowColor(type: DataFlow['type']): Color {
-    const colors = {
-      data: 0x4caf50,
-      request: 0x2196f3,
-      response: 0x9c27b0,
-      error: 0xf44336,
-    };
-
-    return new Color(colors[type]);
-  }
-
-  override dispose(): void {
-    // Clean up animations
-    for (const mixer of this.animations.values()) {
-      mixer.stopAllAction();
-    }
-    this.animations.clear();
-
-    // Clean up objects
-    for (const node of this.nodes.values()) {
-      this.container.remove(node);
-    }
     this.nodes.clear();
+    this.links.clear();
+    this.packets.clear();
+    this.labels.clear();
+    this.packetPaths.clear();
 
-    for (const connection of this.connections.values()) {
-      this.container.remove(connection);
-    }
-    this.connections.clear();
-
-    for (const flow of this.flows.values()) {
-      this.container.remove(flow);
-    }
-    this.flows.clear();
-
-    // Call parent dispose
     super.dispose();
   }
 }
