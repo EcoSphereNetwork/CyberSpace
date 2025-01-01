@@ -1,17 +1,14 @@
 import React from 'react';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ThemeProvider } from '@emotion/react';
 import { theme } from '@/styles/theme';
-import { AppProvider } from '@/contexts/AppContext';
-import { SceneManager } from '@/scenes/SceneManager';
+import App from '@/components/App';
 
-const App: React.FC = () => {
+const Root: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
-      <AppProvider>
-        <SceneManager />
-      </AppProvider>
+      <App />
     </ThemeProvider>
   );
 };
 
-export default App;
+export default Root;

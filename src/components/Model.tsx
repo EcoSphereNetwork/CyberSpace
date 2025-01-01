@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { useGLTF } from '@react-three/drei';
+import { Object3D, Material, BufferGeometry } from 'three';
 
 interface ModelProps {
   url: string;
@@ -8,7 +8,6 @@ interface ModelProps {
   rotation?: [number, number, number];
   scale?: [number, number, number];
   onLoad?: () => void;
-  onError?: (error: Error) => void;
 }
 
 export const Model: React.FC<ModelProps> = ({
@@ -17,19 +16,32 @@ export const Model: React.FC<ModelProps> = ({
   rotation = [0, 0, 0],
   scale = [1, 1, 1],
   onLoad,
-  onError,
 }) => {
-  const gltf = useLoader(GLTFLoader, url);
+  const { scene } = useGLTF(url);
 
   useEffect(() => {
-    if (gltf) {
+    if (scene) {
       onLoad?.();
     }
-  }, [gltf, onLoad]);
+  }, [scene, onLoad]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup
+      scene.traverse((object: Object3D) => {
+        if ((object as any).geometry instanceof BufferGeometry) {
+          (object as any).geometry.dispose();
+        }
+        if ((object as any).material instanceof Material) {
+          (object as any).material.dispose();
+        }
+      });
+    };
+  }, [scene]);
 
   return (
     <primitive
-      object={gltf.scene}
+      object={scene}
       position={position}
       rotation={rotation}
       scale={scale}
