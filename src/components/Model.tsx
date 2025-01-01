@@ -7,7 +7,6 @@ interface ModelProps {
   rotation?: [number, number, number];
   scale?: [number, number, number];
   onLoad?: () => void;
-  onError?: (error: Error) => void;
 }
 
 export const Model: React.FC<ModelProps> = ({
@@ -16,7 +15,6 @@ export const Model: React.FC<ModelProps> = ({
   rotation = [0, 0, 0],
   scale = [1, 1, 1],
   onLoad,
-  onError,
 }) => {
   const { scene } = useGLTF(url);
 
