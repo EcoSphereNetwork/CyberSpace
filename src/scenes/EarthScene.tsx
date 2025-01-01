@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -14,107 +14,100 @@ export const EarthScene: React.FC<EarthSceneProps> = ({ onLoad, onError }) => {
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const starsRef = useRef<THREE.Mesh>(null);
 
-  // Load textures
-  const [
-    earthTexture,
-    cloudsTexture,
-    nightTexture,
-    normalTexture,
-    specularTexture,
-  ] = useLoader(THREE.TextureLoader, [
-    '/textures/earth.jpg',
-    '/textures/clouds.jpg',
-    '/textures/night.jpg',
-    '/textures/normal.jpg',
-    '/textures/specular.jpg',
-  ]);
-
   useEffect(() => {
-    try {
-      // Notify load complete
-      onLoad?.();
-    } catch (error) {
-      console.error('Failed to load earth scene:', error);
-      onError?.(error instanceof Error ? error : new Error('Failed to load earth scene'));
-    }
-  }, [onLoad, onError]);
+    // Load textures
+    const textureLoader = new THREE.TextureLoader();
+    const earthTexture = textureLoader.load('/textures/earth_daymap.jpg');
+    const earthNormalMap = textureLoader.load('/textures/earth_normal_map.jpg');
+    const earthSpecularMap = textureLoader.load('/textures/earth_specular_map.jpg');
+    const cloudsTexture = textureLoader.load('/textures/earth_clouds.jpg');
 
-  // Update rotations
-  useFrame(() => {
     if (earthRef.current) {
-      earthRef.current.rotation.y += 0.001;
+      earthRef.current.material = new THREE.MeshPhongMaterial({
+        map: earthTexture,
+        normalMap: earthNormalMap,
+        specularMap: earthSpecularMap,
+        specular: new THREE.Color(0x333333),
+        shininess: 25,
+      });
+    }
+
+    if (cloudsRef.current) {
+      cloudsRef.current.material = new THREE.MeshPhongMaterial({
+        map: cloudsTexture,
+        transparent: true,
+        opacity: 0.8,
+      });
+    }
+
+    if (atmosphereRef.current) {
+      atmosphereRef.current.material = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          void main() {
+            float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+            gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+          }
+        `,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+      });
+    }
+
+    onLoad?.();
+  }, [onLoad]);
+
+  useFrame((state, delta) => {
+    if (earthRef.current) {
+      earthRef.current.rotation.y += delta * 0.1;
     }
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += 0.0015;
-    }
-    if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y += 0.001;
+      cloudsRef.current.rotation.y += delta * 0.12;
     }
   });
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+      <PerspectiveCamera makeDefault position={[0, 0, 10]} />
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.5}
-        minDistance={3}
-        maxDistance={10}
+        minDistance={5}
+        maxDistance={20}
       />
 
       {/* Earth */}
       <mesh ref={earthRef}>
         <sphereGeometry args={[2, 64, 64]} />
-        <meshPhongMaterial
-          map={earthTexture}
-          normalMap={normalTexture}
-          specularMap={specularTexture}
-          emissiveMap={nightTexture}
-          emissive={0xffffff}
-          emissiveIntensity={0.1}
-          specular={0x666666}
-          shininess={25}
-        />
       </mesh>
 
       {/* Clouds */}
       <mesh ref={cloudsRef}>
         <sphereGeometry args={[2.05, 64, 64]} />
-        <meshPhongMaterial
-          map={cloudsTexture}
-          transparent
-          opacity={0.4}
-          depthWrite={false}
-        />
       </mesh>
 
       {/* Atmosphere */}
       <mesh ref={atmosphereRef}>
         <sphereGeometry args={[2.1, 64, 64]} />
-        <meshPhongMaterial
-          color={0x88ccff}
-          transparent
-          opacity={0.2}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
       </mesh>
 
       {/* Stars */}
       <mesh ref={starsRef}>
-        <sphereGeometry args={[90, 64, 64]} />
-        <meshBasicMaterial
-          color={0x111111}
-          side={THREE.BackSide}
-          fog={false}
-        />
+        <sphereGeometry args={[50, 64, 64]} />
+        <meshBasicMaterial color={0x000000} side={THREE.BackSide} />
       </mesh>
 
       {/* Lights */}
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.1} />
       <directionalLight position={[5, 3, 5]} intensity={1} />
-      <pointLight position={[5, 3, 5]} intensity={0.5} distance={20} decay={2} />
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useGLTF } from '@react-three/drei';
-import type { Object3D, Material, BufferGeometry } from 'three';
+import { useLoader } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 interface ModelProps {
   url: string;
@@ -11,12 +11,6 @@ interface ModelProps {
   onError?: (error: Error) => void;
 }
 
-interface GLTFResult {
-  nodes: { [key: string]: Object3D };
-  materials: { [key: string]: Material };
-  scene: Object3D;
-}
-
 export const Model: React.FC<ModelProps> = ({
   url,
   position = [0, 0, 0],
@@ -25,45 +19,20 @@ export const Model: React.FC<ModelProps> = ({
   onLoad,
   onError,
 }) => {
-  const { scene } = useGLTF(url) as GLTFResult;
+  const gltf = useLoader(GLTFLoader, url);
 
   useEffect(() => {
-    try {
-      // Clone the scene to avoid sharing materials
-      const clonedScene = scene.clone();
+    if (gltf) {
       onLoad?.();
-      return () => {
-        // Cleanup
-        clonedScene.traverse((object) => {
-          if ((object as any).geometry instanceof BufferGeometry) {
-            (object as any).geometry.dispose();
-          }
-          if ((object as any).material instanceof Material) {
-            const material = (object as any).material;
-            if (Array.isArray(material)) {
-              material.forEach((m) => m.dispose());
-            } else {
-              material.dispose();
-            }
-          }
-        });
-      };
-    } catch (error) {
-      console.error('Failed to load model:', error);
-      onError?.(error instanceof Error ? error : new Error('Failed to load model'));
     }
-  }, [scene, onLoad, onError]);
+  }, [gltf, onLoad]);
 
   return (
     <primitive
-      object={scene}
+      object={gltf.scene}
       position={position}
       rotation={rotation}
       scale={scale}
     />
   );
 };
-
-// Pre-load the model to avoid loading it multiple times
-useGLTF.preload('/models/default.glb');
-// Fixed imports
