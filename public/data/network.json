@@ -3,42 +3,200 @@
     {
       "id": "server1",
       "type": "server",
-      "position": { "x": 0, "y": 0, "z": 0 }
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "status": "online",
+      "metadata": {
+        "name": "Main Server",
+        "ip": "192.168.1.1",
+        "load": 0.75
+      }
     },
     {
       "id": "router1",
       "type": "router",
-      "position": { "x": 2, "y": 0, "z": 0 }
+      "position": { "x": 3, "y": 0, "z": 0 },
+      "status": "online",
+      "metadata": {
+        "name": "Core Router",
+        "ip": "192.168.1.254",
+        "throughput": 1000
+      }
+    },
+    {
+      "id": "switch1",
+      "type": "switch",
+      "position": { "x": 6, "y": 0, "z": 0 },
+      "status": "online",
+      "metadata": {
+        "name": "Distribution Switch",
+        "ip": "192.168.1.253",
+        "ports": 24
+      }
     },
     {
       "id": "client1",
       "type": "client",
-      "position": { "x": 4, "y": 1, "z": 0 }
+      "position": { "x": 6, "y": 2, "z": 0 },
+      "status": "online",
+      "metadata": {
+        "name": "Workstation 1",
+        "ip": "192.168.1.101",
+        "user": "Alice"
+      }
     },
     {
       "id": "client2",
       "type": "client",
-      "position": { "x": 4, "y": -1, "z": 0 }
+      "position": { "x": 6, "y": -2, "z": 0 },
+      "status": "warning",
+      "metadata": {
+        "name": "Workstation 2",
+        "ip": "192.168.1.102",
+        "user": "Bob"
+      }
+    },
+    {
+      "id": "server2",
+      "type": "server",
+      "position": { "x": 0, "y": 3, "z": 0 },
+      "status": "online",
+      "metadata": {
+        "name": "Database Server",
+        "ip": "192.168.1.2",
+        "load": 0.45
+      }
+    },
+    {
+      "id": "server3",
+      "type": "server",
+      "position": { "x": 0, "y": -3, "z": 0 },
+      "status": "error",
+      "metadata": {
+        "name": "Backup Server",
+        "ip": "192.168.1.3",
+        "load": 0.95
+      }
     }
   ],
-  "connections": [
+  "links": [
     {
-      "id": "conn1",
+      "id": "link1",
       "source": "server1",
       "target": "router1",
-      "type": "data"
+      "type": "fiber",
+      "bandwidth": 10000,
+      "latency": 1,
+      "status": "active",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "TLS"
+      }
     },
     {
-      "id": "conn2",
+      "id": "link2",
       "source": "router1",
+      "target": "switch1",
+      "type": "fiber",
+      "bandwidth": 10000,
+      "latency": 1,
+      "status": "active",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "None"
+      }
+    },
+    {
+      "id": "link3",
+      "source": "switch1",
       "target": "client1",
-      "type": "data"
+      "type": "copper",
+      "bandwidth": 1000,
+      "latency": 2,
+      "status": "active",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "None"
+      }
     },
     {
-      "id": "conn3",
-      "source": "router1",
+      "id": "link4",
+      "source": "switch1",
       "target": "client2",
-      "type": "data"
+      "type": "copper",
+      "bandwidth": 1000,
+      "latency": 2,
+      "status": "congested",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "None"
+      }
+    },
+    {
+      "id": "link5",
+      "source": "server2",
+      "target": "router1",
+      "type": "fiber",
+      "bandwidth": 10000,
+      "latency": 1,
+      "status": "active",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "TLS"
+      }
+    },
+    {
+      "id": "link6",
+      "source": "server3",
+      "target": "router1",
+      "type": "fiber",
+      "bandwidth": 10000,
+      "latency": 1,
+      "status": "failed",
+      "metadata": {
+        "protocol": "TCP/IP",
+        "encryption": "TLS"
+      }
+    }
+  ],
+  "packets": [
+    {
+      "id": "packet1",
+      "source": "client1",
+      "target": "server1",
+      "type": "data",
+      "size": 1500,
+      "priority": 1,
+      "path": ["client1", "switch1", "router1", "server1"],
+      "metadata": {
+        "protocol": "HTTP",
+        "method": "GET"
+      }
+    },
+    {
+      "id": "packet2",
+      "source": "server2",
+      "target": "client2",
+      "type": "data",
+      "size": 64000,
+      "priority": 2,
+      "path": ["server2", "router1", "switch1", "client2"],
+      "metadata": {
+        "protocol": "FTP",
+        "method": "PUT"
+      }
+    },
+    {
+      "id": "packet3",
+      "source": "server3",
+      "target": "server1",
+      "type": "control",
+      "size": 512,
+      "priority": 3,
+      "path": ["server3", "router1", "server1"],
+      "metadata": {
+        "protocol": "ICMP",
+        "type": "PING"
+      }
     }
   ]
 }
