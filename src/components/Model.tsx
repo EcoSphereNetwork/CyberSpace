@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { useGLTF } from '@react-three/drei';
 
 interface ModelProps {
   url: string;
@@ -19,17 +18,17 @@ export const Model: React.FC<ModelProps> = ({
   onLoad,
   onError,
 }) => {
-  const gltf = useLoader(GLTFLoader, url);
+  const { scene } = useGLTF(url);
 
   useEffect(() => {
-    if (gltf) {
+    if (scene) {
       onLoad?.();
     }
-  }, [gltf, onLoad]);
+  }, [scene, onLoad]);
 
   return (
     <primitive
-      object={gltf.scene}
+      object={scene}
       position={position}
       rotation={rotation}
       scale={scale}

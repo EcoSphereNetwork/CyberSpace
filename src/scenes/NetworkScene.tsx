@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { NetworkToolbar } from '@/components/network/NetworkToolbar';
 import { NetworkSidebar } from '@/components/network/NetworkSidebar';
 import { NetworkContextMenu } from '@/components/network/NetworkContextMenu';
+import { createPortal } from 'react-dom';
 
 interface NetworkSceneProps {
   onLoad?: () => void;
@@ -423,27 +424,32 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
       </mesh>
 
       {/* UI Overlays */}
-      <NetworkToolbar
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onResetCamera={handleResetCamera}
-        onLayerChange={handleLayerChange}
-        onHelp={handleHelp}
-      />
+      {createPortal(
+        <>
+          <NetworkToolbar
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onResetCamera={handleResetCamera}
+            onLayerChange={handleLayerChange}
+            onHelp={handleHelp}
+          />
 
-      <NetworkSidebar
-        onFilterChange={handleFilterChange}
-        onSearch={handleSearch}
-      />
+          <NetworkSidebar
+            onFilterChange={handleFilterChange}
+            onSearch={handleSearch}
+          />
 
-      {contextMenu.visible && contextMenu.object && (
-        <NetworkContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          object={contextMenu.object}
-          onAction={handleContextMenuAction}
-          onClose={() => setContextMenu({ ...contextMenu, visible: false })}
-        />
+          {contextMenu.visible && contextMenu.object && (
+            <NetworkContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              object={contextMenu.object}
+              onAction={handleContextMenuAction}
+              onClose={() => setContextMenu({ ...contextMenu, visible: false })}
+            />
+          )}
+        </>,
+        document.body
       )}
     </>
   );
