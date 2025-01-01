@@ -24,15 +24,15 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Canvas>
-        <Suspense fallback={null}>
-          {activeScene === 'network' ? (
-            <NetworkScene onLoad={handleSceneLoad} onError={handleSceneError} />
-          ) : (
+      {activeScene === 'network' ? (
+        <NetworkScene onLoad={handleSceneLoad} onError={handleSceneError} />
+      ) : (
+        <Canvas>
+          <Suspense fallback={null}>
             <EarthScene onLoad={handleSceneLoad} onError={handleSceneError} />
-          )}
-        </Suspense>
-      </Canvas>
+          </Suspense>
+        </Canvas>
+      )}
 
       {isLoading && <LoadingScreen />}
 
