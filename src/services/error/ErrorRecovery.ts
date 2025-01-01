@@ -47,7 +47,7 @@ export class ErrorRecovery {
     this.registerStrategy({
       name: "networkRetry",
       condition: (error) => error.message.includes("network") || error.message.includes("fetch"),
-      action: async (error) => {
+      action: async () => {
         const maxRetries = 3;
         let retryCount = 0;
 
@@ -71,13 +71,13 @@ export class ErrorRecovery {
     this.registerStrategy({
       name: "resourceRetry",
       condition: (error) => error.message.includes("resource") || error.message.includes("loading"),
-      action: async (error) => {
+      action: async () => {
         try {
           // Clear resource cache
           await caches.delete("resources");
           // Reload the page
           window.location.reload();
-        } catch (clearError) {
+        } catch (clearError: any) {
           throw new Error(`Failed to clear resource cache: ${clearError.message}`);
         }
       },
@@ -87,7 +87,7 @@ export class ErrorRecovery {
     this.registerStrategy({
       name: "stateReset",
       condition: (error) => error.message.includes("state") || error.message.includes("corruption"),
-      action: async (error) => {
+      action: async () => {
         try {
           // Clear local storage
           localStorage.clear();
@@ -95,7 +95,7 @@ export class ErrorRecovery {
           sessionStorage.clear();
           // Reload the page
           window.location.reload();
-        } catch (clearError) {
+        } catch (clearError: any) {
           throw new Error(`Failed to clear application state: ${clearError.message}`);
         }
       },
