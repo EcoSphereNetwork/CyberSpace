@@ -1,102 +1,88 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { Avatar } from "@/components/ui/Avatar";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { Badge } from "@/components/ui/Badge";
 
-const UserListContainer = styled.div`
-  width: 240px;
-  border-left: 1px solid ${props => props.theme.colors.divider};
-  background: ${props => props.theme.colors.background.paper};
-  overflow-y: auto;
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
 `;
 
-const UserListHeader = styled.div`
-  padding: 12px 16px;
-  font-weight: 600;
-  color: ${props => props.theme.colors.text.secondary};
-  border-bottom: 1px solid ${props => props.theme.colors.divider};
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-weight: 500;
 `;
 
 const UserList = styled.div`
-  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const UserItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  gap: 12px;
+`;
 
-  &:hover {
-    background: ${props => props.theme.colors.action.hover};
-  }
+const Avatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ${props => props.theme.colors.primary.main};
+  color: ${props => props.theme.colors.primary.contrastText};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
 `;
 
 const UserInfo = styled.div`
   flex: 1;
-  min-width: 0;
 `;
 
 const UserName = styled.div`
   font-weight: 500;
-  color: ${props => props.theme.colors.text.primary};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
-const UserStatus = styled.div`
-  font-size: 0.75rem;
+const UserStatus = styled.div<{ status: string }>`
   color: ${props => props.theme.colors.text.secondary};
+  font-size: 0.875rem;
 `;
 
-interface ChatUserListProps {
-  users: ChatUserType[];
+export interface ChatUserListProps {
+  users: {
+    id: string;
+    name: string;
+    status: string;
+  }[];
 }
 
-export const ChatUserList: React.FC<ChatUserListProps> = ({ users }) => {
-  const onlineUsers = users.filter(user => user.status === "online");
-  const offlineUsers = users.filter(user => user.status === "offline");
-
+export const ChatUserList: React.FC<ChatUserListProps> = ({
+  users,
+}) => {
   return (
-    <UserListContainer>
-      <UserListHeader>
-        Users ({users.length})
-      </UserListHeader>
+    <Container>
+      <Header>
+        Online Users ({users.length})
+      </Header>
       <UserList>
-        {onlineUsers.map(user => (
+        {users.map(user => (
           <UserItem key={user.id}>
-            <Tooltip content={user.status}>
-              <Badge
-                color="success"
-                variant="dot"
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-              >
-                <Avatar src={user.avatar} alt={user.name} size="small" />
-              </Badge>
-            </Tooltip>
+            <Avatar>
+              {user.name.slice(0, 2).toUpperCase()}
+            </Avatar>
             <UserInfo>
               <UserName>{user.name}</UserName>
-              <UserStatus>{user.status}</UserStatus>
-            </UserInfo>
-          </UserItem>
-        ))}
-        {offlineUsers.map(user => (
-          <UserItem key={user.id}>
-            <Avatar src={user.avatar} alt={user.name} size="small" />
-            <UserInfo>
-              <UserName>{user.name}</UserName>
-              <UserStatus>{user.status}</UserStatus>
+              <UserStatus status={user.status}>
+                {user.status}
+              </UserStatus>
             </UserInfo>
           </UserItem>
         ))}
       </UserList>
-    </UserListContainer>
+    </Container>
   );
 };

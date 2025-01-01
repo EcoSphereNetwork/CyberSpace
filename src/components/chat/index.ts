@@ -1,7 +1,11 @@
-export * from "./ChatWindow";
-export * from "./ChatMessage";
-export * from "./ChatInput";
-export * from "./ChatHeader";
-export * from "./ChatUserList";
-export * from "./ChatTypingIndicator";
-export * from "./types";
+export { ChatWindow } from "./ChatWindow";
+export { ChatMessageComponent } from "./ChatMessage";
+export { ChatTypingIndicator } from "./ChatTypingIndicator";
+export { ChatUserList } from "./ChatUserList";
+
+export const ChatModule = {
+  Window: ChatWindow,
+  Message: ChatMessageComponent,
+  TypingIndicator: ChatTypingIndicator,
+  UserList: ChatUserList,
+};

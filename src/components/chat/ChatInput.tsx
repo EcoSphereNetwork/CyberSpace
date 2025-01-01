@@ -1,17 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { IconButton } from "@/components/ui/IconButton";
 
-const InputContainer = styled.div`
+const Container = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  padding: 16px;
+  border-top: 1px solid ${props => props.theme.colors.divider};
 `;
 
-const TextArea = styled.textarea`
+const InputContainer = styled.div`
   flex: 1;
+  position: relative;
+`;
+
+const Input = styled.textarea`
+  width: 100%;
   min-height: 40px;
   max-height: 120px;
   padding: 8px 12px;
@@ -29,76 +35,82 @@ const TextArea = styled.textarea`
     border-color: ${props => props.theme.colors.primary.main};
   }
 
-  &:disabled {
-    background: ${props => props.theme.colors.background.disabled};
-    cursor: not-allowed;
+  &::placeholder {
+    color: ${props => props.theme.colors.text.secondary};
   }
 `;
 
-const ActionButton = styled(Button)`
-  padding: 8px;
-  min-width: 40px;
-  height: 40px;
-  border-radius: 20px;
-`;
-
-interface ChatInputProps {
+export interface ChatInputProps {
   onSend: (text: string) => void;
   onTyping: (isTyping: boolean) => void;
-  disabled?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSend, onTyping, disabled }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({
+  onSend,
+  onTyping,
+}) => {
   const [text, setText] = useState("");
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const debouncedTyping = useDebounce(onTyping, 500);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.style.height = "40px";
-      const scrollHeight = textAreaRef.current.scrollHeight;
-      textAreaRef.current.style.height = Math.min(scrollHeight, 120) + "px";
-    }
-  }, [text]);
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.target.value);
+
+    onTyping(true);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      onTyping(false);
+    }, 1000);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSend();
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
-    setText(newText);
-    debouncedTyping(newText.length > 0);
-  };
-
   const handleSend = () => {
-    if (!text.trim() || disabled) return;
-    onSend(text.trim());
-    setText("");
-    onTyping(false);
+    const trimmedText = text.trim();
+    if (trimmedText) {
+      onSend(trimmedText);
+      setText("");
+      onTyping(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    }
   };
 
   return (
-    <InputContainer>
-      <TextArea
-        ref={textAreaRef}
-        value={text}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
-        disabled={disabled}
-      />
-      <ActionButton
-        variant="contained"
-        color="primary"
+    <Container>
+      <InputContainer>
+        <Input
+          ref={inputRef}
+          value={text}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message..."
+          rows={1}
+        />
+      </InputContainer>
+      <IconButton
+        aria-label="Send"
         onClick={handleSend}
-        disabled={!text.trim() || disabled}
+        disabled={!text.trim()}
       >
         <Icon name="send" />
-      </ActionButton>
-    </InputContainer>
+      </IconButton>
+    </Container>
   );
 };

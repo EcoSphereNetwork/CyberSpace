@@ -1,85 +1,53 @@
 import React from "react";
 import styled from "@emotion/styled";
 import { IconButton } from "@/components/ui/IconButton";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { Icon } from "@/components/ui/Icon";
-import { NetworkViewMode } from "./types";
 
 const ToolbarContainer = styled.div`
-  position: absolute;
-  top: 16px;
-  left: 16px;
   display: flex;
+  align-items: center;
   gap: 8px;
-  background: ${props => props.theme.colors.background.paper};
-  border-radius: 8px;
   padding: 8px;
-  box-shadow: ${props => props.theme.shadows[2]};
+  background: ${props => props.theme.colors.background.paper};
+  border-radius: 4px;
+  box-shadow: ${props => props.theme.shadows[1]};
 `;
 
-const Divider = styled.div`
-  width: 1px;
-  background: ${props => props.theme.colors.divider};
-  margin: 0 4px;
-`;
-
-interface NetworkToolbarProps {
-  viewMode: NetworkViewMode;
-  onViewModeChange: (mode: NetworkViewMode) => void;
-  onRefresh: () => void;
-  onExport: () => void;
-  onFilter: () => void;
-  onSearch: () => void;
+export interface NetworkToolbarProps {
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onResetCamera?: () => void;
+  onLayerChange?: (layer: string) => void;
+  onHelp?: () => void;
 }
 
 export const NetworkToolbar: React.FC<NetworkToolbarProps> = ({
-  viewMode,
-  onViewModeChange,
-  onRefresh,
-  onExport,
-  onFilter,
-  onSearch,
+  onZoomIn,
+  onZoomOut,
+  onResetCamera,
+  onLayerChange,
+  onHelp,
 }) => {
   return (
     <ToolbarContainer>
-      <Tooltip content="2D View">
-        <IconButton
-          onClick={() => onViewModeChange("2d")}
-          active={viewMode === "2d"}
-        >
-          <Icon name="view2d" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="3D View">
-        <IconButton
-          onClick={() => onViewModeChange("3d")}
-          active={viewMode === "3d"}
-        >
-          <Icon name="view3d" />
-        </IconButton>
-      </Tooltip>
-      <Divider />
-      <Tooltip content="Refresh">
-        <IconButton onClick={onRefresh}>
-          <Icon name="refresh" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="Export">
-        <IconButton onClick={onExport}>
-          <Icon name="download" />
-        </IconButton>
-      </Tooltip>
-      <Divider />
-      <Tooltip content="Filter">
-        <IconButton onClick={onFilter}>
-          <Icon name="filter" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="Search">
-        <IconButton onClick={onSearch}>
-          <Icon name="search" />
-        </IconButton>
-      </Tooltip>
+      <IconButton onClick={onZoomIn} aria-label="Zoom In">
+        <Icon name="zoom_in" />
+      </IconButton>
+      <IconButton onClick={onZoomOut} aria-label="Zoom Out">
+        <Icon name="zoom_out" />
+      </IconButton>
+      <IconButton onClick={onResetCamera} aria-label="Reset Camera">
+        <Icon name="center_focus_strong" />
+      </IconButton>
+      <IconButton onClick={() => onLayerChange?.("2d")} aria-label="2D View">
+        <Icon name="view_in_ar" />
+      </IconButton>
+      <IconButton onClick={() => onLayerChange?.("3d")} aria-label="3D View">
+        <Icon name="view_in_ar" />
+      </IconButton>
+      <IconButton onClick={onHelp} aria-label="Help">
+        <Icon name="help_outline" />
+      </IconButton>
     </ToolbarContainer>
   );
 };

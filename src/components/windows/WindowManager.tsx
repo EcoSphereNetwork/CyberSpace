@@ -1,74 +1,61 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { Window } from "./Window";
-import { WindowState } from "./types";
 
-const WindowManagerContainer = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
+const WindowContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
 `;
 
-interface WindowConfig {
+export interface WindowConfig {
   id: string;
   title: string;
-  icon?: string;
-  component: React.ComponentType<any>;
-  props?: any;
-  initialState?: Partial<WindowState>;
+  children: React.ReactNode;
+  component?: () => React.ReactNode;
+  onFocus?: () => void;
+  onClose?: () => void;
 }
 
-interface WindowManagerProps {
+export interface WindowManagerProps {
   windows: WindowConfig[];
-  onWindowClose?: (id: string) => void;
-  onWindowStateChange?: (id: string, state: WindowState) => void;
+  onFocus?: (id: string) => void;
+  onClose?: (id: string) => void;
 }
 
 export const WindowManager: React.FC<WindowManagerProps> = ({
   windows,
-  onWindowClose,
-  onWindowStateChange,
+  onFocus,
+  onClose,
 }) => {
-  const [windowStates, setWindowStates] = useState<Record<string, WindowState>>({});
+  const [activeWindow, setActiveWindow] = useState<string | null>(null);
 
-  const handleStateChange = useCallback((id: string, state: WindowState) => {
-    setWindowStates(prev => ({
-      ...prev,
-      [id]: state,
-    }));
-    onWindowStateChange?.(id, state);
-  }, [onWindowStateChange]);
+  const handleFocus = (id: string) => {
+    setActiveWindow(id);
+    onFocus?.(id);
+  };
 
-  const handleClose = useCallback((id: string) => {
-    setWindowStates(prev => {
-      const { [id]: _, ...rest } = prev;
-      return rest;
-    });
-    onWindowClose?.(id);
-  }, [onWindowClose]);
+  const handleClose = (id: string) => {
+    if (activeWindow === id) {
+      setActiveWindow(null);
+    }
+    onClose?.(id);
+  };
 
   return (
-    <WindowManagerContainer>
-      {windows.map(({ id, title, icon, component: Component, props, initialState }) => (
+    <WindowContainer>
+      {windows.map(window => (
         <Window
-          key={id}
-          id={id}
-          title={title}
-          icon={icon}
-          initialState={{
-            x: 20 + (Object.keys(windowStates).length * 20),
-            y: 20 + (Object.keys(windowStates).length * 20),
-            ...initialState,
-          }}
-          onStateChange={(state) => handleStateChange(id, state)}
-          onClose={() => handleClose(id)}
+          key={window.id}
+          id={window.id}
+          title={window.title}
+          isActive={activeWindow === window.id}
+          onFocus={() => handleFocus(window.id)}
+          onClose={() => handleClose(window.id)}
         >
-          <Component {...props} />
+          {window.component ? window.component() : window.children}
         </Window>
       ))}
-    </WindowManagerContainer>
+    </WindowContainer>
   );
 };

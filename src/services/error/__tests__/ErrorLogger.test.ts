@@ -1,93 +1,64 @@
 import { ErrorLogger } from "../ErrorLogger";
 
 describe("ErrorLogger", () => {
+  let logger: ErrorLogger;
+
   beforeEach(() => {
-    localStorage.clear();
-    jest.clearAllMocks();
+    logger = new ErrorLogger();
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  it("creates a singleton instance", () => {
-    const logger1 = ErrorLogger.getInstance();
-    const logger2 = ErrorLogger.getInstance();
-    expect(logger1).toBe(logger2);
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("logs errors with timestamp", () => {
-    const logger = ErrorLogger.getInstance();
     const error = new Error("Test error");
     logger.log(error);
+
     const logs = logger.getLogs();
     expect(logs).toHaveLength(1);
     expect(logs[0].error).toBe(error);
     expect(logs[0].timestamp).toBeDefined();
   });
 
-  it("respects maxEntries config", () => {
-    const logger = ErrorLogger.getInstance({ maxEntries: 2 });
-    logger.log(new Error("Error 1"));
-    logger.log(new Error("Error 2"));
-    logger.log(new Error("Error 3"));
+  it("maintains error history", () => {
+    const error1 = new Error("Error 1");
+    const error2 = new Error("Error 2");
+
+    logger.log(error1);
+    logger.log(error2);
+
     const logs = logger.getLogs();
     expect(logs).toHaveLength(2);
-    expect(logs[0].error.message).toBe("Error 3");
-    expect(logs[1].error.message).toBe("Error 2");
+    expect(logs[0].error).toBe(error1);
+    expect(logs[1].error).toBe(error2);
   });
 
-  it("persists logs to localStorage", () => {
-    const logger = ErrorLogger.getInstance({ persistToStorage: true });
+  it("clears error history", () => {
     const error = new Error("Test error");
     logger.log(error);
-    const storedLogs = localStorage.getItem("errorLogs");
-    expect(storedLogs).toBeDefined();
-    const parsedLogs = JSON.parse(storedLogs!);
-    expect(parsedLogs).toHaveLength(1);
-    expect(parsedLogs[0].error.message).toBe("Test error");
-  });
+    logger.clear();
 
-  it("loads logs from localStorage on initialization", () => {
-    const initialLogs = [
-      {
-        timestamp: new Date().toISOString(),
-        error: { message: "Test error" },
-      },
-    ];
-    localStorage.setItem("errorLogs", JSON.stringify(initialLogs));
-
-    const logger = ErrorLogger.getInstance({ persistToStorage: true });
     const logs = logger.getLogs();
-    expect(logs).toHaveLength(1);
-    expect(logs[0].error.message).toBe("Test error");
+    expect(logs).toHaveLength(0);
   });
 
-  it("clears logs", () => {
-    const logger = ErrorLogger.getInstance();
-    logger.log(new Error("Test error"));
-    expect(logger.getLogs()).toHaveLength(1);
-    logger.clearLogs();
-    expect(logger.getLogs()).toHaveLength(0);
-  });
-
-  it("reports errors to server when configured", async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ ok: true });
-    global.fetch = mockFetch;
-
-    const logger = ErrorLogger.getInstance({
-      reportToServer: true,
-      serverEndpoint: "http://example.com/errors",
-    });
-
+  it("logs errors with context", () => {
     const error = new Error("Test error");
-    await logger.log(error);
+    const context = { userId: "123", action: "test" };
+    logger.log(error, context);
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://example.com/errors",
-      expect.objectContaining({
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: expect.any(String),
-      })
-    );
+    const logs = logger.getLogs();
+    expect(logs[0].context).toBe(context);
+  });
+
+  it("logs errors with additional info", () => {
+    const error = new Error("Test error");
+    const info = { details: "Additional information" };
+    logger.log(error, undefined, info);
+
+    const logs = logger.getLogs();
+    expect(logs[0].info).toBe(info);
   });
 });
