@@ -9,30 +9,37 @@ const MenuContainer = styled.div`
   z-index: 1000;
 `;
 
-export interface NetworkObject {
-  id: string;
-  type: string;
-  status: "online" | "offline" | "warning" | "error";
-  metadata?: Record<string, any>;
-}
-
 export interface NetworkContextMenuProps {
   x: number;
   y: number;
-  object: NetworkObject;
-  onAction: (action: string) => void;
+  node: NetworkNode;
+  onAction?: (action: string, node: NetworkNode) => void;
   onClose: () => void;
+  onCopyId?: (id: string) => void;
+  onHideNode?: (node: NetworkNode) => void;
+  onExpandNode?: (node: NetworkNode) => void;
+  onFocusNode?: (node: NetworkNode) => void;
+  onShowDetails?: (node: NetworkNode) => void;
+  onChangeStatus?: (node: NetworkNode, status: string) => void;
+  onUngroupCluster?: (node: NetworkNode) => void;
 }
 
 export const NetworkContextMenu: React.FC<NetworkContextMenuProps> = ({
   x,
   y,
-  object,
+  node,
   onAction,
   onClose,
+  onCopyId,
+  onHideNode,
+  onExpandNode,
+  onFocusNode,
+  onShowDetails,
+  onChangeStatus,
+  onUngroupCluster,
 }) => {
   const handleAction = (action: string) => {
-    onAction(action);
+    onAction?.(action, node);
     onClose();
   };
 
@@ -40,56 +47,85 @@ export const NetworkContextMenu: React.FC<NetworkContextMenuProps> = ({
     <MenuContainer style={{ left: x, top: y }}>
       <Menu>
         <MenuItem
+          icon={<Icon name="content_copy" />}
+          onClick={() => {
+            onCopyId?.(node.id);
+            onClose();
+          }}
+        >
+          Copy ID
+        </MenuItem>
+        <MenuItem
           icon={<Icon name="info" />}
-          onClick={() => handleAction("info")}
+          onClick={() => {
+            onShowDetails?.(node);
+            onClose();
+          }}
         >
-          View Details
+          Show Details
         </MenuItem>
         <MenuItem
-          icon={<Icon name="edit" />}
-          onClick={() => handleAction("edit")}
+          icon={<Icon name="center_focus_strong" />}
+          onClick={() => {
+            onFocusNode?.(node);
+            onClose();
+          }}
         >
-          Edit
+          Focus
         </MenuItem>
-        {object.type === "node" && (
-          <>
-            <MenuItem
-              icon={<Icon name="refresh" />}
-              onClick={() => handleAction("restart")}
-            >
-              Restart
-            </MenuItem>
-            <MenuItem
-              icon={<Icon name="terminal" />}
-              onClick={() => handleAction("terminal")}
-            >
-              Open Terminal
-            </MenuItem>
-          </>
-        )}
-        {object.type === "link" && (
-          <>
-            <MenuItem
-              icon={<Icon name="analytics" />}
-              onClick={() => handleAction("monitor")}
-            >
-              Monitor Traffic
-            </MenuItem>
-            <MenuItem
-              icon={<Icon name="block" />}
-              onClick={() => handleAction("block")}
-            >
-              Block Traffic
-            </MenuItem>
-          </>
-        )}
         <MenuItem
-          icon={<Icon name="delete" />}
-          onClick={() => handleAction("delete")}
-          color="error"
+          icon={<Icon name="expand_more" />}
+          onClick={() => {
+            onExpandNode?.(node);
+            onClose();
+          }}
         >
-          Delete
+          Expand
         </MenuItem>
+        <MenuItem
+          icon={<Icon name="visibility_off" />}
+          onClick={() => {
+            onHideNode?.(node);
+            onClose();
+          }}
+        >
+          Hide
+        </MenuItem>
+        {node.type === 'cluster' && (
+          <MenuItem
+            icon={<Icon name="unfold_less" />}
+            onClick={() => {
+              onUngroupCluster?.(node);
+              onClose();
+            }}
+          >
+            Ungroup
+          </MenuItem>
+        )}
+        {node.status && (
+          <MenuItem
+            icon={<Icon name="refresh" />}
+            onClick={() => {
+              const nextStatus = 
+                node.status === 'online' ? 'warning' :
+                node.status === 'warning' ? 'error' :
+                node.status === 'error' ? 'offline' :
+                'online';
+              onChangeStatus?.(node, nextStatus);
+              onClose();
+            }}
+          >
+            Change Status
+          </MenuItem>
+        )}
+        {onAction && (
+          <MenuItem
+            icon={<Icon name="more_horiz" />}
+            onClick={() => handleAction("more")}
+          >
+            More Actions...
+          </MenuItem>
+        )}
       </Menu>
     </MenuContainer>
   );
