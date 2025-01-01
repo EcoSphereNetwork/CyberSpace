@@ -1,38 +1,43 @@
 {
   "nodes": [
     {
-      "id": "node1",
+      "id": "server1",
       "type": "server",
       "position": { "x": 0, "y": 0, "z": 0 }
     },
     {
-      "id": "node2",
-      "type": "client",
-      "position": { "x": 2, "y": 1, "z": 1 }
+      "id": "router1",
+      "type": "router",
+      "position": { "x": 2, "y": 0, "z": 0 }
     },
     {
-      "id": "node3",
-      "type": "router",
-      "position": { "x": -2, "y": -1, "z": 1 }
+      "id": "client1",
+      "type": "client",
+      "position": { "x": 4, "y": 1, "z": 0 }
+    },
+    {
+      "id": "client2",
+      "type": "client",
+      "position": { "x": 4, "y": -1, "z": 0 }
     }
   ],
   "connections": [
     {
       "id": "conn1",
-      "source": "node1",
-      "target": "node2",
+      "source": "server1",
+      "target": "router1",
       "type": "data"
     },
     {
       "id": "conn2",
-      "source": "node1",
-      "target": "node3",
-      "type": "control"
+      "source": "router1",
+      "target": "client1",
+      "type": "data"
     },
     {
       "id": "conn3",
-      "source": "node2",
-      "target": "node3",
+      "source": "router1",
+      "target": "client2",
       "type": "data"
     }
   ]
