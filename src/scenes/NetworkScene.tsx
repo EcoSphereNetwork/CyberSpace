@@ -1,7 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import { NetworkToolbar } from '@/components/network/NetworkToolbar';
+import { NetworkSidebar } from '@/components/network/NetworkSidebar';
+import { NetworkContextMenu } from '@/components/network/NetworkContextMenu';
 
 interface NetworkSceneProps {
   onLoad?: () => void;
@@ -44,12 +47,39 @@ interface NetworkData {
   packets: NetworkPacket[];
 }
 
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  object: {
+    id: string;
+    type: string;
+    status: 'online' | 'offline' | 'warning' | 'error';
+  } | null;
+}
+
 export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    object: null,
+  });
+  const [activeFilters, setActiveFilters] = useState({
+    activeNodes: true,
+    criticalPaths: false,
+    warnings: true,
+    errors: true,
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+
   const nodes = useRef<Map<string, THREE.Mesh>>(new Map());
   const links = useRef<Map<string, THREE.Line>>(new Map());
   const packets = useRef<Map<string, THREE.Mesh>>(new Map());
   const packetPaths = useRef<Map<string, { pathIndex: number; progress: number }>>(new Map());
+
+  const { camera } = useThree();
 
   useEffect(() => {
     const loadNetwork = async () => {
@@ -111,11 +141,6 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
 
       if (!sourceNode || !targetNode) return;
 
-      const points = [
-        sourceNode.position.clone(),
-        targetNode.position.clone(),
-      ];
-
       // Add curve to the link
       const midPoint = sourceNode.position.clone().add(targetNode.position).multiplyScalar(0.5);
       midPoint.y += 0.5; // Add some height to the curve
@@ -170,7 +195,7 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
     };
   }, [networkData]);
 
-  const createPacket = (packetData: NetworkPacket) => {
+  const createPacket = useCallback((packetData: NetworkPacket) => {
     const geometry = new THREE.SphereGeometry(0.1);
     const material = new THREE.MeshPhongMaterial({
       color: getPacketColor(packetData.type),
@@ -189,7 +214,7 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
     mesh.userData = packetData;
     packets.current.set(packetData.id, mesh);
     packetPaths.current.set(packetData.id, { pathIndex: 0, progress: 0 });
-  };
+  }, []);
 
   const getNodeColor = (type: string): number => {
     switch (type) {
@@ -301,6 +326,65 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
     }
   });
 
+  const handleContextMenu = (event: MouseEvent) => {
+    event.preventDefault();
+    // TODO: Implement raycasting to find clicked object
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      object: {
+        id: 'Node A',
+        type: 'server',
+        status: 'online',
+      },
+    });
+  };
+
+  const handleContextMenuAction = (action: string) => {
+    console.log('Context menu action:', action);
+    // TODO: Implement context menu actions
+  };
+
+  const handleFilterChange = (filters: { [key: string]: boolean }) => {
+    setActiveFilters(filters);
+    // TODO: Apply filters to network visualization
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    // TODO: Implement search functionality
+  };
+
+  const handleZoomIn = () => {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.position.multiplyScalar(0.9);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.position.multiplyScalar(1.1);
+    }
+  };
+
+  const handleResetCamera = () => {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.position.set(0, 2, 10);
+      camera.lookAt(0, 0, 0);
+    }
+  };
+
+  const handleLayerChange = (layer: string) => {
+    console.log('Layer changed:', layer);
+    // TODO: Implement layer switching
+  };
+
+  const handleHelp = () => {
+    console.log('Help clicked');
+    // TODO: Implement help functionality
+  };
+
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 2, 10]} />
@@ -337,6 +421,30 @@ export const NetworkScene: React.FC<NetworkSceneProps> = ({ onLoad, onError }) =
         <sphereGeometry args={[50, 32, 32]} />
         <meshBasicMaterial color={0x111111} side={THREE.BackSide} fog={false} />
       </mesh>
+
+      {/* UI Overlays */}
+      <NetworkToolbar
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onResetCamera={handleResetCamera}
+        onLayerChange={handleLayerChange}
+        onHelp={handleHelp}
+      />
+
+      <NetworkSidebar
+        onFilterChange={handleFilterChange}
+        onSearch={handleSearch}
+      />
+
+      {contextMenu.visible && contextMenu.object && (
+        <NetworkContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          object={contextMenu.object}
+          onAction={handleContextMenuAction}
+          onClose={() => setContextMenu({ ...contextMenu, visible: false })}
+        />
+      )}
     </>
   );
 };

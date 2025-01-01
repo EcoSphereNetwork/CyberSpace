@@ -1,67 +1,21 @@
 import React, { useState, Suspense } from 'react';
-import styled from '@emotion/styled';
 import { Canvas } from '@react-three/fiber';
-import { LoadingScreen } from './ui/LoadingScreen';
-import { ErrorScreen } from './ui/ErrorScreen';
-import { DebugOverlay } from './ui/DebugOverlay';
-import { EarthScene } from '@/scenes/EarthScene';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { ErrorScreen } from '@/components/ui/ErrorScreen';
 import { NetworkScene } from '@/scenes/NetworkScene';
+import { EarthScene } from '@/scenes/EarthScene';
 
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: #000;
-`;
-
-const SceneSelector = styled.div`
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 100;
-  display: flex;
-  gap: 10px;
-`;
-
-const Button = styled.button`
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  &.active {
-    background: rgba(255, 255, 255, 0.3);
-  }
-`;
-
-const App = () => {
+const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeScene, setActiveScene] = useState<'earth' | 'network'>('earth');
+  const [activeScene, setActiveScene] = useState<'earth' | 'network'>('network');
 
-  const handleLoad = () => {
+  const handleSceneLoad = () => {
     setIsLoading(false);
   };
 
-  const handleError = (error: Error) => {
-    console.error('Failed to load scene:', error);
+  const handleSceneError = (error: Error) => {
     setError(error.message);
-  };
-
-  const handleReset = () => {
-    // Reset camera handled by OrbitControls
-  };
-
-  const handleVR = () => {
-    // TODO: Implement VR mode
-    console.log('VR mode not implemented yet');
   };
 
   if (error) {
@@ -70,35 +24,38 @@ const App = () => {
 
   return (
     <>
-      <Container>
-        <Canvas>
-          <Suspense fallback={null}>
-            {activeScene === 'earth' ? (
-              <EarthScene onLoad={handleLoad} onError={handleError} />
-            ) : (
-              <NetworkScene onLoad={handleLoad} onError={handleError} />
-            )}
-          </Suspense>
-        </Canvas>
-      </Container>
-
-      <SceneSelector>
-        <Button
-          className={activeScene === 'earth' ? 'active' : ''}
-          onClick={() => setActiveScene('earth')}
-        >
-          Earth View
-        </Button>
-        <Button
-          className={activeScene === 'network' ? 'active' : ''}
-          onClick={() => setActiveScene('network')}
-        >
-          Network View
-        </Button>
-      </SceneSelector>
+      <Canvas>
+        <Suspense fallback={null}>
+          {activeScene === 'network' ? (
+            <NetworkScene onLoad={handleSceneLoad} onError={handleSceneError} />
+          ) : (
+            <EarthScene onLoad={handleSceneLoad} onError={handleSceneError} />
+          )}
+        </Suspense>
+      </Canvas>
 
       {isLoading && <LoadingScreen />}
-      <DebugOverlay onReset={handleReset} onVR={handleVR} />
+
+      <div style={{
+        position: 'fixed',
+        top: 10,
+        right: 10,
+        zIndex: 100,
+      }}>
+        <button
+          onClick={() => setActiveScene(activeScene === 'earth' ? 'network' : 'earth')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#00cc66',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Switch to {activeScene === 'earth' ? 'Network' : 'Earth'} View
+        </button>
+      </div>
     </>
   );
 };
