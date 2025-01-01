@@ -1,555 +1,202 @@
-import { Layer, LayerConfig } from '@/core/layers/Layer';
-import {
-  Object3D,
-  Vector3,
-  Color,
-  ShaderMaterial,
-  Points,
-  BufferGeometry,
-  Float32BufferAttribute,
-  Mesh,
-  PlaneGeometry,
-  AdditiveBlending,
-  FogExp2,
-  TextureLoader,
-  RepeatWrapping,
-  InstancedMesh,
-  Matrix4,
-  DynamicDrawUsage,
-} from 'three';
+import * as THREE from 'three';
+import { Layer } from '@/core/Layer';
+import { EventEmitter } from '@/utils/EventEmitter';
 
-interface WeatherParticle {
-  position: Vector3;
-  velocity: Vector3;
-  size: number;
-  lifetime: number;
-  age: number;
+interface WeatherConfig {
+  particleCount?: number;
+  particleSize?: number;
+  particleColor?: number;
+  particleOpacity?: number;
+  windSpeed?: number;
+  windDirection?: THREE.Vector3;
+  type?: 'rain' | 'snow' | 'fog';
 }
 
-interface WeatherEffect {
-  type: 'rain' | 'snow' | 'fog' | 'clouds' | 'lightning' | 'custom';
-  intensity?: number;
-  color?: number;
-  area?: {
-    center: Vector3;
-    size: Vector3;
-  };
-  speed?: number;
-  metadata?: Record<string, any>;
-}
-
-interface WeatherLayerConfig extends LayerConfig {
-  effects?: WeatherEffect[];
-  maxParticles?: number;
-  wind?: Vector3;
-  ambient?: {
-    color?: number;
-    intensity?: number;
-  };
-  fog?: {
-    color?: number;
-    density?: number;
-  };
-}
-
-/**
- * Layer for weather and environmental effects
- */
 export class WeatherLayer extends Layer {
-  private readonly weatherConfig: WeatherLayerConfig;
-  private effects: Map<string, Object3D>;
-  private particles: Map<string, WeatherParticle[]>;
-  private wind: Vector3;
+  private particles: THREE.Points | null = null;
+  private particleSystem: THREE.BufferGeometry | null = null;
+  private config: Required<WeatherConfig>;
+  private velocities: Float32Array;
 
-  // Shaders
-  private static readonly rainShader = {
-    vertexShader: `
-      attribute float size;
-      attribute float opacity;
-      varying float vOpacity;
-      void main() {
-        vOpacity = opacity;
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = size * (300.0 / -mvPosition.z);
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `,
-    fragmentShader: `
-      uniform sampler2D texture;
-      varying float vOpacity;
-      void main() {
-        vec2 uv = vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y);
-        vec4 tex = texture2D(texture, uv);
-        gl_FragColor = vec4(vec3(0.7, 0.7, 0.9), tex.a * vOpacity);
-      }
-    `,
-  };
+  constructor(scene: THREE.Scene, config: WeatherConfig = {}) {
+    super(scene);
 
-  private static readonly snowShader = {
-    vertexShader: `
-      attribute float size;
-      attribute float rotation;
-      attribute float opacity;
-      varying float vRotation;
-      varying float vOpacity;
-      void main() {
-        vRotation = rotation;
-        vOpacity = opacity;
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = size * (300.0 / -mvPosition.z);
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `,
-    fragmentShader: `
-      uniform sampler2D texture;
-      varying float vRotation;
-      varying float vOpacity;
-      void main() {
-        vec2 center = vec2(0.5, 0.5);
-        vec2 uv = gl_PointCoord - center;
-        float c = cos(vRotation);
-        float s = sin(vRotation);
-        vec2 ruv = vec2(uv.x * c - uv.y * s, uv.x * s + uv.y * c) + center;
-        vec4 tex = texture2D(texture, ruv);
-        gl_FragColor = vec4(vec3(1.0), tex.a * vOpacity);
-      }
-    `,
-  };
+    this.config = {
+      particleCount: config.particleCount ?? 1000,
+      particleSize: config.particleSize ?? 0.1,
+      particleColor: config.particleColor ?? 0xffffff,
+      particleOpacity: config.particleOpacity ?? 0.6,
+      windSpeed: config.windSpeed ?? 1,
+      windDirection: config.windDirection ?? new THREE.Vector3(1, -1, 0).normalize(),
+      type: config.type ?? 'rain',
+    };
 
-  private static readonly cloudShader = {
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform sampler2D noiseTexture;
-      uniform float time;
-      uniform vec3 color;
-      uniform float density;
-      varying vec2 vUv;
-      void main() {
-        vec2 uv = vUv + vec2(time * 0.01, 0.0);
-        float noise = texture2D(noiseTexture, uv).r;
-        noise += texture2D(noiseTexture, uv * 2.0).r * 0.5;
-        noise = smoothstep(0.4, 0.6, noise);
-        gl_FragColor = vec4(color, noise * density);
-      }
-    `,
-  };
-
-  constructor(config: WeatherLayerConfig) {
-    super(config);
-    this.weatherConfig = config;
-    this.effects = new Map();
-    this.particles = new Map();
-    this.wind = config.wind ?? new Vector3(0, 0, 0);
+    this.velocities = new Float32Array(this.config.particleCount * 3);
+    this.createParticleSystem();
   }
 
-  protected async loadResources(): Promise<void> {
-    // Load textures
-    const textureLoader = new TextureLoader();
-    const [rainTexture, snowTexture, noiseTexture] = await Promise.all([
-      this.loadTexture(textureLoader, '/assets/textures/rain.png'),
-      this.loadTexture(textureLoader, '/assets/textures/snow.png'),
-      this.loadTexture(textureLoader, '/assets/textures/noise.png'),
-    ]);
+  private createParticleSystem(): void {
+    // Create geometry
+    this.particleSystem = new THREE.BufferGeometry();
 
-    noiseTexture.wrapS = RepeatWrapping;
-    noiseTexture.wrapT = RepeatWrapping;
+    // Create positions
+    const positions = new Float32Array(this.config.particleCount * 3);
+    for (let i = 0; i < this.config.particleCount * 3; i += 3) {
+      positions[i] = Math.random() * 20 - 10; // x
+      positions[i + 1] = Math.random() * 20; // y
+      positions[i + 2] = Math.random() * 20 - 10; // z
 
-    this.resources.textures.set('rain', rainTexture);
-    this.resources.textures.set('snow', snowTexture);
-    this.resources.textures.set('noise', noiseTexture);
+      // Initialize velocities
+      this.velocities[i] = this.config.windDirection.x * this.config.windSpeed;
+      this.velocities[i + 1] = this.config.windDirection.y * this.config.windSpeed;
+      this.velocities[i + 2] = this.config.windDirection.z * this.config.windSpeed;
 
-    // Create materials
-    this.resources.materials.set(
-      'rain',
-      new ShaderMaterial({
-        uniforms: {
-          texture: { value: rainTexture },
-        },
-        vertexShader: WeatherLayer.rainShader.vertexShader,
-        fragmentShader: WeatherLayer.rainShader.fragmentShader,
-        transparent: true,
-        depthWrite: false,
-      })
-    );
-
-    this.resources.materials.set(
-      'snow',
-      new ShaderMaterial({
-        uniforms: {
-          texture: { value: snowTexture },
-        },
-        vertexShader: WeatherLayer.snowShader.vertexShader,
-        fragmentShader: WeatherLayer.snowShader.fragmentShader,
-        transparent: true,
-        depthWrite: false,
-      })
-    );
-
-    this.resources.materials.set(
-      'cloud',
-      new ShaderMaterial({
-        uniforms: {
-          noiseTexture: { value: noiseTexture },
-          time: { value: 0 },
-          color: { value: new Color(0xffffff) },
-          density: { value: 0.5 },
-        },
-        vertexShader: WeatherLayer.cloudShader.vertexShader,
-        fragmentShader: WeatherLayer.cloudShader.fragmentShader,
-        transparent: true,
-        depthWrite: false,
-      })
-    );
-
-    // Setup fog
-    if (this.weatherConfig.fog) {
-      this.setupFog();
+      // Add random variation to velocities
+      this.velocities[i] += (Math.random() - 0.5) * 0.2;
+      this.velocities[i + 1] += (Math.random() - 0.5) * 0.2;
+      this.velocities[i + 2] += (Math.random() - 0.5) * 0.2;
     }
 
-    // Create initial effects
-    if (this.weatherConfig.effects) {
-      for (const effect of this.weatherConfig.effects) {
-        await this.createWeatherEffect(effect);
-      }
-    }
-  }
+    this.particleSystem.setAttribute(
+      'position',
+      new THREE.BufferAttribute(positions, 3)
+    );
 
-  protected async setup(): Promise<void> {
-    // Additional setup if needed
-  }
-
-  protected updateLayer(deltaTime: number): void {
-    // Update wind
-    this.updateWind(deltaTime);
-
-    // Update effects
-    this.effects.forEach((effect, id) => {
-      this.updateEffect(effect, deltaTime);
-    });
-
-    // Update particles
-    this.particles.forEach((particles, id) => {
-      this.updateParticles(particles, deltaTime);
-    });
-
-    // Update materials
-    this.updateMaterials(deltaTime);
-  }
-
-  /**
-   * Load a texture
-   */
-  private loadTexture(
-    loader: TextureLoader,
-    url: string
-  ): Promise<THREE.Texture> {
-    return new Promise((resolve, reject) => {
-      loader.load(url, resolve, undefined, reject);
-    });
-  }
-
-  /**
-   * Setup fog
-   */
-  private setupFog(): void {
-    const scene = this.root.parent;
-    if (scene) {
-      scene.fog = new FogExp2(
-        this.weatherConfig.fog?.color ?? 0xcccccc,
-        this.weatherConfig.fog?.density ?? 0.005
-      );
-    }
-  }
-
-  /**
-   * Create a weather effect
-   */
-  private async createWeatherEffect(config: WeatherEffect): Promise<Object3D> {
-    let effect: Object3D;
-
-    switch (config.type) {
-      case 'rain':
-        effect = await this.createRainEffect(config);
-        break;
+    // Create material based on weather type
+    let material: THREE.PointsMaterial;
+    switch (this.config.type) {
       case 'snow':
-        effect = await this.createSnowEffect(config);
+        material = new THREE.PointsMaterial({
+          color: this.config.particleColor,
+          size: this.config.particleSize,
+          opacity: this.config.particleOpacity,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          map: this.createSnowflakeTexture(),
+        });
         break;
+
       case 'fog':
-        effect = await this.createFogEffect(config);
+        material = new THREE.PointsMaterial({
+          color: this.config.particleColor,
+          size: this.config.particleSize * 3,
+          opacity: this.config.particleOpacity * 0.5,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          map: this.createFogTexture(),
+        });
         break;
-      case 'clouds':
-        effect = await this.createCloudEffect(config);
-        break;
-      case 'lightning':
-        effect = await this.createLightningEffect(config);
-        break;
+
+      case 'rain':
       default:
-        effect = await this.createCustomEffect(config);
+        material = new THREE.PointsMaterial({
+          color: this.config.particleColor,
+          size: this.config.particleSize,
+          opacity: this.config.particleOpacity,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        break;
     }
 
-    // Store effect
-    const id = `${config.type}_${this.effects.size}`;
-    this.effects.set(id, effect);
-    this.resources.objects.set(id, effect);
-
-    // Add to root
-    this.root.add(effect);
-
-    return effect;
+    // Create points
+    this.particles = new THREE.Points(this.particleSystem, material);
+    this.container.add(this.particles);
   }
 
-  /**
-   * Create rain effect
-   */
-  private async createRainEffect(config: WeatherEffect): Promise<Object3D> {
-    const count = Math.floor((config.intensity ?? 1) * 1000);
-    const area = config.area ?? {
-      center: new Vector3(0, 20, 0),
-      size: new Vector3(40, 0, 40),
-    };
+  private createSnowflakeTexture(): THREE.Texture {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d')!;
 
-    const geometry = new BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    const opacities = new Float32Array(count);
+    // Draw snowflake
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(16, 16, 8, 0, Math.PI * 2);
+    ctx.fill();
 
-    const particles: WeatherParticle[] = [];
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
 
-    for (let i = 0; i < count; i++) {
-      const particle = this.createRainParticle(area);
-      particles.push(particle);
+  private createFogTexture(): THREE.Texture {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d')!;
 
-      const i3 = i * 3;
-      positions[i3] = particle.position.x;
-      positions[i3 + 1] = particle.position.y;
-      positions[i3 + 2] = particle.position.z;
+    // Create radial gradient
+    const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
-      sizes[i] = particle.size;
-      opacities[i] = 1;
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 32, 32);
+
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  public setWindSpeed(speed: number): void {
+    this.config.windSpeed = speed;
+    for (let i = 0; i < this.velocities.length; i += 3) {
+      this.velocities[i] = this.config.windDirection.x * speed + (Math.random() - 0.5) * 0.2;
+      this.velocities[i + 1] = this.config.windDirection.y * speed + (Math.random() - 0.5) * 0.2;
+      this.velocities[i + 2] = this.config.windDirection.z * speed + (Math.random() - 0.5) * 0.2;
     }
-
-    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1));
-    geometry.setAttribute('opacity', new Float32BufferAttribute(opacities, 1));
-
-    const material = this.resources.materials.get('rain')!.clone();
-    const points = new Points(geometry, material);
-
-    // Store particles
-    this.particles.set(points.uuid, particles);
-
-    return points;
   }
 
-  /**
-   * Create snow effect
-   */
-  private async createSnowEffect(config: WeatherEffect): Promise<Object3D> {
-    const count = Math.floor((config.intensity ?? 1) * 500);
-    const area = config.area ?? {
-      center: new Vector3(0, 20, 0),
-      size: new Vector3(40, 0, 40),
-    };
-
-    const geometry = new BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    const rotations = new Float32Array(count);
-    const opacities = new Float32Array(count);
-
-    const particles: WeatherParticle[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const particle = this.createSnowParticle(area);
-      particles.push(particle);
-
-      const i3 = i * 3;
-      positions[i3] = particle.position.x;
-      positions[i3 + 1] = particle.position.y;
-      positions[i3 + 2] = particle.position.z;
-
-      sizes[i] = particle.size;
-      rotations[i] = Math.random() * Math.PI * 2;
-      opacities[i] = 1;
-    }
-
-    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1));
-    geometry.setAttribute('rotation', new Float32BufferAttribute(rotations, 1));
-    geometry.setAttribute('opacity', new Float32BufferAttribute(opacities, 1));
-
-    const material = this.resources.materials.get('snow')!.clone();
-    const points = new Points(geometry, material);
-
-    // Store particles
-    this.particles.set(points.uuid, particles);
-
-    return points;
+  public setWindDirection(direction: THREE.Vector3): void {
+    this.config.windDirection.copy(direction.normalize());
+    this.setWindSpeed(this.config.windSpeed);
   }
 
-  /**
-   * Create fog effect
-   */
-  private async createFogEffect(config: WeatherEffect): Promise<Object3D> {
-    // Implementation
-    return new Object3D(); // Placeholder
+  public setParticleCount(count: number): void {
+    this.config.particleCount = count;
+    this.velocities = new Float32Array(count * 3);
+    this.createParticleSystem();
   }
 
-  /**
-   * Create cloud effect
-   */
-  private async createCloudEffect(config: WeatherEffect): Promise<Object3D> {
-    const geometry = new PlaneGeometry(100, 100);
-    const material = this.resources.materials.get('cloud')!.clone();
-    material.uniforms.color.value = new Color(config.color ?? 0xffffff);
-    material.uniforms.density.value = config.intensity ?? 0.5;
-
-    const mesh = new Mesh(geometry, material);
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = 30;
-
-    return mesh;
+  public setType(type: 'rain' | 'snow' | 'fog'): void {
+    this.config.type = type;
+    this.createParticleSystem();
   }
 
-  /**
-   * Create lightning effect
-   */
-  private async createLightningEffect(
-    config: WeatherEffect
-  ): Promise<Object3D> {
-    // Implementation
-    return new Object3D(); // Placeholder
-  }
+  public update(deltaTime: number): void {
+    if (!this.particleSystem || !this.particles) return;
 
-  /**
-   * Create custom effect
-   */
-  private async createCustomEffect(config: WeatherEffect): Promise<Object3D> {
-    // Implementation
-    return new Object3D(); // Placeholder
-  }
+    const positions = this.particleSystem.attributes.position.array as Float32Array;
+    for (let i = 0; i < positions.length; i += 3) {
+      // Update positions
+      positions[i] += this.velocities[i] * deltaTime;
+      positions[i + 1] += this.velocities[i + 1] * deltaTime;
+      positions[i + 2] += this.velocities[i + 2] * deltaTime;
 
-  /**
-   * Create a rain particle
-   */
-  private createRainParticle(area: {
-    center: Vector3;
-    size: Vector3;
-  }): WeatherParticle {
-    return {
-      position: new Vector3(
-        area.center.x + (Math.random() - 0.5) * area.size.x,
-        area.center.y,
-        area.center.z + (Math.random() - 0.5) * area.size.z
-      ),
-      velocity: new Vector3(0, -10, 0),
-      size: Math.random() * 0.1 + 0.1,
-      lifetime: Infinity,
-      age: 0,
-    };
-  }
-
-  /**
-   * Create a snow particle
-   */
-  private createSnowParticle(area: {
-    center: Vector3;
-    size: Vector3;
-  }): WeatherParticle {
-    return {
-      position: new Vector3(
-        area.center.x + (Math.random() - 0.5) * area.size.x,
-        area.center.y,
-        area.center.z + (Math.random() - 0.5) * area.size.z
-      ),
-      velocity: new Vector3(Math.random() - 0.5, -2, Math.random() - 0.5),
-      size: Math.random() * 0.2 + 0.2,
-      lifetime: Infinity,
-      age: 0,
-    };
-  }
-
-  /**
-   * Update wind
-   */
-  private updateWind(deltaTime: number): void {
-    // Add wind variation
-    const time = Date.now() * 0.001;
-    this.wind.x = Math.sin(time * 0.3) * 0.5;
-    this.wind.z = Math.cos(time * 0.5) * 0.5;
-  }
-
-  /**
-   * Update effect
-   */
-  private updateEffect(effect: Object3D, deltaTime: number): void {
-    if (effect.material instanceof ShaderMaterial) {
-      if (effect.material.uniforms.time) {
-        effect.material.uniforms.time.value += deltaTime;
+      // Reset particles that go out of bounds
+      if (positions[i + 1] < 0) {
+        positions[i] = Math.random() * 20 - 10;
+        positions[i + 1] = 20;
+        positions[i + 2] = Math.random() * 20 - 10;
       }
     }
+
+    this.particleSystem.attributes.position.needsUpdate = true;
   }
 
-  /**
-   * Update particles
-   */
-  private updateParticles(
-    particles: WeatherParticle[],
-    deltaTime: number
-  ): void {
-    particles.forEach((particle) => {
-      // Apply wind
-      particle.velocity.add(this.wind.clone().multiplyScalar(deltaTime));
-
-      // Update position
-      particle.position.add(
-        particle.velocity.clone().multiplyScalar(deltaTime)
-      );
-
-      // Reset if out of bounds
-      if (particle.position.y < -10) {
-        particle.position.y = 20;
-        particle.position.x += (Math.random() - 0.5) * 40;
-        particle.position.z += (Math.random() - 0.5) * 40;
-        particle.velocity.set(0, -10, 0);
+  public dispose(): void {
+    if (this.particles) {
+      this.particles.geometry.dispose();
+      (this.particles.material as THREE.Material).dispose();
+      if ((this.particles.material as THREE.PointsMaterial).map) {
+        (this.particles.material as THREE.PointsMaterial).map.dispose();
       }
-    });
-
-    // Update geometry
-    const points = this.root.getObjectByProperty(
-      'uuid',
-      particles[0].uuid
-    ) as Points;
-    if (points) {
-      const positions = points.geometry.attributes.position
-        .array as Float32Array;
-      particles.forEach((particle, i) => {
-        const i3 = i * 3;
-        positions[i3] = particle.position.x;
-        positions[i3 + 1] = particle.position.y;
-        positions[i3 + 2] = particle.position.z;
-      });
-      points.geometry.attributes.position.needsUpdate = true;
     }
+    super.dispose();
   }
-
-  /**
-   * Update materials
-   */
-  private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach((material) => {
-      if (material instanceof ShaderMaterial && material.uniforms.time) {
-        material.uniforms.time.value += deltaTime;
-      }
-    });
-  }
-
-  // Public API methods...
-  // (Add methods for controlling weather effects)
 }

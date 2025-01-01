@@ -1,441 +1,315 @@
-import { Layer, LayerConfig } from '@/core/layers/Layer';
-import {
-  Object3D,
-  Vector3,
-  Color,
-  BufferGeometry,
-  Float32BufferAttribute,
-  Points,
-  LineSegments,
-  ShaderMaterial,
-  AdditiveBlending,
-  Mesh,
-  SphereGeometry,
-  MeshBasicMaterial,
-  Line,
-  CatmullRomCurve3,
-  TubeGeometry,
-  Matrix4,
-  InstancedMesh,
-  DynamicDrawUsage,
-} from 'three';
+import * as THREE from 'three';
+import { Layer } from '@/core/Layer';
+import { EventEmitter } from '@/utils/EventEmitter';
 
 interface DataPoint {
   id: string;
-  position: Vector3;
+  position: THREE.Vector3;
   value: number;
-  category?: string;
-  color?: number;
-  size?: number;
+  type: string;
   metadata?: Record<string, any>;
 }
 
 interface DataConnection {
   id: string;
-  from: string;
-  to: string;
-  value?: number;
-  type?: string;
-  color?: number;
-  width?: number;
-  animated?: boolean;
+  source: string;
+  target: string;
+  value: number;
+  type: string;
   metadata?: Record<string, any>;
 }
 
-interface DataCluster {
-  id: string;
-  points: string[];
-  center?: Vector3;
-  radius?: number;
-  color?: number;
-  metadata?: Record<string, any>;
+interface DataConfig {
+  pointSize?: number;
+  pointColor?: number;
+  lineColor?: number;
+  lineWidth?: number;
+  showLabels?: boolean;
+  labelSize?: number;
+  labelColor?: string;
+  animationSpeed?: number;
+  glowIntensity?: number;
+  highlightColor?: number;
 }
 
-interface DataFlow {
-  id: string;
-  path: Vector3[];
-  value?: number;
-  color?: number;
-  width?: number;
-  speed?: number;
-  metadata?: Record<string, any>;
-}
-
-interface DataLayerConfig extends LayerConfig {
-  points?: DataPoint[];
-  connections?: DataConnection[];
-  clusters?: DataCluster[];
-  flows?: DataFlow[];
-  maxPoints?: number;
-  maxConnections?: number;
-  defaultSize?: number;
-  defaultColor?: number;
-  animated?: boolean;
-}
-
-/**
- * Layer for data visualization in 3D space
- */
 export class DataLayer extends Layer {
-  private readonly dataConfig: DataLayerConfig;
-  private points: Map<string, Object3D>;
-  private connections: Map<string, Object3D>;
-  private clusters: Map<string, Object3D>;
-  private flows: Map<string, Object3D>;
+  private config: Required<DataConfig>;
+  private points: Map<string, THREE.Mesh> = new Map();
+  private connections: Map<string, THREE.Line> = new Map();
+  private labels: Map<string, THREE.Sprite> = new Map();
+  private glowMaterial: THREE.ShaderMaterial;
+  private highlightedPoints: Set<string> = new Set();
+  private highlightedConnections: Set<string> = new Set();
+  private animationTime: number = 0;
 
-  // Shaders
-  private static readonly pointShader = {
-    vertexShader: `
-      attribute float size;
-      attribute vec3 color;
-      attribute float value;
-      varying vec3 vColor;
-      varying float vValue;
-      void main() {
-        vColor = color;
-        vValue = value;
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = size * (300.0 / -mvPosition.z);
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `,
-    fragmentShader: `
-      varying vec3 vColor;
-      varying float vValue;
-      void main() {
-        vec2 center = gl_PointCoord - vec2(0.5);
-        float dist = length(center);
-        float alpha = smoothstep(0.5, 0.4, dist);
-        float glow = exp(-dist * 3.0) * vValue;
-        gl_FragColor = vec4(vColor, alpha) + vec4(vColor * glow, glow * 0.5);
-      }
-    `,
-  };
+  constructor(scene: THREE.Scene, config: DataConfig = {}) {
+    super(scene);
 
-  private static readonly flowShader = {
-    vertexShader: `
-      uniform float time;
-      attribute float progress;
-      varying float vProgress;
-      varying vec2 vUv;
-      void main() {
-        vProgress = fract(progress + time);
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform vec3 color;
-      uniform float value;
-      varying float vProgress;
-      varying vec2 vUv;
-      void main() {
-        float alpha = smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
-        alpha *= smoothstep(0.0, 0.1, vProgress) * smoothstep(1.0, 0.9, vProgress);
-        gl_FragColor = vec4(color, alpha * value);
-      }
-    `,
-  };
+    this.config = {
+      pointSize: config.pointSize ?? 0.1,
+      pointColor: config.pointColor ?? 0x00ff00,
+      lineColor: config.lineColor ?? 0x00ff00,
+      lineWidth: config.lineWidth ?? 1,
+      showLabels: config.showLabels ?? true,
+      labelSize: config.labelSize ?? 0.1,
+      labelColor: config.labelColor ?? '#ffffff',
+      animationSpeed: config.animationSpeed ?? 1,
+      glowIntensity: config.glowIntensity ?? 0.5,
+      highlightColor: config.highlightColor ?? 0xffff00,
+    };
 
-  constructor(config: DataLayerConfig) {
-    super(config);
-    this.dataConfig = config;
-    this.points = new Map();
-    this.connections = new Map();
-    this.clusters = new Map();
-    this.flows = new Map();
+    this.glowMaterial = this.createGlowMaterial();
   }
 
-  protected async loadResources(): Promise<void> {
-    // Create materials
-    this.resources.materials.set(
-      'point',
-      new ShaderMaterial({
-        uniforms: {
-          time: { value: 0 },
-        },
-        vertexShader: DataLayer.pointShader.vertexShader,
-        fragmentShader: DataLayer.pointShader.fragmentShader,
-        transparent: true,
-        blending: AdditiveBlending,
-        depthWrite: false,
-      })
-    );
-
-    this.resources.materials.set(
-      'flow',
-      new ShaderMaterial({
-        uniforms: {
-          time: { value: 0 },
-          color: { value: new Color(0x00ff00) },
-          value: { value: 1.0 },
-        },
-        vertexShader: DataLayer.flowShader.vertexShader,
-        fragmentShader: DataLayer.flowShader.fragmentShader,
-        transparent: true,
-        blending: AdditiveBlending,
-        depthWrite: false,
-      })
-    );
-
-    // Load initial data
-    if (this.dataConfig.points) {
-      for (const point of this.dataConfig.points) {
-        await this.createDataPoint(point);
-      }
-    }
-
-    if (this.dataConfig.connections) {
-      for (const connection of this.dataConfig.connections) {
-        await this.createDataConnection(connection);
-      }
-    }
-
-    if (this.dataConfig.clusters) {
-      for (const cluster of this.dataConfig.clusters) {
-        await this.createDataCluster(cluster);
-      }
-    }
-
-    if (this.dataConfig.flows) {
-      for (const flow of this.dataConfig.flows) {
-        await this.createDataFlow(flow);
-      }
-    }
-  }
-
-  protected async setup(): Promise<void> {
-    // Additional setup if needed
-  }
-
-  protected updateLayer(deltaTime: number): void {
-    // Update materials
-    this.updateMaterials(deltaTime);
-
-    // Update flows
-    this.flows.forEach((flow, id) => {
-      this.updateFlow(flow, deltaTime);
-    });
-
-    // Update clusters
-    this.clusters.forEach((cluster, id) => {
-      this.updateCluster(cluster, deltaTime);
-    });
-  }
-
-  /**
-   * Create a data point
-   */
-  private async createDataPoint(config: DataPoint): Promise<Object3D> {
-    const geometry = new BufferGeometry();
-    const positions = new Float32Array([
-      config.position.x,
-      config.position.y,
-      config.position.z,
-    ]);
-    const colors = new Float32Array([
-      ((config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 16) &
-        (255 / 255),
-      ((config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) >> 8) &
-        (255 / 255),
-      (config.color ?? this.dataConfig.defaultColor ?? 0x00ff00) & (255 / 255),
-    ]);
-    const sizes = new Float32Array([
-      config.size ?? this.dataConfig.defaultSize ?? 1,
-    ]);
-    const values = new Float32Array([config.value]);
-
-    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1));
-    geometry.setAttribute('value', new Float32BufferAttribute(values, 1));
-
-    const material = this.resources.materials.get('point')!.clone();
-    const point = new Points(geometry, material);
-    point.userData = config;
-
-    // Store point
-    this.points.set(config.id, point);
-    this.resources.objects.set(`point_${config.id}`, point);
-
-    // Add to root
-    this.root.add(point);
-
-    return point;
-  }
-
-  /**
-   * Create a data connection
-   */
-  private async createDataConnection(
-    config: DataConnection
-  ): Promise<Object3D> {
-    const fromPoint = this.points.get(config.from);
-    const toPoint = this.points.get(config.to);
-
-    if (!fromPoint || !toPoint) {
-      throw new Error(
-        `Invalid connection points: ${config.from} -> ${config.to}`
-      );
-    }
-
-    const geometry = new BufferGeometry();
-    const material = new ShaderMaterial({
+  private createGlowMaterial(): THREE.ShaderMaterial {
+    return new THREE.ShaderMaterial({
       uniforms: {
-        color: { value: new Color(config.color ?? 0x00ff00) },
-        value: { value: config.value ?? 1 },
+        glowColor: { value: new THREE.Color(this.config.pointColor) },
+        intensity: { value: this.config.glowIntensity },
         time: { value: 0 },
       },
       vertexShader: `
-        uniform float time;
-        varying float vProgress;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
-          vProgress = position.y;
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
       fragmentShader: `
-        uniform vec3 color;
-        uniform float value;
-        varying float vProgress;
+        uniform vec3 glowColor;
+        uniform float intensity;
+        uniform float time;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
-          float alpha = sin(vProgress * 3.14159);
-          gl_FragColor = vec4(color, alpha * value);
+          float glow = pow(intensity * (1.0 + 0.2 * sin(time * 2.0)), 2.0);
+          float rim = 1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0)));
+          gl_FragColor = vec4(glowColor, rim * glow);
         }
       `,
       transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      side: THREE.FrontSide,
     });
-
-    const line = new Line(geometry, material);
-    line.userData = config;
-
-    // Store connection
-    this.connections.set(config.id, line);
-    this.resources.objects.set(`connection_${config.id}`, line);
-
-    // Add to root
-    this.root.add(line);
-
-    return line;
   }
 
-  /**
-   * Create a data cluster
-   */
-  private async createDataCluster(config: DataCluster): Promise<Object3D> {
-    const points = config.points
-      .map((id) => this.points.get(id))
-      .filter((point) => point !== undefined) as Object3D[];
+  public addPoint(point: DataPoint): void {
+    // Create point geometry
+    const geometry = new THREE.SphereGeometry(this.config.pointSize);
+    const material = new THREE.MeshPhongMaterial({
+      color: this.config.pointColor,
+      emissive: this.config.pointColor,
+      emissiveIntensity: 0.2,
+    });
 
-    if (points.length === 0) {
-      throw new Error(`No valid points for cluster: ${config.id}`);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(point.position);
+    mesh.userData = { ...point };
+
+    // Add glow effect
+    const glowMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(this.config.pointSize * 1.5),
+      this.glowMaterial.clone()
+    );
+    mesh.add(glowMesh);
+
+    // Add label if enabled
+    if (this.config.showLabels) {
+      const label = this.createLabel(point.id, point.position);
+      this.labels.set(point.id, label);
+      this.container.add(label);
     }
 
-    // Calculate cluster center if not provided
-    const center = config.center ?? this.calculateClusterCenter(points);
-    const radius = config.radius ?? this.calculateClusterRadius(points, center);
+    this.points.set(point.id, mesh);
+    this.container.add(mesh);
+  }
 
-    const geometry = new SphereGeometry(radius, 32, 32);
-    const material = new MeshBasicMaterial({
-      color: config.color ?? 0x00ff00,
+  public addConnection(connection: DataConnection): void {
+    const sourcePoint = this.points.get(connection.source);
+    const targetPoint = this.points.get(connection.target);
+
+    if (!sourcePoint || !targetPoint) {
+      console.warn(`Cannot create connection: points not found`);
+      return;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array([
+      sourcePoint.position.x, sourcePoint.position.y, sourcePoint.position.z,
+      targetPoint.position.x, targetPoint.position.y, targetPoint.position.z,
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.LineBasicMaterial({
+      color: this.config.lineColor,
+      linewidth: this.config.lineWidth,
       transparent: true,
-      opacity: 0.2,
-      wireframe: true,
+      opacity: 0.6,
     });
 
-    const cluster = new Mesh(geometry, material);
-    cluster.position.copy(center);
-    cluster.userData = { ...config, points };
+    const line = new THREE.Line(geometry, material);
+    line.userData = { ...connection };
 
-    // Store cluster
-    this.clusters.set(config.id, cluster);
-    this.resources.objects.set(`cluster_${config.id}`, cluster);
-
-    // Add to root
-    this.root.add(cluster);
-
-    return cluster;
+    this.connections.set(connection.id, line);
+    this.container.add(line);
   }
 
-  /**
-   * Create a data flow
-   */
-  private async createDataFlow(config: DataFlow): Promise<Object3D> {
-    const curve = new CatmullRomCurve3(config.path);
-    const geometry = new TubeGeometry(curve, 64, config.width ?? 0.1, 8, false);
-    const material = this.resources.materials.get('flow')!.clone();
+  private createLabel(text: string, position: THREE.Vector3): THREE.Sprite {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    context.font = '48px Arial';
+    context.fillStyle = this.config.labelColor;
+    context.fillText(text, 0, 48);
 
-    material.uniforms.color.value = new Color(config.color ?? 0x00ff00);
-    material.uniforms.value.value = config.value ?? 1;
-
-    const flow = new Mesh(geometry, material);
-    flow.userData = config;
-
-    // Store flow
-    this.flows.set(config.id, flow);
-    this.resources.objects.set(`flow_${config.id}`, flow);
-
-    // Add to root
-    this.root.add(flow);
-
-    return flow;
-  }
-
-  /**
-   * Calculate cluster center
-   */
-  private calculateClusterCenter(points: Object3D[]): Vector3 {
-    const center = new Vector3();
-    points.forEach((point) => {
-      center.add(point.position);
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
     });
-    return center.divideScalar(points.length);
+
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.position.copy(position);
+    sprite.position.y += this.config.pointSize * 2;
+    sprite.scale.set(this.config.labelSize, this.config.labelSize, 1);
+
+    return sprite;
   }
 
-  /**
-   * Calculate cluster radius
-   */
-  private calculateClusterRadius(points: Object3D[], center: Vector3): number {
-    let maxDistance = 0;
-    points.forEach((point) => {
-      const distance = point.position.distanceTo(center);
-      if (distance > maxDistance) {
-        maxDistance = distance;
-      }
-    });
-    return maxDistance;
-  }
+  public highlightPoint(id: string, highlight: boolean = true): void {
+    const point = this.points.get(id);
+    if (!point) return;
 
-  /**
-   * Update materials
-   */
-  private updateMaterials(deltaTime: number): void {
-    this.resources.materials.forEach((material) => {
-      if (material instanceof ShaderMaterial && material.uniforms.time) {
-        material.uniforms.time.value += deltaTime;
-      }
-    });
-  }
-
-  /**
-   * Update flow
-   */
-  private updateFlow(flow: Object3D, deltaTime: number): void {
-    if (flow.material instanceof ShaderMaterial) {
-      flow.material.uniforms.time.value +=
-        deltaTime * (flow.userData.speed ?? 1);
+    if (highlight) {
+      this.highlightedPoints.add(id);
+      (point.material as THREE.MeshPhongMaterial).emissive.setHex(this.config.highlightColor);
+      (point.material as THREE.MeshPhongMaterial).emissiveIntensity = 0.5;
+    } else {
+      this.highlightedPoints.delete(id);
+      (point.material as THREE.MeshPhongMaterial).emissive.setHex(this.config.pointColor);
+      (point.material as THREE.MeshPhongMaterial).emissiveIntensity = 0.2;
     }
   }
 
-  /**
-   * Update cluster
-   */
-  private updateCluster(cluster: Object3D, deltaTime: number): void {
-    // Add cluster animation or updates here
+  public highlightConnection(id: string, highlight: boolean = true): void {
+    const connection = this.connections.get(id);
+    if (!connection) return;
+
+    if (highlight) {
+      this.highlightedConnections.add(id);
+      (connection.material as THREE.LineBasicMaterial).color.setHex(this.config.highlightColor);
+      (connection.material as THREE.LineBasicMaterial).opacity = 1;
+    } else {
+      this.highlightedConnections.delete(id);
+      (connection.material as THREE.LineBasicMaterial).color.setHex(this.config.lineColor);
+      (connection.material as THREE.LineBasicMaterial).opacity = 0.6;
+    }
   }
 
-  // Public API methods...
-  // (Add methods for adding/removing/updating data points, connections, clusters, and flows)
+  public updatePointPosition(id: string, position: THREE.Vector3): void {
+    const point = this.points.get(id);
+    const label = this.labels.get(id);
+    if (!point) return;
+
+    point.position.copy(position);
+    if (label) {
+      label.position.copy(position);
+      label.position.y += this.config.pointSize * 2;
+    }
+
+    // Update connected lines
+    this.connections.forEach((line) => {
+      const { source, target } = line.userData;
+      if (source === id || target === id) {
+        const positions = line.geometry.attributes.position.array as Float32Array;
+        const sourcePoint = this.points.get(source);
+        const targetPoint = this.points.get(target);
+
+        if (sourcePoint && targetPoint) {
+          positions[0] = sourcePoint.position.x;
+          positions[1] = sourcePoint.position.y;
+          positions[2] = sourcePoint.position.z;
+          positions[3] = targetPoint.position.x;
+          positions[4] = targetPoint.position.y;
+          positions[5] = targetPoint.position.z;
+          line.geometry.attributes.position.needsUpdate = true;
+        }
+      }
+    });
+  }
+
+  public setPointValue(id: string, value: number): void {
+    const point = this.points.get(id);
+    if (!point) return;
+
+    point.userData.value = value;
+    const scale = 0.5 + value * 0.5;
+    point.scale.setScalar(scale);
+  }
+
+  public setConnectionValue(id: string, value: number): void {
+    const connection = this.connections.get(id);
+    if (!connection) return;
+
+    connection.userData.value = value;
+    (connection.material as THREE.LineBasicMaterial).opacity = 0.2 + value * 0.8;
+  }
+
+  public update(deltaTime: number): void {
+    this.animationTime += deltaTime * this.config.animationSpeed;
+
+    // Update glow effect
+    this.points.forEach((point) => {
+      point.children.forEach((child) => {
+        if (child.material instanceof THREE.ShaderMaterial) {
+          child.material.uniforms.time.value = this.animationTime;
+        }
+      });
+    });
+
+    // Update labels to face camera
+    if (this.config.showLabels) {
+      const cameraPosition = this.scene.getObjectByName('camera')?.position;
+      if (cameraPosition) {
+        this.labels.forEach((label) => {
+          label.lookAt(cameraPosition);
+        });
+      }
+    }
+  }
+
+  public dispose(): void {
+    // Dispose points
+    this.points.forEach((point) => {
+      point.geometry.dispose();
+      (point.material as THREE.Material).dispose();
+      point.children.forEach((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry.dispose();
+          (child.material as THREE.Material).dispose();
+        }
+      });
+    });
+
+    // Dispose connections
+    this.connections.forEach((connection) => {
+      connection.geometry.dispose();
+      (connection.material as THREE.Material).dispose();
+    });
+
+    // Dispose labels
+    this.labels.forEach((label) => {
+      (label.material as THREE.SpriteMaterial).map?.dispose();
+      (label.material as THREE.Material).dispose();
+    });
+
+    this.points.clear();
+    this.connections.clear();
+    this.labels.clear();
+    this.highlightedPoints.clear();
+    this.highlightedConnections.clear();
+
+    super.dispose();
+  }
 }
