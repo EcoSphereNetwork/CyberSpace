@@ -213,8 +213,8 @@ export const EarthScene: React.FC<EarthSceneProps> = ({
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.5}
-        minDistance={5}
-        maxDistance={20}
+        minDistance={2}
+        maxDistance={100}
       />
 
       {/* Earth */}

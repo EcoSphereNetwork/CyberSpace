@@ -50,35 +50,68 @@ export interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [typingUsers, setTypingUsers] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [users, setUsers] = useState<ChatUser[]>([]);
+  const [typingUsers, setTypingUsers] = useState<ChatUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when new messages arrive
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   useEffect(() => {
-    // Mock data
-    setMessages([
-      {
-        id: "1",
-        userId: "1",
-        userName: "User 1",
-        text: "Hello, world!",
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+    const loadChannelData = async () => {
+      try {
+        setIsLoading(true);
+        // TODO: Replace with actual API calls
+        const mockMessages = [
+          {
+            id: "1",
+            userId: "1",
+            userName: "User 1",
+            text: "Hello, world!",
+            timestamp: new Date().toISOString(),
+          },
+        ];
 
-    setUsers([
-      {
-        id: "1",
-        name: "User 1",
-        status: "online",
-      },
-      {
-        id: "2",
-        name: "User 2",
-        status: "offline",
-      },
-    ]);
-  }, [channelId]);
+        const mockUsers = [
+          {
+            id: "1",
+            name: "User 1",
+            status: "online",
+            avatar: "/avatars/user1.jpg",
+          },
+          {
+            id: "2",
+            name: "User 2",
+            status: "offline",
+            avatar: "/avatars/user2.jpg",
+          },
+        ];
+
+        setMessages(mockMessages);
+        setUsers(mockUsers);
+        setError(null);
+        scrollToBottom();
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to load channel data"));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChannelData();
+  }, [channelId, scrollToBottom]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   const handleSendMessage = (text: string) => {
     if (!user) return;
@@ -109,10 +142,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
     }
   };
 
+  if (error) {
+    return (
+      <Container>
+        <div style={{ padding: '16px', color: 'red' }}>
+          Error: {error.message}
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Header>
         <Title>Channel Name</Title>
+        {isLoading && <span>Loading...</span>}
       </Header>
       <Content>
         <MessageList>
@@ -126,12 +171,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
           {typingUsers.length > 0 && (
             <ChatTypingIndicator users={typingUsers} />
           )}
+          <div ref={messagesEndRef} style={{ height: 1 }} />
         </MessageList>
         <Sidebar>
           <ChatUserList users={users} />
         </Sidebar>
       </Content>
-      <ChatInput onSend={handleSendMessage} onTyping={handleTyping} />
+      <ChatInput 
+        onSend={handleSendMessage} 
+        onTyping={handleTyping}
+        disabled={isLoading || !!error} 
+      />
     </Container>
   );
 };
