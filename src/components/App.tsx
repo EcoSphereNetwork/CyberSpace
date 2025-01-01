@@ -41,7 +41,7 @@ const Button = styled.button`
   }
 `;
 
-export const App: React.FC = () => {
+const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeScene, setActiveScene] = useState<'earth' | 'network'>('earth');
@@ -102,3 +102,5 @@ export const App: React.FC = () => {
     </>
   );
 };
+
+export default App;
