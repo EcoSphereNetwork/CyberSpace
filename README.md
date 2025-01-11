@@ -193,3 +193,7 @@ npm run test:e2e
 - [Issue Tracker](https://github.com/EcoSphereNetwork/CyberSpace/issues)
 - [Discussions](https://github.com/EcoSphereNetwork/CyberSpace/discussions)
 - [Documentation](docs/)
+
+### Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/cb5cd21d87747a17558d55c005034a3578f3dd28.svg "Repobeats analytics image")
