@@ -14,6 +14,7 @@ Stellen Sie sich eine Plattform vor, die es ermöglicht, komplexe Netzwerke und 
 
 Zeitplan:
 
+    Phase 1
     Monat 1-2: Anforderungsanalyse und Planung
         Definition der funktionalen und nicht-funktionalen Anforderungen.
         Erstellung eines detaillierten Projektplans mit klaren Meilensteinen.
@@ -22,6 +23,7 @@ Zeitplan:
         Implementierung der Kernkomponenten für die dreidimensionale Darstellung von Netzwerken.
         Integration von Tools zur Echtzeit-Datenanalyse.
 
+    Phase 2
     Monat 5-6: Implementierung der Multi-User-Kollaborationsfunktionen
         Entwicklung von Mechanismen für die gleichzeitige Interaktion mehrerer Benutzer.
         Sicherstellung der Synchronisation und Konsistenz innerhalb der virtuellen Umgebung.
@@ -38,6 +40,7 @@ Zeitplan:
         Durchführung umfangreicher Tests zur Sicherstellung der Stabilität und Performance.
         Behebung identifizierter Fehler und Optimierung der Systemleistung.
 
+    Phase 3
     Monat 10: Dokumentation und Schulung
         Erstellung von Benutzerhandbüchern und technischen Dokumentationen.
         Anbieten von Schulungen und Tutorials für Endbenutzer und Administratoren.
