@@ -106,8 +106,6 @@ In Readme Implementieren:
 Diese Liste umfasst die wichtigsten Aspekte, die CyberSpace und NovaProtocol zu einer umfassenden, open-source Metaverse-Plattform machen würden, die die Funktionen von virtuellen Welten, Spieleplattformen und Analysewerkzeugen kombiniert.
 
 Ergänzungen:
-Web2 ist nicht vollständig outdated, da es immer noch weit verbreitet ist und viele der Dienste, die wir täglich nutzen, auf Web2-Technologien basieren. Allerdings gewinnt Web3 zunehmend an Bedeutung und bietet neue Möglichkeiten, die über Web2 hinausgehen[1][3].
-
 Hier ist eine erweiterte Liste der Anforderungen für CyberSpace und NovaProtocol, die Web3-Technologien einbezieht:
 
 ## Technologie und Fokus (Web3-spezifisch)
