@@ -2,6 +2,15 @@
 
 An immersive 3D platform for network visualization, data analysis, and collaborative interaction in virtual environments.
 
+In Readme Implementieren:
+-"Fun Fact" der Netzwerkscanns und Sicherheitsanaylsen erklären
+- genaue Funktionen von CyberSpace erklären
+   - Ähnlich wie "SecondLive" ...
+   - Unternehmen können Ihre Firmensitze Mappen und Vorstellen
+   - User (Künstler) können ihre Produkte als NFTs mappen (Musik, Bilder, Kunst allgemein) -> Easteregg-Style - Wie heißt dieses GEO-Tracking Game?
+   - ...<weitere Funktionen und Aspkete>...
+
+
 ## Features
 
 ### Core Features
