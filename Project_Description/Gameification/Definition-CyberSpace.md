@@ -1,7 +1,3 @@
-Danke für die Klarstellung! Basierend auf deinen Antworten habe ich eine überarbeitete **Definition von CyberSpace** formuliert, die den Missverständnissen entgegenwirkt und die Abgrenzung zu NovaProtocol verdeutlicht.
-
----
-
 # **CyberSpace – Definition und Funktionen**
 
 ### **1. Was ist CyberSpace?**
