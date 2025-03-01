@@ -64,3 +64,52 @@ CyberSpace ist eine **immersive Visualisierungsplattform**, die Augmented Realit
 | **Technologie-Enthusiasten** | AR-Viewer, Geocaching, interaktive 3D-Maps |
 
 📌 **CyberSpace kombiniert Technologie, Gaming & Wirtschaft und spricht daher ein breites Publikum an.**  
+
+---
+
+📌 Empfehlung zur Zielgruppen-Definition
+
+Eine kleiner definierte Zielgruppe kann bedeuten, dass weniger Leute die App nutzen. Aber es hat auch Vorteile, wie z. B.:
+
+    Bessere Nutzererfahrung, weil die Features genau auf eine Zielgruppe abgestimmt sind.
+    Stärkere Community, weil die Nutzer wirklich engagiert sind.
+    Gezielteres Marketing, wodurch man schneller Reichweite und Wachstum erzielen kann.
+
+Ein breites Publikum klingt gut, aber es kann dazu führen, dass die App für niemanden richtig perfekt ist. Daher empfehle ich einen strategischen Ansatz:
+🔹 Empfehlung: Fokus auf eine Kernzielgruppe, aber offen für andere
+
+📌 Mein Vorschlag: 1️⃣ Primäre Zielgruppe (Hauptnutzer, auf die alles optimiert wird)
+
+    Entwickler & Game-Designer
+    Gamer & Metaverse-Communitys
+    Web3-/NFT-Entwickler
+
+2️⃣ Sekundäre Zielgruppe (Optional, aber später erweiterbar)
+
+    Unternehmen für Showrooms & Marketing
+    Cybersecurity-Analysten für Netzwerke
+
+💡 Warum?
+
+    Entwickler und Game-Designer bringen Inhalte in CyberSpace (Spiele, NFTs, APIs).
+    Gamer und Metaverse-User nutzen und testen aktiv neue Features.
+    Web3-/NFT-Entwickler helfen mit Innovation & Monetarisierung.
+    Unternehmen & Cybersecurity-Firmen können später integriert werden, wenn die Plattform wächst.
+
+🔹 Strategie für Wachstum
+
+📌 Phase 1 (MVP-Start) 🎯 Zielgruppe: Game-Developer, Metaverse-User & NFT-Entwickler
+💡 Warum? Sie experimentieren gerne mit neuen Plattformen & bringen Inhalte mit.
+🚀 Maßnahmen:
+
+    Fokus auf Game-Integration (NovaProtocol, eigene Spiele, Game-Streaming).
+    NFT-Platzierung in Spaces als interaktive 3D-Objekte.
+    Community-Events für Metaverse-Gruppen & NFT-Künstler.
+
+📌 Phase 2 (Expansion) 🎯 Zielgruppe: Unternehmen, Marketing & Cybersecurity
+💡 Warum? Wenn das System stabil läuft, können Unternehmen virtuelle Showrooms & Cybersecurity-Analysen nutzen.
+🚀 Maßnahmen:
+
+    AR/VR-Showrooms für digitale Shops & Unternehmen.
+    Netzwerksicherheit-Visualisierung für IT-Security-Experten.
+    KI-gestützte Analyse-Features für Firmenkunden.
