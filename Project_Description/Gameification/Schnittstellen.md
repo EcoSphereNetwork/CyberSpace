@@ -1,6 +1,3 @@
-# OpenWorld 
-
-Unten findest du ein umfassendes Konzept, wie du Schnittstellen zu anderen 3D-Welten (bzw. „Spaces“) implementieren kannst, um deinen Cyberspace möglichst vielfältig und erweiterbar zu gestalten. Das Ziel ist, dass dein „Ghost in the Shell“-ähnliches 3D-Umfeld nicht isoliert bleibt, sondern sich mit anderen VR-/3D‑Umgebungen austauscht, um beispielsweise Daten, Objekte, Avatare oder Szenen zu teilen und nahtlos miteinander zu interagieren.
 
 ## 1. Überblick und Ziele
 
