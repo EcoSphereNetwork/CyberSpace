@@ -11,16 +11,17 @@
     "test": "jest -c jest.config.cjs"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@react-three/drei": "^9.93.0",
     "@react-three/fiber": "^8.15.13",
     "@types/three": "^0.160.0",
+    "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "gsap": "^3.12.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-force-graph": "^1.45.4",
+    "react-force-graph": "^1.47.3",
     "socket.io-client": "^4.8.1",
     "three": "^0.160.0"
   },

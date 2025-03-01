@@ -271,6 +271,8 @@ Citations:
 3. **Install Dependencies**
    ```bash
    npm install
+   npm install d3
+   npm install react-force-graph @emotion/styled @emotion/react
    ```
 
 4. **Start Development Server**
